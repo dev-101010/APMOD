@@ -10,7 +10,7 @@ Entpacke es auf deinem Computer. (z.B. in eigene Dateien)
 
 Aktiviere den "Entwicklermodus" und klicke danach auf "Enpackte Erweiterung laden".
 
-Gehe zu deinen entpackten Datein und wähle den Ordner "Filler" aus.
+Gehe zu deinen entpackten Datein und wähle den Ordner "APMOD" aus.
 
 Öffne oder lade APM jetzt neu.
 

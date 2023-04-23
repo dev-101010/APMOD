@@ -56,6 +56,8 @@ Für diejenigen die sich schon mal mit programmieren beschäftigt haben. In dies
 
 ( equipment.contains("AR.ZONE.2") || equipmentdesc.contains("pakivaa02") ) && shift.contains("DS42")
 
+Und alle Einträge auf die das zutrifft werden angezeigt.
+
 ----
 
 Hier geht es um die Sortierung, man kann nach jeder Spalte sotieren, von A -> Z oder von Z -> A.

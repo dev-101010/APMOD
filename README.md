@@ -8,6 +8,8 @@ WO Listen [Filter](https://github.com/dev-101010/APMOD/blob/main/README.md#filte
 
 Klicke hier auf den grünen "Code" Button und dann auf "Download ZIP".
 
+([Direct Download Link]())
+
 Entpacke es auf deinem Computer. (z.B. in eigene Dateien)
 
 Öffne Chrome und gehe zu Erweiterungen. (Menu -> Einstellungen -> Erweiterungen)

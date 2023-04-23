@@ -96,11 +96,11 @@ Mit Shift + Linksklick in ein APM Textfeld wird der Wert in diesem Textfeld in d
 
 Mit Strg + Alt + Linksklick in ein APM Textfeld wird ein abgelegter Wert gelöscht.
 
-So weit so simpel? Nicht ganz.
+So simpel ist es? Nicht ganz.
 
 Man kann nicht nur einen Wert pro Feld ablegen.
 
-Wenn mehrere Werte abgelegt werden, dann erscheinen Auswahlräder... 
+Wenn mehrere Werte abgelegt werden, dann erscheinen Auswahlräder...
 
 ----
 

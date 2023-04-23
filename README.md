@@ -26,17 +26,42 @@ Klicke hier: https://github.com/dev-101010/APMOD/raw/main/script.user.js
 
 # Filter:
 
-Filter benutzen ist denkbar einfach, einfach nur anwählen und es wird direkt geladen.
+Filter benutzen ist denkbar einfach, nur anwählen und es wird direkt geladen.
+
+Die Reihenfolge ist dabei aber zu beachten.
+Als erstes gilt das APM Dropdown, (grün 1)
+danach kommt das zusätliche Filter Dropdown dran, (grün 2)
+und als letztes werden dann noch die im Header eingetragenen Werte gefiltert. (grün 3)
 
 ![dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy.png)
 
+----
+
 Eigene Filter erstellen ist hingegen etwas komplizierter.
+Wenn ich das hier alles beschreiben müsste wäre ich eine Woche dran, deswegen nur ein Schaubild.
+Sicherlich finden sich einige die damit ohne Probleme zurecht kommen und Filter erstellen können.
+Es gibt eine Export und Import Funktion, damit könnt ihr Filter leicht untereinander tauschen.
 
 ![dataspy_edit_menu.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_menu.png)
 
+----
+
+Für diejenigen die etwas vom Programmieren verstehen. In diesem Filter steht einfach:
+( equipment.contains("AR.ZONE.2") || equipmentdesc.contains("pakivaa02") ) && shilft.contains("DS42")
+
 ![dataspy_edit_filter.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_filter.png)
 
+----
+
+Hier geht es um die Sortierung, man kann nach jeder Spalte sotieren, von A -> Z oder von Z -> A.
+Viel gibt es hier eigentlich nicht zu tun. die Sortierung nach Startdatum ist vermutlich die sinnvollste. 
+
 ![dataspy_edit_sort.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_sort.png)
+
+----
+
+Hier kann man auswählen welche Spalten einem wann überhaupt angezeigt werden sollen.
+Kennt sicher jeder, dass die standart Filter völlig überladen sind.
 
 ![dataspy_edit_fields.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_fields.png)
 

@@ -20,3 +20,4 @@ Gehe zu deinen entpackten Datein und wähle den Ordner "APMOD" aus.
 
 ---
 
+![alt dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy.png)

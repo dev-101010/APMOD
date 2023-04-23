@@ -1,6 +1,6 @@
 # APMod
 
-Fügt diverse Funktionen in die APM Website ein:
+Fügt verschiedene zusätzliche Funktionen in die APM Website ein:
 
 WO Listen Filter, Textfeld Ausfüllhilfe, Checkbox Auswahlhilfe
 

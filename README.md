@@ -22,9 +22,7 @@ Gehe zu deinen entpackten Datein und wähle den Ordner "APMOD" aus.
 
 Installiere in deinem Browser die Tampermonkey extension.
 
-Klicke hier auf die Datei "script.user.js" und dann auf den "Raw" Button.
-
-https://github.com/dev-101010/APMOD/raw/main/script.user.js
+Klicke hier: https://github.com/dev-101010/APMOD/raw/main/script.user.js
 
 # Filter:
 

@@ -4,7 +4,7 @@ Fügt diverse Funktionen in die Website ein:
 
 WO Listen Filter, Checkbox Auswahlhilfe, Textfeld Ausfüllhilfe
 
- ---
+# Installation:
 
 Klicke auf den grünen "Code" Button und dann auf "Download ZIP".
 
@@ -18,9 +18,7 @@ Gehe zu deinen entpackten Datein und wähle den Ordner "APMOD" aus.
 
 Öffne oder lade APM jetzt neu.
 
----
-
-#Filter:
+# Filter:
 
 ![dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy.png)
 ![dataspy_edit_menu.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_menu.png)
@@ -28,7 +26,7 @@ Gehe zu deinen entpackten Datein und wähle den Ordner "APMOD" aus.
 ![dataspy_edit_sort.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_sort.png)
 ![dataspy_edit_fields.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_fields.png)
 
-#Ausfüllhilfe:
+# Ausfüllhilfe:
 
 ![filler_button.png](https://github.com/dev-101010/APMOD/blob/main/images/filler_button.png)
 ![filler_menu.png](https://github.com/dev-101010/APMOD/blob/main/images/filler_menu.png)
@@ -37,6 +35,6 @@ Gehe zu deinen entpackten Datein und wähle den Ordner "APMOD" aus.
 ![wheel_over_next.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_over_next.png)
 ![wheel_del.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_del.png)
 
-#Auswahlhilfe:
+# Auswahlhilfe:
 
 ![selector.png](https://github.com/dev-101010/APMOD/blob/main/images/selector.png)

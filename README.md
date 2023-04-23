@@ -29,8 +29,11 @@ Lade die Datei "script.user.js" in Tampermonkey. (Oder: [Direct Download Link](h
 Filter benutzen ist denkbar einfach, nur anwählen und es wird direkt geladen.
 
 Die Reihenfolge ist dabei aber zu beachten.
+
 Als erstes gilt das APM Dropdown (grün 1), 
+
 danach kommt das zusätliche Filter Dropdown dran (grün 2), 
+
 und als letztes werden dann noch die im Header eingetragenen Werte gefiltert (grün 3). 
 
 ![dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy.png)
@@ -38,8 +41,11 @@ und als letztes werden dann noch die im Header eingetragenen Werte gefiltert (gr
 ----
 
 Eigene Filter erstellen ist hingegen etwas komplizierter.
+
 Wenn ich das hier alles beschreiben müsste wäre ich eine Woche dran, deswegen nur ein Schaubild.
+
 Sicherlich finden sich einige die damit ohne Probleme zurecht kommen und Filter erstellen können.
+
 Es gibt eine Export und Import Funktion, damit könnt ihr Filter leicht untereinander tauschen.
 
 ![dataspy_edit_menu.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_menu.png)
@@ -47,7 +53,9 @@ Es gibt eine Export und Import Funktion, damit könnt ihr Filter leicht unterein
 ----
 
 Zu Filtern können Reihen hinzugefügt werden, gelöscht werden, die Reihenfolge geändert werden.
+
 Alle werte können frei angepasst werden, aber am Ende muss ein logischer Ablauf dabei raus kommen.
+
 Wichtig ist auch, dass die Klammern alle geschlossen sind.
 
 ![dataspy_edit_filter.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_filter.png)
@@ -61,6 +69,7 @@ Und alle Einträge auf die das zutrifft werden angezeigt.
 ----
 
 Hier geht es um die Sortierung, man kann nach jeder Spalte sotieren, von A -> Z oder von Z -> A.
+
 Viel gibt es hier eigentlich nicht zu tun. die Sortierung nach Startdatum ist vermutlich die sinnvollste. 
 
 ![dataspy_edit_sort.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_sort.png)
@@ -68,6 +77,7 @@ Viel gibt es hier eigentlich nicht zu tun. die Sortierung nach Startdatum ist ve
 ----
 
 Hier kann man auswählen welche Spalten einem wann überhaupt angezeigt werden sollen.
+
 Kennt sicher jeder, dass die standart Filter völlig überladen sind.
 
 ![dataspy_edit_fields.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_fields.png)
@@ -75,6 +85,7 @@ Kennt sicher jeder, dass die standart Filter völlig überladen sind.
 ## Ausfüllhilfe:
 
 Die Ausfüllhilfe ist ein Werkzeug das am ehesten mit "Copy Paste" verglichen werden kann.
+
 Nur dass hier nicht nur ein Ablageplatz für alles existiert der immer wieder überschrieben wird, sondern für jedes APM Feld eine eigene Ablage existiert.
 
 Erstmal zur einfachen Steuerung:
@@ -83,10 +94,12 @@ Mit Strg + Linksklick in ein APM Textfeld wird der für dieses Feld abgelegte we
 
 Mit Shift + Linksklick in ein APM Textfeld wird der Wert in diesem Textfeld in dessen Ablage gelegt.
 
-Mit Strg + Alt + Linksklick in ein APM Textfeld wird der abgelegte Wert gelöscht.
+Mit Strg + Alt + Linksklick in ein APM Textfeld wird ein abgelegter Wert gelöscht.
 
 So weit so simpel? Nicht ganz.
+
 Man kann nicht nur einen Wert pro Feld ablegen.
+
 Wenn mehrere Werte abgelegt werden, dann erscheinen Auswahlräder... 
 
 ----
@@ -104,6 +117,7 @@ Im roten Rad kannst du abgelegte Werte löschen, wenn du sie nicht mehr brauchst
 ----
 
 Im orangen Rad kannst du den aktuellen Wert des Feldes in die Ablage legen.
+
 Entweder auf einen neuen Platz "TO NEW", oder einen vorhandenen Wert überschreiben.
 
 ![wheel_over.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_over.png)
@@ -111,6 +125,7 @@ Entweder auf einen neuen Platz "TO NEW", oder einen vorhandenen Wert überschrei
 ----
 
 Wie viele Einträge du ablegst bleibt dir überlassen, aber irgendwann kann es eng werden, deswegen hat jedes Rad 10 Tiefen.
+
 Mit Scrollrad oder Pfeiltasten kannst du durch diese durchsschalten.
 
 ![wheel_over_next.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_over_next.png)
@@ -124,6 +139,7 @@ Um die Ganzen Einträge zu verwalten gibt es nochmal ein Menu:
 ----
 
 Hier siehst du alle gespeicherten Werte den feldern zugeordnet und in welcher Tiefe des Rads sie sich befinden.
+
 Ausserden kann man hier für jeden Wert auch einen Alias anlegen, der im Rad dann anstatt des Wertes angezeigt wird.
 
 ![filler_menu.png](https://github.com/dev-101010/APMOD/blob/main/images/filler_menu.png)
@@ -131,6 +147,9 @@ Ausserden kann man hier für jeden Wert auch einen Alias anlegen, der im Rad dan
 ## Auswahlhilfe:
 
 Die Auswahlhilfe ist wieder recht einfach. Man klickt auf eine der Schaltflächen und alle dazugehörigen Checkboxen (die geladen sind) werden angewählt.
-Standartmäßig ist ein überschreiben ausgeschaltet, damit ihr euch beim Arbeiten z.B. die "Nein" schon mal setzen könnt und später dann nicht versehentlich überschreibt. Es gibt allerdings eine Override Checkbox, wenn diese ausgewählt ist wird alles gesetzt egal was vorher ausgewählt war.
+
+Standartmäßig ist ein überschreiben ausgeschaltet, damit ihr euch beim Arbeiten z.B. die "Nein" schon mal setzen könnt und später dann nicht versehentlich überschreibt.
+
+Es gibt allerdings eine Override Checkbox, wenn diese ausgewählt ist wird alles gesetzt egal was vorher ausgewählt war.
 
 ![selector.png](https://github.com/dev-101010/APMOD/blob/main/images/selector.png)

@@ -7,6 +7,7 @@ WO Listen Filter, Textfeld Ausfüllhilfe, Checkbox Auswahlhilfe
 # Installation in Chrome:
 
 Klicke auf den grünen "Code" Button und dann auf "Download ZIP".
+https://github.com/dev-101010/APMOD/archive/refs/heads/main.zip
 
 Entpacke es auf deinem Computer. (z.B. in eigene Dateien)
 

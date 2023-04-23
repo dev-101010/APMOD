@@ -24,6 +24,8 @@ Installiere in deinem Browser die Tampermonkey extension.
 
 Klicke hier auf die Datei "script.user.js" und dann auf den "Raw" Button.
 
+https://github.com/dev-101010/APMOD/raw/main/script.user.js
+
 # Filter:
 
 ![dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy.png)

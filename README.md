@@ -26,7 +26,11 @@ Klicke hier: https://github.com/dev-101010/APMOD/raw/main/script.user.js
 
 # Filter:
 
+Filter benutzen ist denkbar einfach, einfach nur anwählen und es wird direkt geladen.
+
 ![dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy.png)
+
+Eigene Filter erstellen ist hingegen etwas komplizierter.
 
 ![dataspy_edit_menu.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_menu.png)
 

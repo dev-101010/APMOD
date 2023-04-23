@@ -4,7 +4,7 @@ Fügt diverse Funktionen in die APM Website ein:
 
 WO Listen Filter, Textfeld Ausfüllhilfe, Checkbox Auswahlhilfe
 
-# Installation in Chrome:
+# Installation als Chrome extension:
 
 Klicke auf den grünen "Code" Button und dann auf "Download ZIP".
 

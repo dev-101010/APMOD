@@ -1,6 +1,6 @@
 # APMOD
 
-Fügt diverse Funktionen in die Website ein:
+Fügt diverse Funktionen in die APM Website ein:
 
 WO Listen Filter, Checkbox Auswahlhilfe, Textfeld Ausfüllhilfe
 

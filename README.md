@@ -4,7 +4,7 @@ Fügt diverse Funktionen in die APM Website ein:
 
 WO Listen Filter, Textfeld Ausfüllhilfe, Checkbox Auswahlhilfe
 
-# Installation:
+# Installation in Chrome:
 
 Klicke auf den grünen "Code" Button und dann auf "Download ZIP".
 
@@ -17,6 +17,12 @@ Aktiviere den "Entwicklermodus" und klicke danach auf "Enpackte Erweiterung lade
 Gehe zu deinen entpackten Datein und wähle den Ordner "APMOD" aus.
 
 Öffne oder lade APM jetzt neu.
+
+# Alternative Installation:
+
+Installiere in deinem Browser die Tampermonkey extension.
+
+Klicke hier auf die Datei "script.user.js" und dann auf den "Raw" Button.
 
 # Filter:
 

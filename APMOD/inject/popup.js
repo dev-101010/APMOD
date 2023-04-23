@@ -24,4 +24,4 @@ APModPopup.closePopup = () => {
 	APModPopup.Popup.style.display = "none";
 }
 
-//window.addEventListener("load", APModPopup.load);
+window.addEventListener("load", APModPopup.load);

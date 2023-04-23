@@ -3,7 +3,7 @@
 
 	"name": "APMOD",
 	"description": "",
-	"version": "0.2",
+	"version": "1.0",
 
 	"content_scripts": [{
 		"world": "MAIN",

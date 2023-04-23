@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         APMod
-// @namespace    http://tampermonkey.net/
+// @namespace    https://github.com/dev-101010/APMOD/
 // @version      1.0
 // @description  Modding APM
 // @author       dev-101010

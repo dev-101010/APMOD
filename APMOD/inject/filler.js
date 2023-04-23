@@ -274,7 +274,7 @@ APModFiller.injectRecordView = () => {
 					parent.add({
 						xtype: 'button',
 						name: 'apModCloseCodes',
-						text: 'Filler Close',
+						text: 'Fill Close Codes',
 						margin: '0 0 0 150',
 						listeners: {
 							click: function(cmp,e) {

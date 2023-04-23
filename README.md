@@ -6,9 +6,7 @@ WO Listen [Filter](https://github.com/dev-101010/APMOD/blob/main/README.md#filte
 
 ## Installation als Chrome extension:
 
-Klicke hier auf den grünen "Code" Button und dann auf "Download ZIP".
-
-([Direct Download Link](https://github.com/dev-101010/APMOD/archive/refs/heads/main.zip))
+Klicke hier auf den grünen "Code" Button und dann auf "Download ZIP". (Oder: [Direct Download Link](https://github.com/dev-101010/APMOD/archive/refs/heads/main.zip))
 
 Entpacke es auf deinem Computer. (z.B. in eigene Dateien)
 

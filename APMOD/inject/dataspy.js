@@ -71,10 +71,10 @@ APModDataSpy.injectReadOnlyGrid = () => {
 	if (typeof EAM?.view?.common?.grids?.core?.ReadOnlyGrid === 'undefined') return;
 	const ROGclass = EAM.view.common.grids.core.ReadOnlyGrid;
 
-	const code1 = "/*----inject CustomDataSpy----*/[a,b]=APModDataSpy.injectBuildHeaderFilter(l,a,b);/*----end----*/";
+	const code1 = "/*----inject CustomDataSpy----*/[a,b]=EAM.APModDataSpy.injectBuildHeaderFilter(l,a,b);/*----end----*/";
 	ROGclass.prototype.buildHeaderFilter = APModDataSpy.injectCodeInFunction(ROGclass.prototype.buildHeaderFilter, 1, code1, []);
 
-	const code2 = "/*----inject CustomDataSpy----*/f=APModDataSpy.injectGetVisibleFieldsAndReorder(b,f);/*----end----*/";
+	const code2 = "/*----inject CustomDataSpy----*/f=EAM.APModDataSpy.injectGetVisibleFieldsAndReorder(b,f);/*----end----*/";
 	ROGclass.prototype.getVisibleFieldsAndReorder = APModDataSpy.injectCodeInFunction(ROGclass.prototype.getVisibleFieldsAndReorder, 3, code2, ['f']);
 
 }

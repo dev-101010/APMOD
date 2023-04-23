@@ -46,10 +46,15 @@ Es gibt eine Export und Import Funktion, damit könnt ihr Filter leicht unterein
 
 ----
 
-Für diejenigen die etwas vom Programmieren verstehen. In diesem Filter steht einfach:
-( equipment.contains("AR.ZONE.2") || equipmentdesc.contains("pakivaa02") ) && shilft.contains("DS42")
+Zu Filtern können Reihen hinzugefügt werden, gelöscht werden, die Reihenfolge geändert werden.
+Alle werte können frei angepasst werden, aber am Ende muss ein logischer Ablauf dabei raus kommen.
+Wichtig ist auch, dass die Klammern alle geschlossen sind.
 
 ![dataspy_edit_filter.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_filter.png)
+
+Für diejenigen die etwas vom Programmieren verstehen. In diesem Filter steht einfach:
+
+( equipment.contains("AR.ZONE.2") || equipmentdesc.contains("pakivaa02") ) && shilft.contains("DS42")
 
 ----
 

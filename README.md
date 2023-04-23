@@ -2,7 +2,7 @@
 
 Fügt diverse Funktionen in die APM Website ein:
 
-WO Listen Filter, Checkbox Auswahlhilfe, Textfeld Ausfüllhilfe
+WO Listen Filter, Textfeld Ausfüllhilfe, Checkbox Auswahlhilfe
 
 # Installation:
 

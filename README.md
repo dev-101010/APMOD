@@ -84,25 +84,43 @@ So weit so simpel? Nicht ganz.
 Man kann nicht nur einen Wert pro Feld ablegen.
 Wenn mehrere Werte abgelegt werden, dann erscheinen Auswahlräder... 
 
+----
+
 Das schwarze Rad zeigt dir deien abgelegten Werte ann die du in dieses Feld einfügen kannst.
+
 ![wheel_get.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_get.png)
 
+----
+
 Im roten Rad kannst du abgelegte Werte löschen, wenn du sie nicht mehr brauchst.
+
 ![wheel_del.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_del.png)
+
+----
 
 Im orangen Rad kannst du den aktuellen Wert des Feldes in die Ablage legen.
 Entweder auf einen neuen Platz "TO NEW", oder einen vorhandenen Wert überschreiben.
+
 ![wheel_over.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_over.png)
+
+----
 
 Wie viele Einträge du ablegst bleibt dir überlassen, aber irgendwann kann es eng werden, deswegen hat jedes Rad 10 Tiefen.
 Mit Scrollrad oder Pfeiltasten kannst du durch diese durchsschalten.
+
 ![wheel_over_next.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_over_next.png)
 
+----
+
 Um die Ganzen Einträge zu verwalten gibt es nochmal ein Menu:
+
 ![filler_button.png](https://github.com/dev-101010/APMOD/blob/main/images/filler_button.png)
+
+----
 
 Hier siehst du alle gespeicherten Werte den feldern zugeordnet und in welcher Tiefe des Rads sie sich befinden.
 Ausserden kann man hier für jeden Wert auch einen Alias anlegen, der im Rad dann anstatt des Wertes angezeigt wird.
+
 ![filler_menu.png](https://github.com/dev-101010/APMOD/blob/main/images/filler_menu.png)
 
 ## Auswahlhilfe:

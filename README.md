@@ -43,12 +43,12 @@ Klicke hier: https://github.com/dev-101010/APMOD/raw/main/script.user.js
 ![filler_menu.png](https://github.com/dev-101010/APMOD/blob/main/images/filler_menu.png)
 
 ![wheel_get.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_get.png)
+![wheel_del.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_del.png)
 
 ![wheel_over.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_over.png)
-
 ![wheel_over_next.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_over_next.png)
 
-![wheel_del.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_del.png)
+
 
 # Auswahlhilfe:
 

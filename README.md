@@ -78,8 +78,11 @@ Die Ausfüllhilfe ist ein Werkzeug das am ehesten mit "Copy Paste" verglichen we
 Nur dass hier nicht nur ein Ablageplatz für alles existiert der immer wieder überschrieben wird, sondern für jedes APM Feld eine eigene Ablage existiert.
 
 Erstmal zur einfachen Steuerung:
+
 Mit Strg + Linksklick in ein APM Textfeld wird der für dieses Feld abgelegte werd in das Textfeld eingefügt.
+
 Mit Shift + Linksklick in ein APM Textfeld wird der Wert in diesem Textfeld in dessen Ablage gelegt.
+
 Mit Strg + Alt + Linksklick in ein APM Textfeld wird der abgelegte Wert gelöscht.
 
 So weit so simpel? Nicht ganz.

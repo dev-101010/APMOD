@@ -665,4 +665,4 @@ APModFiller.save = () => {
 	localStorage.setItem("APModFiller", JSON.stringify(APModFiller.store));
 }
 
-window.addEventListener("load", APModFiller.load);
+//window.addEventListener("load", APModFiller.load);

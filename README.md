@@ -29,9 +29,9 @@ Klicke hier: https://github.com/dev-101010/APMOD/raw/main/script.user.js
 Filter benutzen ist denkbar einfach, nur anwählen und es wird direkt geladen.
 
 Die Reihenfolge ist dabei aber zu beachten.
-Als erstes gilt das APM Dropdown, (grün 1)
-danach kommt das zusätliche Filter Dropdown dran, (grün 2)
-und als letztes werden dann noch die im Header eingetragenen Werte gefiltert. (grün 3)
+Als erstes gilt das APM Dropdown (grün 1), 
+danach kommt das zusätliche Filter Dropdown dran (grün 2), 
+und als letztes werden dann noch die im Header eingetragenen Werte gefiltert (grün 3). 
 
 ![dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy.png)
 

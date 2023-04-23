@@ -86,7 +86,7 @@ Wenn mehrere Werte abgelegt werden, dann erscheinen Auswahlräder...
 
 ----
 
-Das schwarze Rad zeigt dir deien abgelegten Werte ann die du in dieses Feld einfügen kannst.
+Das schwarze Rad zeigt dir deine abgelegten Werte an die du in dieses Feld einfügen kannst.
 
 ![wheel_get.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_get.png)
 
@@ -124,5 +124,8 @@ Ausserden kann man hier für jeden Wert auch einen Alias anlegen, der im Rad dan
 ![filler_menu.png](https://github.com/dev-101010/APMOD/blob/main/images/filler_menu.png)
 
 ## Auswahlhilfe:
+
+Die Auswahlhilfe ist wieder recht einfach. Man klickt auf eine der Schaltflächen und alle dazugehörigen Checkboxen (die geladen sind) werden angewählt.
+Standartmäßig ist ein überschreiben ausgeschaltet, damit ihr euch beim Arbeiten z.B. die "Nein" schon mal setzen könnt und später dann nicht versehentlich überschreibt. Es gibt allerdings eine Override Checkbox, wenn diese ausgewählt ist wird alles gesetzt egal was vorher ausgewählt war.
 
 ![selector.png](https://github.com/dev-101010/APMOD/blob/main/images/selector.png)

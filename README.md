@@ -20,17 +20,17 @@ Gehe zu deinen entpackten Datein und wähle den Ordner "APMOD" aus.
 
 ---
 
-![alt dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy.png)
-![alt dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_menu.png)
-![alt dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_filter.png)
-![alt dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_sort.png)
-![alt dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_fields.png)
+![dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy.png)
+![dataspy_edit_menu.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_menu.png)
+![dataspy_edit_filter.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_filter.png)
+![dataspy_edit_sort.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_sort.png)
+![dataspy_edit_fields.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_fields.png)
 
-![alt dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/filler_button.png)
-![alt dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/filler_menu.png)
-![alt dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_get.png)
-![alt dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_over.png)
-![alt dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_over_next.png)
-![alt dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_del.png)
+![filler_button.png](https://github.com/dev-101010/APMOD/blob/main/images/filler_button.png)
+![filler_menu.png](https://github.com/dev-101010/APMOD/blob/main/images/filler_menu.png)
+![wheel_get.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_get.png)
+![wheel_over.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_over.png)
+![wheel_over_next.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_over_next.png)
+![wheel_del.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_del.png)
 
-![alt dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/selector.png)
+![selector.png](https://github.com/dev-101010/APMOD/blob/main/images/selector.png)

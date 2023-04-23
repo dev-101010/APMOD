@@ -1070,4 +1070,4 @@ function bracketTest(entries) {
 	return open.length === 0;
 }
 
-//window.addEventListener("load", APModDataSpy.load);
+window.addEventListener("load", APModDataSpy.load);

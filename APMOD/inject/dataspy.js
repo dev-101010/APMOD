@@ -4,6 +4,7 @@ const APModDataSpy = {
 
 APModDataSpy.load = () => {
 	if (typeof Ext === 'undefined' || typeof EAM === 'undefined') return;
+	EAM.APModDataSpy = APModDataSpy;
 
 	Ext.data.Store.prototype.dsGetData = function() {
 		const arr = [];

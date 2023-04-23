@@ -52,9 +52,9 @@ Wichtig ist auch, dass die Klammern alle geschlossen sind.
 
 ![dataspy_edit_filter.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_filter.png)
 
-Für diejenigen die etwas vom Programmieren verstehen. In diesem Filter steht einfach:
+Für diejenigen die sich schon mal mit programmieren beschäftigt haben. In diesem Filter steht einfach:
 
-( equipment.contains("AR.ZONE.2") || equipmentdesc.contains("pakivaa02") ) && shilft.contains("DS42")
+( equipment.contains("AR.ZONE.2") || equipmentdesc.contains("pakivaa02") ) && shift.contains("DS42")
 
 ----
 

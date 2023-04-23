@@ -155,4 +155,4 @@ APModSelector.types = {
 	"s_check" : {"str":"X","type":"checkbox","title":"Override"},
 };
 
-//window.addEventListener("load", APModSelector.load);
+window.addEventListener("load", APModSelector.load);

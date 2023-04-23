@@ -6,7 +6,7 @@ WO Listen Filter, Textfeld Ausfüllhilfe, Checkbox Auswahlhilfe
 
 # Installation als Chrome extension:
 
-Klicke auf den grünen "Code" Button und dann auf "Download ZIP".
+Klicke hier auf den grünen "Code" Button und dann auf "Download ZIP".
 
 Entpacke es auf deinem Computer. (z.B. in eigene Dateien)
 

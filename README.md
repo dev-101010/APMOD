@@ -4,7 +4,7 @@ Fügt verschiedene zusätzliche Funktionen in die APM Website ein:
 
 WO Listen [Filter](https://github.com/dev-101010/APMOD/blob/main/README.md#filter), Textfeld [Ausfüllhilfe](https://github.com/dev-101010/APMOD/blob/main/README.md#ausf%C3%BCllhilfe), Checkbox [Auswahlhilfe](https://github.com/dev-101010/APMOD/blob/main/README.md#auswahlhilfe)
 
-# Installation als Chrome extension:
+## Installation als Chrome extension:
 
 Klicke hier auf den grünen "Code" Button und dann auf "Download ZIP".
 
@@ -18,7 +18,7 @@ Gehe zu deinen entpackten Datein und wähle den Ordner "APMOD" aus.
 
 Öffne oder lade APM jetzt neu.
 
-# Alternative Installation (Tampermonkey):
+## Alternative Installation (Tampermonkey):
 
 Installiere in deinem Browser die Tampermonkey extension.
 

@@ -657,6 +657,12 @@ APModFiller.store.data = [{
 		"title": "",
 		"depth":0,
 	},
+	{
+		"field":"apModCloseCodes",
+		"data":"N.A.|N.A.|N.A.",
+		"title":"N.A.",
+		"depth":0
+	}
 ];
 
 APModFiller.store.settings = {"wheelSize":200,"fontSize":38};

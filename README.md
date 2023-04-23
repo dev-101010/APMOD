@@ -2,7 +2,7 @@
 
 Fügt verschiedene zusätzliche Funktionen in die APM Website ein:
 
-WO Listen Filter, Textfeld Ausfüllhilfe, Checkbox Auswahlhilfe
+WO Listen Filter, Textfeld [Ausfüllhilfe](https://github.com/dev-101010/APMOD/blob/main/README.md#ausf%C3%BCllhilfe), Checkbox Auswahlhilfe
 
 # Installation als Chrome extension:
 
@@ -24,7 +24,7 @@ Installiere in deinem Browser die Tampermonkey extension.
 
 Klicke hier: https://github.com/dev-101010/APMOD/raw/main/script.user.js
 
-# Filter:
+## Filter:
 
 Filter benutzen ist denkbar einfach, nur anwählen und es wird direkt geladen.
 
@@ -70,7 +70,7 @@ Kennt sicher jeder, dass die standart Filter völlig überladen sind.
 
 ![dataspy_edit_fields.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_fields.png)
 
-# Ausfüllhilfe:
+## Ausfüllhilfe:
 
 ![filler_button.png](https://github.com/dev-101010/APMOD/blob/main/images/filler_button.png)
 
@@ -82,8 +82,6 @@ Kennt sicher jeder, dass die standart Filter völlig überladen sind.
 ![wheel_over.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_over.png)
 ![wheel_over_next.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_over_next.png)
 
-
-
-# Auswahlhilfe:
+## Auswahlhilfe:
 
 ![selector.png](https://github.com/dev-101010/APMOD/blob/main/images/selector.png)

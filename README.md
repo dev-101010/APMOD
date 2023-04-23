@@ -22,7 +22,7 @@ Gehe zu deinen entpackten Datein und wähle den Ordner "APMOD" aus.
 
 Installiere in deinem Browser die Tampermonkey extension.
 
-Klicke hier: https://github.com/dev-101010/APMOD/raw/main/script.user.js
+Lade das "script.user.js" in Tampermonkey. (Oder: [Direct Download Link]())
 
 ## Filter:
 

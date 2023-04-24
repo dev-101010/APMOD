@@ -1,8 +1,8 @@
 {
 	"manifest_version": 3,
 
-	"name": "APMOD",
-	"description": "",
+	"name": "APMod",
+	"description": "APMod fügt Filter und Ausfüllhilfen in APM ein welche die Arbeit erleichtern.",
 	"version": "1.0",
 
 	"content_scripts": [{

@@ -31,6 +31,10 @@ Firefox läd Addons in ungepackter/unsignierter Form leider nur temporär. Heiß
 
 Kopiere einfach folgendes in die Adressleiste: "about:debugging#/runtime/this-firefox" und gehe auf "Temporäres Add-on laden...".
 
+Gehe zu deinen entpackten Datein und wähle im Ordner "APMOD" die Datei "manifest.json" aus.
+
+Öffne oder lade APM jetzt neu.
+
 ## Alternative Installation (Tampermonkey):
 
 Installiere in deinem Browser die Tampermonkey extension.

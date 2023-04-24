@@ -114,6 +114,8 @@ Kennt sicher jeder, dass die standart Filter völlig überladen sind.
 
 ![dataspy_edit_fields.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_fields.png)
 
+<br /><br /><br />
+
 ## Ausfüllhilfe:
 
 Die Ausfüllhilfe ist ein Werkzeug das am ehesten mit "Copy Paste" verglichen werden kann.
@@ -175,6 +177,8 @@ Hier siehst du alle gespeicherten Werte den feldern zugeordnet und in welcher Ti
 Ausserden kann man hier für jeden Wert auch einen Alias anlegen, der im Rad dann anstatt des Wertes angezeigt wird.
 
 ![filler_menu.png](https://github.com/dev-101010/APMOD/blob/main/images/filler_menu.png)
+
+<br /><br /><br />
 
 ## Auswahlhilfe:
 

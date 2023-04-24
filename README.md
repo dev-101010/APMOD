@@ -21,6 +21,11 @@ Gehe zu deinen entpackten Datein und wähle den Ordner "APMOD" aus.
 ## Installation als Firefox extension:
 
 ```diff
+- Ich rate von der Nutzung in Firefox als direkte Extension ab.
+- Benutze lieber einen anderen Browser oder Tampermonkey.
+```
+
+```diff
 ! Chrome benutzt schon Manifest V3, welche ich auch nutze. Firefox leider noch nicht in allen aktuellen Browser Versionen.
 
 ! Zum Beispiel geht es nicht in den ESR Versionen, dort muss man noch die Manifest V2 nutzen.

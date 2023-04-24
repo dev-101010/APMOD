@@ -32,7 +32,7 @@ Gehe zu deinen entpackten Datein und wähle den Ordner "APMOD" aus.
 
 ! Eine passende Datei habe ich beigelegt: manifest_V2.json welche man auf manifest.json umbenennen muss um diese zu nutzen.
 ```
-Klicke hier auf den grünen "Code" Button und dann auf "Download ZIP". (Oder: Direct Download Link)
+Klicke hier auf den grünen "Code" Button und dann auf "Download ZIP". (Oder: [Direct Download Link](https://github.com/dev-101010/APMOD/archive/refs/heads/main.zip))
 
 Entpacke es auf deinem Computer. (z.B. in eigene Dateien)
 

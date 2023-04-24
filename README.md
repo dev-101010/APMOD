@@ -3,7 +3,7 @@
 Fügt verschiedene zusätzliche Funktionen in die APM Website ein:
 
 WO Listen [Filter](https://github.com/dev-101010/APMOD/blob/main/README.md#filter), Textfeld [Ausfüllhilfe](https://github.com/dev-101010/APMOD/blob/main/README.md#ausf%C3%BCllhilfe), Checkbox [Auswahlhilfe](https://github.com/dev-101010/APMOD/blob/main/README.md#auswahlhilfe)
-
+<br /><br /><br />
 ## Installation als Chrome extension:
 
 Klicke hier auf den grünen "Code" Button und dann auf "Download ZIP". (Oder: [Direct Download Link](https://github.com/dev-101010/APMOD/archive/refs/heads/main.zip))
@@ -17,6 +17,8 @@ Aktiviere den "Entwicklermodus" und klicke danach auf "Enpackte Erweiterung lade
 Gehe zu deinen entpackten Datein und wähle den Ordner "APMOD" aus.
 
 Öffne oder lade APM jetzt neu.
+
+<br /><br /><br />
 
 ## Installation als Firefox extension:
 
@@ -44,11 +46,15 @@ Gehe zu deinen entpackten Datein und wähle im Ordner "APMOD" die Datei "manifes
 
 Öffne oder lade APM jetzt neu.
 
+<br /><br /><br />
+
 ## Alternative Installation (Tampermonkey):
 
 Installiere in deinem Browser die [Tampermonkey](https://www.tampermonkey.net/index.php) extension.
 
 Lade die Datei "script.user.js" in Tampermonkey. (Oder: [Direct Download Link](https://github.com/dev-101010/APMOD/raw/main/script.user.js))
+
+<br /><br /><br />
 
 ## Filter:
 

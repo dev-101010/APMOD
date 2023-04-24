@@ -1,0 +1,22 @@
+{
+	"manifest_version": 2,
+
+	"name": "APMOD",
+	"description": "",
+	"version": "1.0",
+
+	"content_scripts": [{
+		"matches": ["https://eam.eu1.inforcloudsuite.com/*"],
+		"all_frames": true,
+		"js": ["inject.js"]
+	}],
+
+	"web_accessible_resources": [
+		"inject/selector.js","inject/dataspy.js","inject/dataspyfilter.js","inject/filler.js","inject/popup.js","inject/radialmenu.js","inject/style.css","inject/radialmenu.css","inject/load.js"
+	],
+
+	"browser_action": {
+		"default_title": "APMOD",
+		"default_icon": "icon.png"
+	}
+}

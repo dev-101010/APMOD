@@ -6,15 +6,18 @@
 	"version": "1.0",
 
 	"content_scripts": [{
-		"world": "MAIN",
 		"matches": ["https://eam.eu1.inforcloudsuite.com/*"],
 		"all_frames": true,
-		"js": ["./inject/selector.js","./inject/dataspy.js","./inject/dataspyfilter.js","./inject/filler.js","./inject/popup.js","./inject/radialmenu.js","./inject/load.js"],
-		"css": ["./inject/style.css","./inject/radialmenu.css"]
+		"js": ["inject.js"]
 	}],
+
+	"web_accessible_resources": [{
+		"resources": ["inject/selector.js","inject/dataspy.js","inject/dataspyfilter.js","inject/filler.js","inject/popup.js","inject/radialmenu.js","inject/style.css","inject/radialmenu.css","inject/load.js"],
+		"matches": ["https://eam.eu1.inforcloudsuite.com/*"]
+	  }],
 
 	"action": {
 		"default_title": "APMOD",
-		"default_icon": "./icon.png"
+		"default_icon": "icon.png"
 	}
 }

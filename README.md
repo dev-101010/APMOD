@@ -27,6 +27,9 @@ Gehe zu deinen entpackten Datein und wähle den Ordner "APMOD" aus.
 
 ! Eine passende Datei habe ich beigelegt: manifest_V2.json welche man auf manifest.json umbenennen muss um diese zu nutzen.
 ```
+Firefox läd Addons in ungepackter/unsignierter Form leider nur temporär. Heißt du musst es bei jeden Brower start wieder laden.
+
+Kopiere einfach folgendes in die Adressleiste: "about:debugging#/runtime/this-firefox" und gehe auf "Temporäres Add-on laden...".
 
 ## Alternative Installation (Tampermonkey):
 

@@ -46,7 +46,7 @@ Gehe zu deinen entpackten Datein und wähle im Ordner "APMOD" die Datei "manifes
 
 ## Alternative Installation (Tampermonkey):
 
-Installiere in deinem Browser die Tampermonkey extension.
+Installiere in deinem Browser die [Tampermonkey](https://www.tampermonkey.net/index.php) extension.
 
 Lade die Datei "script.user.js" in Tampermonkey. (Oder: [Direct Download Link](https://github.com/dev-101010/APMOD/raw/main/script.user.js))
 

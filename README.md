@@ -20,7 +20,7 @@ Gehe zu deinen entpackten Datein und wähle den Ordner "APMOD" aus.
 
 <br /><br /><br />
 
-## Installation als Firefox extension:
+## Installation als Firefox extension (temp):
 
 ```diff
 - Ich rate von der Nutzung in Firefox als direkte Extension ab.

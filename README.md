@@ -29,11 +29,8 @@ Gehe zu deinen entpackten Datein und wähle den Ordner "APMOD" aus.
 
 ```diff
 ! Chrome benutzt schon Manifest V3, welche ich auch nutze. Firefox leider noch nicht in allen aktuellen Browser Versionen.
-
 ! Zum Beispiel geht es nicht in den ESR Versionen, dort muss man noch die Manifest V2 nutzen.
-
 ! Eine passende Datei habe ich beigelegt: manifest_V2.json welche man auf manifest.json umbenennen muss um diese zu nutzen.
-
 ! Firefox läd Addons in ungepackter/unsignierter Form leider nur temporär. (brower neu öffen heißt neu laden...)
 ```
 Klicke hier auf den grünen "Code" Button und dann auf "Download ZIP". (Oder: [Direct Download Link](https://github.com/dev-101010/APMOD/archive/refs/heads/main.zip))

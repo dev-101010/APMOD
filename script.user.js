@@ -23,7 +23,9 @@
 GM_addStyle (GM_getResourceText("STYLE1"));
 GM_addStyle (GM_getResourceText("STYLE2"));
 
-window.addEventListener("load", APModPopup.load);
-window.addEventListener("load", APModDataSpy.load);
-window.addEventListener("load", APModFiller.load);
-window.addEventListener("load", APModSelector.load);
+window.addEventListener("load", ()=> {
+  if(APModPopup!=null)APModPopup.load();
+  if(APModDataSpy!=null)APModDataSpy.load()
+  if(APModFiller!=null)APModFiller.load()
+  if(APModSelector!=null)APModSelector.load()
+});

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         APMod
 // @namespace    https://github.com/dev-101010/APMOD/
-// @version      1.0.1
+// @version      1.0.2
 // @description  Modding APM
 // @author       dev-101010
 // @match        https://eam.eu1.inforcloudsuite.com/*

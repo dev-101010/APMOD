@@ -2,7 +2,7 @@
 // @name         APMod
 // @namespace    https://github.com/dev-101010/APMOD/
 // @version      1.0.2
-// @description  Modding APM
+// @description  APMod fügt Filter und Ausfüllhilfen in APM ein welche die Arbeit erleichtern.
 // @author       dev-101010
 // @match        https://eam.eu1.inforcloudsuite.com/*
 // @icon         https://raw.githubusercontent.com/dev-101010/APMOD/main/APMOD/icon.png

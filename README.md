@@ -40,7 +40,7 @@ Klicke hier auf den grünen "Code" Button und dann auf "Download ZIP". (Oder: [D
 
 Entpacke es auf deinem Computer. (z.B. in eigene Dateien)
 
-Kopiere einfach folgendes in die Adressleiste: "about:debugging#/runtime/this-firefox" und gehe auf "Temporäres Add-on laden...".
+Kopiere folgendes in die Adressleiste: "about:debugging#/runtime/this-firefox" und gehe auf "Temporäres Add-on laden...".
 
 Gehe zu deinen entpackten Datein und wähle im Ordner "APMOD" die Datei "manifest.json" aus.
 

@@ -420,20 +420,14 @@ APModFiller.createPopupPanel = (store) => {
 					text: 'Export',
 					xtype: 'button',
 					handler: function() {
-						const out = {settings:{},data:{}};
-						const wSTF= this.up('window[name="FillerWindow"]').down('textfield[name="wheelSizeTextField"]');
-						const fSTF = this.up('window[name="FillerWindow"]').down('textfield[name="fontSizeTextField"]');
-						out.settings.wheelSize = typeof wSTF.value === 'string' && wSTF.value > 0 ? parseInt(wSTF.value) : 200;
-						out.settings.fontSize = typeof fSTF.value === 'string' && fSTF.value > 0 ? parseInt(fSTF.value) : 38;
-						out.data = fillerStore.dsGetData();
-						APModFiller.exportToJsonFile(out);
+						APModFiller.exportToJsonFile(fillerStore.dsGetData());
 					},
 				}, {
 					minWidth: 80,
 					text: 'Import',
 					xtype: 'button',
 					handler: function() {
-						APModFiller.importJsonToNew();
+						APModFiller.importJsonToNew(fillerStore.dsGetData());
 					},
 				}
 			],
@@ -455,7 +449,7 @@ APModFiller.exportToJsonFile = (data) => {
 	linkElement.click();
 }
 
-APModFiller.importJsonToNew = () => {
+APModFiller.importJsonToNew = (apModData) => {
 	const input = document.createElement('input');
 	input.type = 'file';
 	input.onchange = e => {
@@ -467,7 +461,7 @@ APModFiller.importJsonToNew = () => {
 			let data = null;
 			try {
 				const test = JSON.parse(content);
-				if (test != null && typeof test === 'object' && test.data != null && typeof test.data === 'object')
+				if (test != null && typeof test === 'object')
 					data = test;
 				else
 					throw new Error();
@@ -475,12 +469,18 @@ APModFiller.importJsonToNew = () => {
 				alert('Ungültige Datei.');
 			}
 
-			if (data != null) {
+			if (data != null && apModData != null && Array.isArray(data) && Array.isArray(apModData) ) {
+				for(entry of data) {
+					if(apModData.find(e => e.field == entry.field && e.data == entry.data) != null) continue;
+					apModData.push(entry);
+				}
+				const out = Ext.clone(APModFiller.store);
+				out.data = apModData;
 				APModFiller.popup.disable();
 				new Ext.util.DelayedTask(function() {
 					APModFiller.popup.destroy();
 					APModFiller.popup = null;
-					APModFiller.popup = APModFiller.createPopupPanel(data);
+					APModFiller.popup = APModFiller.createPopupPanel(out);
 					if (APModFiller.popup != null) APModFiller.popup.show();
 				}).delay(200);
 			}

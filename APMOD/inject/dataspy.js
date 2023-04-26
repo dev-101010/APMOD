@@ -636,7 +636,10 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore) => {
 						displayField: 'label',
 						valueField: 'name',
 						store: filterAliasStore,
-						editable: false
+						editable: true,
+						forceSelection: true,
+						anyMatch: true,
+						queryMode: 'local',
 					},
 					align: 'center'
 				},
@@ -651,7 +654,10 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore) => {
 					editor: {
 						xtype: 'combobox',
 						store: ['CONTAINS', 'NOTCONTAINS', 'IS EMPTY', 'NOT EMPTY', 'BEGINS', 'ENDS', '<', '>', '<=', '>=', '=', '!='],
-						editable: false
+						editable: true,
+						forceSelection: true,
+						anyMatch: true,
+						queryMode: 'local',
 					},
 					align: 'center'
 				},
@@ -677,7 +683,10 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore) => {
 					editor: {
 						xtype: 'combobox',
 						store: ['AND', 'OR'],
-						editable: false
+						editable: true,
+						forceSelection: true,
+						anyMatch: true,
+						queryMode: 'local',
 					},
 					align: 'center'
 				},
@@ -804,7 +813,10 @@ APModDataSpy.sortPanel = (sortStore, filterAliasStore) => {
 						displayField: 'label',
 						valueField: 'name',
 						store: filterAliasStore,
-						editable: false
+						editable: true,
+						forceSelection: true,
+						anyMatch: true,
+						queryMode: 'local',
 					},
 					align: 'center'
 				},
@@ -817,7 +829,10 @@ APModDataSpy.sortPanel = (sortStore, filterAliasStore) => {
 					editor: {
 						xtype: 'combobox',
 						store: ['ASC', 'DESC'],
-						editable: false
+						editable: true,
+						forceSelection: true,
+						anyMatch: true,
+						queryMode: 'local',
 					},
 					align: 'center'
 				}
@@ -930,7 +945,10 @@ APModDataSpy.fieldPanel = (fieldStore, filterAliasStore) => {
 						displayField: 'label',
 						valueField: 'name',
 						store: filterAliasStore,
-						editable: false
+						editable: true,
+						forceSelection: true,
+						anyMatch: true,
+						queryMode: 'local',
 					},
 					align: 'center'
 				},

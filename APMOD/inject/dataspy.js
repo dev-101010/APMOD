@@ -100,7 +100,7 @@ String.prototype.sIndexOf = function(find, count) {
 }
 
 APModDataSpy.injectGetVisibleFieldsAndReorder = (b, f) => {
-	b.realOriginalGridFields = Ext.clone(f);
+	b.originalGridFields = Ext.clone(f);
 	const dsCombo = b.customDataSpyCombo;
 	if (dsCombo != null && dsCombo.getSelectedRecord() != null) {
 		const rec = dsCombo.getSelectedRecord();
@@ -179,7 +179,7 @@ APModDataSpy.getCustomDataSpy = (grid) => {
 		value: grid.apModStore.data.items[0],
 		listeners: {
 			select: (combo, records, eOpts) => {
-				combo.grid.refreshGridFields(combo.grid.realOriginalGridFields);
+				combo.grid.refreshGridFields(combo.grid.originalGridFields);
 				combo.grid.runDataspy(null);
 			}
 		}
@@ -234,9 +234,10 @@ APModDataSpy.createPopupPanel = (grid,data) => {
 		data: newRec ? newData.field : selRec.data.field
 	});
 
+	const gridFields = Ext.clone(grid.originalGridFields).filter(field => field.filterable == "+");
 	const filterAliasStore = Ext.create('Ext.data.Store', {
 		field: ['name', 'label'],
-		data: [...grid.realOriginalGridFields].sort((a, b) => a.label.localeCompare(b.label))
+		data: gridFields.sort((a, b) => a.label.localeCompare(b.label))
 	});
 
 	const posList = [];

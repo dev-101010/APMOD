@@ -20,7 +20,8 @@ APModDataSpy.load = () => {
 	APModDataSpy.injectReadOnlyGrid();
 }
 
-APModDataSpy.loadFilter = (gridURL) => {
+APModDataSpy.loadFilter = (grid) => {
+	const gridURL = grid.gridURL;
 	
 	if(gridURL == null || typeof gridURL !== 'string' || gridURL.length <= 0)
 		return Ext.create('Ext.data.Store', { field: ['name', 'sort', 'filter', 'field'], data: [] } );
@@ -29,10 +30,13 @@ APModDataSpy.loadFilter = (gridURL) => {
 	
 	//start - remove after intigation to: const storage = lStorage[gridURL];
 	let storage = [];
-	if(lStorage != null && typeof lStorage === 'object' && Array.isArray(lStorage))
+	if(lStorage != null && typeof lStorage === 'object' && Array.isArray(lStorage)) {
 		storage = lStorage;
-	else
-		storage = lStorage[gridURL] || [];
+		APModDataSpy.saveFilterToLocalStorage = (grid,storage)
+	}
+	else {
+		storage = lStorage[gridURL];
+	}
 	//end - remove after intigation to: const storage = lStorage[gridURL];
 
 	const def = APModDataSpyDefaultData[gridURL];
@@ -69,7 +73,7 @@ APModDataSpy.injectDataspy = (dsStore) => {
 			this.apmodDataSpyOrigInitComponent.apply(this, []);
 			if (this.gridURL == "WSJOBS.xmlhttp") {
 				const grid = this.getGrid();
-				grid.apModStore = APModDataSpy.loadFilter(this.gridURL);
+				grid.apModStore = APModDataSpy.loadFilter(grid);
 				const customDataSpyCombo = grid.customDataSpyCombo = APModDataSpy.getCustomDataSpy(grid);
 				const customDataSpyEdit = APModDataSpy.getDataSpyEditButton(grid);
 				this.insert(2, customDataSpyCombo);

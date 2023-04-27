@@ -1,4 +1,4 @@
-APModDataSpyDefaultData = [{
+APModDataSpyDefaultData = {"WSJOBS.xmlhttp":[{
 		"name": "AR 2 DS41",
 		"field": [{
 				"NAME": "workordernum",
@@ -436,4 +436,4 @@ APModDataSpyDefaultData = [{
 			"RPAREN": false
 		}]
 	}
-]
+]}

@@ -20,10 +20,22 @@ APModDataSpy.load = () => {
 	APModDataSpy.injectReadOnlyGrid();
 }
 
-APModDataSpy.loadFilter = () => {
+APModDataSpy.loadFilter = (gridURL) => {
+	
+	if(gridURL == null || typeof gridURL !== 'string' || gridURL.length <= 0)
+		return Ext.create('Ext.data.Store', { field: ['name', 'sort', 'filter', 'field'], data: [] } );
 
-	const storage = JSON.parse(localStorage.getItem("APModDataSpy"));
-	const def = APModDataSpyDefaultData;
+	const lStorage = JSON.parse(localStorage.getItem("APModDataSpy"));
+	
+	//start - remove after intigation to: const storage = lStorage[gridURL];
+	let storage = [];
+	if(lStorage != null && typeof lStorage === 'object' && Array.isArray(lStorage))
+		storage = lStorage;
+	else
+		storage = lStorage[gridURL] || [];
+	//end - remove after intigation to: const storage = lStorage[gridURL];
+
+	const def = APModDataSpyDefaultData[gridURL];
 
 	let out = null;
 
@@ -51,13 +63,13 @@ APModDataSpy.injectDataspy = (dsStore) => {
 	if (typeof EAM?.view?.common?.grids?.core?.Dataspy === 'undefined') return;
 	const DSclass = EAM.view.common.grids.core.Dataspy;
 
-	if (DSclass.prototype.amodDataSpyOrigInitComponent == null) {
-		DSclass.prototype.amodDataSpyOrigInitComponent = DSclass.prototype.initComponent;
+	if (DSclass.prototype.apmodDataSpyOrigInitComponent == null) {
+		DSclass.prototype.apmodDataSpyOrigInitComponent = DSclass.prototype.initComponent;
 		DSclass.prototype.initComponent = function() {
-			this.amodDataSpyOrigInitComponent.apply(this, []);
+			this.apmodDataSpyOrigInitComponent.apply(this, []);
 			if (this.gridURL == "WSJOBS.xmlhttp") {
 				const grid = this.getGrid();
-				grid.apModStore = APModDataSpy.loadFilter();
+				grid.apModStore = APModDataSpy.loadFilter(this.gridURL);
 				const customDataSpyCombo = grid.customDataSpyCombo = APModDataSpy.getCustomDataSpy(grid);
 				const customDataSpyEdit = APModDataSpy.getDataSpyEditButton(grid);
 				this.insert(2, customDataSpyCombo);
@@ -76,7 +88,26 @@ APModDataSpy.injectReadOnlyGrid = () => {
 
 	const code2 = "/*----inject CustomDataSpy----*/f=EAM.APModDataSpy.injectGetVisibleFieldsAndReorder(b,f);/*----end----*/";
 	ROGclass.prototype.getVisibleFieldsAndReorder = APModDataSpy.injectCodeInFunction(ROGclass.prototype.getVisibleFieldsAndReorder, 3, code2, ['f']);
-
+	
+	ROGclass.prototype.exportToCSV = function(){APModDataSpy.exportToCSV(this)};
+	
+	if (ROGclass.prototype.apmodReadOnlyGridOrigInitComponent == null) {
+		ROGclass.prototype.apmodReadOnlyGridOrigInitComponent = ROGclass.prototype.initComponent;
+		ROGclass.prototype.initComponent = function() {
+			this.apmodReadOnlyGridOrigInitComponent.apply(this, []);
+			if (this.gridURL == "WSJOBS.xmlhttp") {
+				const list = this.getDockedItems('toolbar[dock="bottom"]');
+				if(list.length > 0) {
+						const botToolbar = this.getDockedItems('toolbar[dock="bottom"]')[0];
+						if(botToolbar != null && botToolbar.items != null) {
+						const pos = botToolbar.items.length;
+						const gridToCsvButton = APModDataSpy.getGridToCsvButton(this);
+						botToolbar.insert(pos,gridToCsvButton);
+					}
+				}
+			}
+		}
+	}
 }
 
 APModDataSpy.injectCodeInFunction = (fn, behind, code, param) => {
@@ -139,6 +170,7 @@ APModDataSpy.injectBuildHeaderFilter = (l, a, b) => {
 			b['MADDON_FILTER_VALUE_' + a] = '';
 			b['MADDON_FILTER_ALIAS_NAME_' + a] = 'organization';
 			a++;
+			
 			for (const filter of rec.data.filter) {
 				b['MADDON_FILTER_ALIAS_NAME_' + a] = filter.NAME;
 				b['MADDON_FILTER_OPERATOR_' + a] = filter.OPERATOR;
@@ -195,6 +227,16 @@ APModDataSpy.getDataSpyEditButton = (grid) => {
 				APModDataSpy.popup = APModDataSpy.createPopupPanel(grid,null)
 				if (APModDataSpy.popup != null) APModDataSpy.popup.show();
 			}
+		}
+	});
+}
+
+APModDataSpy.getGridToCsvButton = (grid) => {
+	return Ext.create('Ext.Button', {
+		text: "⇩",
+		tooltip: "Download CSV",
+		handler: function() {
+			grid.exportToCSV();
 		}
 	});
 }
@@ -409,7 +451,7 @@ APModDataSpy.createPopupPanel = (grid,data) => {
 						if (!newRec) {
 							dsCombo.store.remove(selRec);
 							APModDataSpy.popup.disable();
-							localStorage.setItem("APModDataSpy", JSON.stringify(dsCombo.store.dsGetData()));
+							APModDataSpy.saveFilterToLocalStorage(grid,dsCombo.store.dsGetData());
 							new Ext.util.DelayedTask(function() {
 								APModDataSpy.popup.destroy();
 								APModDataSpy.popup = null;
@@ -441,7 +483,7 @@ APModDataSpy.createPopupPanel = (grid,data) => {
 							if (entry.LPAREN) arr.push("(");
 							if (entry.RPAREN) arr.push(")");
 						}
-						if (!bracketTest(arr)) {
+						if (!APModDataSpy.bracketTest(arr)) {
 							Ext.Msg.alert('Error', 'Filter braces wrong.');
 							return;
 						}
@@ -457,7 +499,7 @@ APModDataSpy.createPopupPanel = (grid,data) => {
 						dsCombo.store.insert(newPos, newEntry);
 
 						APModDataSpy.popup.disable();
-						localStorage.setItem("APModDataSpy", JSON.stringify(dsCombo.store.dsGetData()));
+						APModDataSpy.saveFilterToLocalStorage(grid,dsCombo.store.dsGetData());
 						new Ext.util.DelayedTask(function() {
 							APModDataSpy.popup.destroy();
 							APModDataSpy.popup = null;
@@ -494,7 +536,7 @@ APModDataSpy.createPopupPanel = (grid,data) => {
 							if (entry.LPAREN) arr.push("(");
 							if (entry.RPAREN) arr.push(")");
 						}
-						if (!bracketTest(arr)) {
+						if (!APModDataSpy.bracketTest(arr)) {
 							Ext.Msg.alert('Error', 'Filter braces wrong.');
 							return;
 						}
@@ -1074,7 +1116,20 @@ APModDataSpy.defaultFilter = {
 	],
 };
 
-function bracketTest(entries) {
+APModDataSpy.saveFilterToLocalStorage = (grid,filter) => {
+	const gridURL = grid.gridURL;
+	if(gridURL == null || typeof gridURL !== 'string' || gridURL.length <= 0) return;
+	
+	let lStorage = JSON.parse(localStorage.getItem("APModDataSpy"));
+	if(lStorage == null || typeof lStorage !== 'object' || Array.isArray(lStorage)) {
+		lStorage = {};
+	}
+	lStorage[gridURL] = filter;
+	
+	localStorage.setItem("APModDataSpy", JSON.stringify(lStorage));
+}
+
+APModDataSpy.bracketTest = (entries) => {
 	const bracketPairs = {'[': ']','{': '}','(': ')'},
 		closingBrackets = new Set(Object.values(bracketPairs)),
 		open = [];
@@ -1087,6 +1142,51 @@ function bracketTest(entries) {
 		if (entry in bracketPairs) open.push(bracketPairs[entry]);
 	}
 	return open.length === 0;
+}
+
+APModDataSpy.exportToCSV = (grid) => {
+	let text = "";
+	const separator = ";";
+	
+	if(grid == null || grid.columnManager == null) return;
+	
+	const columns = grid.columnManager.columns;
+	const columnsCount = columns.length;
+	
+	const rows = grid.store.data.items;
+	const rowsCount = rows.length;
+	
+	if(columnsCount <= 0 || rowsCount <= 0) return;
+	
+	//Columns
+	for (let i = 0; i < columnsCount; i++) {
+		text += columns[i].text + separator;
+	}
+	text = text.substring(0, text.length-1);
+	text += "\r";
+	
+	//Row
+	for (let i = 0; i < rowsCount; i++) {
+		const row = rows[i].data;
+		for (let j = 0; j<columnsCount; j++) {
+			const value = row[columns[j].dataIndex];
+			text += "\"" + value + "\"" + separator;
+		}
+		text = text.substring(0, text.length-1);
+		text += "\r";
+	}
+	
+	if(text == null || typeof text !== 'string' || text.length <= 0) return;
+
+	const csvData = new Blob([text], { type: 'text/csv' }); 
+	const csvUrl = URL.createObjectURL(csvData);
+	const element = document.createElement("a");
+	element.setAttribute("href",csvUrl);
+	element.setAttribute("download", "grid.csv");
+	element.style.display = "none";
+	document.body.appendChild(element);
+	element.click();
+	document.body.removeChild(element);
 }
 
 //window.addEventListener("load", APModDataSpy.load);

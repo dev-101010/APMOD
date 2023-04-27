@@ -32,7 +32,7 @@ APModDataSpy.loadFilter = (grid) => {
 	let storage = [];
 	if(lStorage != null && typeof lStorage === 'object' && Array.isArray(lStorage)) {
 		storage = lStorage;
-		APModDataSpy.saveFilterToLocalStorage = (grid,storage)
+		APModDataSpy.saveFilterToLocalStorage(grid,storage);
 		console.log("----------Storage new format!------------");
 	}
 	else {

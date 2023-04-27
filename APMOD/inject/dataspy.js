@@ -281,7 +281,8 @@ APModDataSpy.createPopupPanel = (grid,data) => {
 		data: newRec ? newData.field : selRec.data.field
 	});
 
-	const gridFields = Ext.clone(grid.originalGridFields).filter(field => field.filterable == "+");
+	//const gridFields = Ext.clone(grid.originalGridFields).filter(field => field.filterable == "+");
+	const gridFields = Ext.clone(grid.originalGridFields);
 	const filterAliasStore = Ext.create('Ext.data.Store', {
 		field: ['name', 'label'],
 		data: gridFields.sort((a, b) => a.label.localeCompare(b.label))

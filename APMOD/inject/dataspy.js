@@ -98,8 +98,8 @@ APModDataSpy.injectReadOnlyGrid = () => {
 			if (this.gridURL == "WSJOBS.xmlhttp") {
 				const list = this.getDockedItems('toolbar[dock="bottom"]');
 				if(list.length > 0) {
-						const botToolbar = this.getDockedItems('toolbar[dock="bottom"]')[0];
-						if(botToolbar != null && botToolbar.items != null) {
+					const botToolbar = this.getDockedItems('toolbar[dock="bottom"]')[0];
+					if(botToolbar != null && botToolbar.items != null) {
 						const pos = botToolbar.items.length;
 						const gridToCsvButton = APModDataSpy.getGridToCsvButton(this);
 						botToolbar.insert(pos,gridToCsvButton);

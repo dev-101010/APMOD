@@ -3,7 +3,7 @@
 
 	"name": "APMod",
 	"description": "APMod fügt Filter und Ausfüllhilfen in APM ein welche die Arbeit erleichtern.",
-	"version": "1.0.5",
+	"version": "1.0.6",
 
 	"content_scripts": [{
 		"matches": ["https://eam.eu1.inforcloudsuite.com/*"],

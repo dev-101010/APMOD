@@ -23,8 +23,16 @@ APModDataSpy.load = () => {
 APModDataSpy.loadFilter = (grid) => {
 	const gridURL = grid.gridURL;
 	
-	if(gridURL == null || typeof gridURL !== 'string' || gridURL.length <= 0)
-		return Ext.create('Ext.data.Store', { field: ['name', 'sort', 'filter', 'field'], data: [] } );
+	if(gridURL == null || typeof gridURL !== 'string' || gridURL.length <= 0) {
+		const out = [];
+		out.unshift({
+			name: "No Filter",
+			sort: [],
+			filter: [],
+			field: []
+		});		
+		return Ext.create('Ext.data.Store', { field: ['name', 'sort', 'filter', 'field'], data: out } );
+	}
 
 	const lStorage = JSON.parse(localStorage.getItem("APModDataSpy"));
 	
@@ -52,10 +60,7 @@ APModDataSpy.loadFilter = (grid) => {
 		field: []
 	});
 	
-	return Ext.create('Ext.data.Store', {
-		field: ['name', 'sort', 'filter', 'field'],
-		data: out
-	});
+	return Ext.create('Ext.data.Store', { field: ['name', 'sort', 'filter', 'field'], data: out } );
 }
 
 APModDataSpy.injectDataspy = (dsStore) => {

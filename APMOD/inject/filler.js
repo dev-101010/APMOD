@@ -461,7 +461,7 @@ APModFiller.importJsonToNew = (apModData) => {
 			let data = null;
 			try {
 				const test = JSON.parse(content);
-				if (test != null && typeof test === 'object')
+				if (test != null && typeof test === 'object' && Array.isArray(test) && test[0] != null && test[0]["field"] != null && test[0]["data"] != null )
 					data = test;
 				else
 					throw new Error();

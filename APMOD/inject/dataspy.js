@@ -28,19 +28,13 @@ APModDataSpy.loadFilter = (grid) => {
 
 	const lStorage = JSON.parse(localStorage.getItem("APModDataSpy"));
 	
-	//start - remove after intigation to: const storage = lStorage[gridURL];
-	let storage = [];
-	if(lStorage != null && typeof lStorage === 'object' && Array.isArray(lStorage)) {
-		storage = lStorage;
-		APModDataSpy.saveFilterToLocalStorage(grid,storage);
-		console.log("----------Storage new format!------------");
-	}
-	else {
+	let storage = null;
+	if(lStorage != null && typeof lStorage === 'object')
 		storage = lStorage[gridURL];
-	}
-	//end - remove after intigation to: const storage = lStorage[gridURL];
 
-	const def = APModDataSpyDefaultData[gridURL];
+	let def = null:
+	if(APModDataSpyDefaultData != null && typeof APModDataSpyDefaultData === 'object')
+		def = APModDataSpyDefaultData[gridURL];
 
 	let out = null;
 

@@ -23,12 +23,12 @@ Gehe zu deinen entpackten Datein und wähle den Ordner "APMOD" aus.
 ## Installation als Firefox extension (temp):
 
 ```diff
-- Ich rate von der Nutzung in Firefox als direkte Extension ab.
+- Es ist von der Nutzung in Firefox als direkte Extension abzuraten.
 - Benutze lieber einen anderen Browser oder Tampermonkey.
 ```
 
 ```diff
-! Chrome benutzt schon Manifest V3, welche ich auch nutze. Firefox leider noch nicht in allen aktuellen Browser Versionen.
+! Chrome benutzt schon Manifest V3, Firefox leider noch nicht in allen aktuellen Browser Versionen.
 ! Zum Beispiel geht es nicht in den ESR Versionen, dort muss man noch die Manifest V2 nutzen.
 ! Eine passende Datei habe ich beigelegt: manifest_V2.json welche man auf manifest.json umbenennen muss um diese zu nutzen.
 
@@ -72,9 +72,9 @@ und als letztes werden dann noch die im Header eingetragenen Werte gefiltert (gr
 
 Eigene Filter erstellen ist hingegen etwas komplizierter.
 
-Wenn ich das hier alles beschreiben müsste wäre ich eine Woche dran, deswegen nur ein Schaubild.
+Das alles zu beschreiben würde sehr lange dauern, deswegen nur ein Schaubild.
 
-Sicherlich finden sich einige die damit ohne Probleme zurecht kommen und Filter erstellen können.
+Sicherlich finden sich der eine oder angere der damit ohne Probleme zurecht kommen und Filter erstellen kann.
 
 Es gibt eine Export und Import Funktion, damit könnt ihr Filter leicht untereinander tauschen.
 
@@ -84,7 +84,7 @@ Es gibt eine Export und Import Funktion, damit könnt ihr Filter leicht unterein
 
 Zu Filtern können Reihen hinzugefügt werden, gelöscht werden, die Reihenfolge geändert werden.
 
-Alle werte können frei angepasst werden, aber am Ende muss ein logischer Ablauf dabei raus kommen.
+Alle Werte können frei angepasst werden, aber am Ende muss ein logischer Ablauf dabei raus kommen.
 
 Wichtig ist auch, dass die Klammern alle geschlossen sind.
 
@@ -94,7 +94,7 @@ Für diejenigen die sich schon mal mit programmieren beschäftigt haben. In dies
 
 ( equipment.contains("AR.ZONE.2") || equipmentdesc.contains("pakivaa02") ) && shift.contains("DS42")
 
-Und alle Einträge auf die das zutrifft werden angezeigt.
+Und alle Einträge auf die diese Prüfung zutrifft werden dann angezeigt.
 
 ----
 

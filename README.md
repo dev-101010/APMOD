@@ -23,7 +23,8 @@ Gehe zu deinen entpackten Datein und wähle den Ordner "APMOD" aus.
 ## Installation als Firefox extension (temp):
 
 ```diff
-- Es ist von der Nutzung in Firefox als direkte Extension abzuraten.
+- Es ist von der Nutzung als direkte geladene Extension in Firefox abzuraten.
+- Es ist einfach unnötig Kompliziert für euch.
 - Benutze lieber einen anderen Browser oder Tampermonkey.
 ```
 

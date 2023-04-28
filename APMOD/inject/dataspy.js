@@ -32,7 +32,7 @@ APModDataSpy.loadFilter = (grid) => {
 	if(lStorage != null && typeof lStorage === 'object')
 		storage = lStorage[gridURL];
 
-	let def = null:
+	let def = null;
 	if(APModDataSpyDefaultData != null && typeof APModDataSpyDefaultData === 'object')
 		def = APModDataSpyDefaultData[gridURL];
 

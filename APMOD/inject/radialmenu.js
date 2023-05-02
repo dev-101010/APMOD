@@ -77,7 +77,8 @@ RadialMenu.prototype.close = function () {
 
 		self.currentMenu.setAttribute('class', 'menu ' +self.type+ ' inner');
 		setTimeout(() => {
-			self.currentMenu.remove();
+			if(self.currentMenu)
+				self.currentMenu.remove();
 			self.currentMenu = null;
 			if(self.holder)
 				self.holder.remove();

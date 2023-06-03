@@ -49,7 +49,7 @@ APModSelector.dataChanged = (target,grid) => {
 		if(button.key == "s_poor" && button.xVis != null) button.xVis( selector.good );
 		if(button.key == "s_check" && button.xVis != null) {
 			button.xVis( selector.comp || selector.yes || selector.good );
-			button.checked = selector.override;
+			button.setValue(selector.override);
 		}
 	}
 }

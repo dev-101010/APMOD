@@ -251,7 +251,7 @@ APModFiller.injectMainToolbar = () => {
 		TBclass.prototype.APModFillerOrigInitComponent = TBclass.prototype.initComponent;
 		TBclass.prototype.initComponent = function() {
 			this.APModFillerOrigInitComponent.apply(this, []);
-			this.insert(this.items.length - 1, APModFiller.createFillerButton());
+			this.insert(this.items.length, APModFiller.createFillerButton());
 		}
 	}
 }

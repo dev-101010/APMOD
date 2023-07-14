@@ -271,7 +271,8 @@ APModFiller.injectRecordView = () => {
 				const causecode = a.getForm().findField('causecode');
 				if(problemcode != null && failurecode != null && causecode != null) {
 					const parent = causecode.ownerCt;
-					parent.add({
+					const pos = parent.items.keys.indexOf(causecode.id) + 1;
+					parent.insert(pos,{
 						xtype: 'button',
 						name: 'apModCloseCodes',
 						text: 'Fill Close Codes',

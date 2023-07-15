@@ -91,11 +91,13 @@ Wichtig ist auch, dass die Klammern alle geschlossen sind.
 
 ![dataspy_edit_filter.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_filter.png)
 
+```diff
 Für diejenigen die sich schon mal mit programmieren beschäftigt haben. In diesem Filter steht einfach:
 
 ( equipment.contains("AR.ZONE.2") || equipmentdesc.contains("pakivaa02") ) && shift.contains("DS42")
 C
 Und alle Einträge auf die diese Prüfung zutrifft werden dann angezeigt.
+```
 
 <br />
 

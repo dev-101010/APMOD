@@ -100,20 +100,31 @@ Und alle Einträge auf die diese Prüfung zutrifft werden dann angezeigt.
 <br />
 
 Field Name hat mehrere doppelte Eigenschaften, z.B:
+
 Status -> workorderstatus -> Der Workorderstatus Datenbankseitig. -> Value: R, IP, C, CANC
+
 Status -> workorderstatus_display -> Der Workorderstatus ausgeschreiben in der ausgewählten Sprache. -> Value: Open, In Progress, Completed, Canceled
 
+
 Type -> workordertype -> Der Workordertyp Datenbankseitig. -> Value: PM, SC, FPM, PR, BRKD, CM
+
 Type -> workordertype_display -> Der Workordertyp ausgeschreiben in der ausgewählten Sprache. -> Value: Prev. Maint., Systemcheck, Followup, Project, Breakdown, Corrective
+
 
 Andere Eigenschaften wie z.B. Equipment sind etwas einfacher, sie haben immer die selbe Value, in allen Sprachen.
 
+
 Leider ist APMOD hier etwas umständlicher zu handhaben als APM selber, aber anders wäre es viel komplizierter und viel mehr Aufwand, der sich nicht lohnen würde.
 
+
 Eine zusätzliche Möglichkeit der Value die eingeführt wurde sind Variablen fürs Datum:
+
 #DATE -> Kann im Filter verwendet werden und gibt immer das aktuelle Datum.
+
 #DATE D +3 -> Gibt das Datum von Heute plus 3 Tage.
+
 #DATE W -> Gibt das Datum vom Ende der aktuellen Woche. (Sonntag)
+
 #DATE W +2 -> Gibt das Datum vom Ende der übernächsten Woche. (Sonntag)
 
 ----

@@ -18,7 +18,7 @@ Gehe zu deinen entpackten Datein und wähle den Ordner "APMOD" aus.
 
 Öffne oder lade APM jetzt neu.
 
-<br />
+<br /><br /><br />
 
 ## Installation als Firefox extension (temp):
 
@@ -97,7 +97,7 @@ Für diejenigen die sich schon mal mit programmieren beschäftigt haben. In dies
 C
 Und alle Einträge auf die diese Prüfung zutrifft werden dann angezeigt.
 
-<br /><br /><br />
+<br />
 
 Field Name hat mehrere doppelte Eigenschaften, z.B:
 Status -> workorderstatus -> Der Workorderstatus Datenbankseitig. -> Value: R, IP, C, CANC

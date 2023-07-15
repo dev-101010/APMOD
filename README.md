@@ -99,7 +99,7 @@ Und alle Einträge auf die diese Prüfung zutrifft werden dann angezeigt.
 
 <br />
 
-Field Name hat mehrere doppelte Eigenschaften, z.B:
+"Field Name" hat leider mehrere doppelte Eigenschaften, z.B:
 
 Status -> workorderstatus -> Der Workorderstatus Datenbankseitig. -> Value: "R", "IP", "C", "CANC"
 
@@ -113,11 +113,12 @@ Type -> workordertype_display -> Der Workordertyp ausgeschreiben in der ausgewä
 
 <br />
 
-Andere Eigenschaften wie z.B. Equipment sind etwas einfacher, sie haben immer die selbe Value, in allen Sprachen.
+Leider ist APMOD hier etwas umständlicher zu handhaben als APM selber, aber anders wäre es viel komplizierter und viel mehr Aufwand, der sich nicht lohnen würde.
 
 <br />
 
-Leider ist APMOD hier etwas umständlicher zu handhaben als APM selber, aber anders wäre es viel komplizierter und viel mehr Aufwand, der sich nicht lohnen würde.
+Andere Eigenschaften wie z.B. Equipment sind etwas einfacher, sie haben immer die selbe Value, in allen Sprachen.
+
 
 <br />
 

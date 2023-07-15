@@ -105,17 +105,21 @@ Status -> workorderstatus -> Der Workorderstatus Datenbankseitig. -> Value: R, I
 
 Status -> workorderstatus_display -> Der Workorderstatus ausgeschreiben in der ausgewählten Sprache. -> Value: Open, In Progress, Completed, Canceled
 
+<br />
 
 Type -> workordertype -> Der Workordertyp Datenbankseitig. -> Value: PM, SC, FPM, PR, BRKD, CM
 
 Type -> workordertype_display -> Der Workordertyp ausgeschreiben in der ausgewählten Sprache. -> Value: Prev. Maint., Systemcheck, Followup, Project, Breakdown, Corrective
 
+<br />
 
 Andere Eigenschaften wie z.B. Equipment sind etwas einfacher, sie haben immer die selbe Value, in allen Sprachen.
 
+<br />
 
 Leider ist APMOD hier etwas umständlicher zu handhaben als APM selber, aber anders wäre es viel komplizierter und viel mehr Aufwand, der sich nicht lohnen würde.
 
+<br />
 
 Eine zusätzliche Möglichkeit der Value die eingeführt wurde sind Variablen fürs Datum:
 

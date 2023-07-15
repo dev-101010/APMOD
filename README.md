@@ -101,13 +101,13 @@ Und alle Einträge auf die diese Prüfung zutrifft werden dann angezeigt.
 
 "Field Name" hat leider mehrere doppelte Eigenschaften, z.B:
 
-Status -> workorderstatus -> Der Workorderstatus Datenbankseitig. -> Value: "R", "IP", "C", "CANC"
+Status -> workorderstatus -> Der Workorderstatus datenbankseitig, unabhänig der Sprache. -> Value: "R", "IP", "C", "CANC"
 
 Status -> workorderstatus_display -> Der Workorderstatus ausgeschreiben in der ausgewählten Sprache. -> Value: "Open", "In Progress", "Completed", "Canceled"
 
 <br />
 
-Type -> workordertype -> Der Workordertyp Datenbankseitig. -> Value: "PM", "SC", "FPM", "PR", "BRKD", "CM"
+Type -> workordertype -> Der Workordertyp datenbankseitig, unabhänig der Sprache. -> Value: "PM", "SC", "FPM", "PR", "BRKD", "CM"
 
 Type -> workordertype_display -> Der Workordertyp ausgeschreiben in der ausgewählten Sprache. -> Value: "Prev. Maint.", "Systemcheck", "Followup", "Project", "Breakdown", "Corrective"
 

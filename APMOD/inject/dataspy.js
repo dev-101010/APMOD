@@ -784,6 +784,11 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore, filterValueStore) => 
 					sortable: false,
 					menuDisabled: true,
 					flex: 1,
+					renderer: function(value, metadata, record) {
+						APModDataSpy.tooltipRenderer(value, metadata, record);
+						return value;
+					},
+					align: 'center',
 					editor: {
 						xtype: 'combobox',
 						editable: true,
@@ -793,15 +798,13 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore, filterValueStore) => 
 						valueField: 'value',
 						listeners:{
 						   expand:function(combo){
-							   const name = combo.up().context.record.data.NAME;
-							   combo.store.clearFilter();
-							   combo.store.filterBy(function(rec){
+								const name = combo.up().context.record.data.NAME;
+								combo.store.clearFilter();
+								combo.store.filterBy(function(rec){
 									return rec.data.typ == name;
-							  })
+								})
+							}
 						}
-					},
-					align: 'center',
-					renderer: function(value, metadata, record) {APModDataSpy.tooltipRenderer(value, metadata, record);return value;}
                     }
 				},
 				{

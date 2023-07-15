@@ -785,6 +785,7 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore, filterValueStore) => 
 					menuDisabled: true,
 					flex: 1,
 					renderer: function(value, metadata, record) {
+						value = value?value:"";
 						APModDataSpy.tooltipRenderer(value, metadata, record);
 						return value;
 					},
@@ -797,15 +798,20 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore, filterValueStore) => 
 						displayField: 'value',
 						valueField: 'value',
 						listeners:{
-						   expand:function(combo){
-								const name = combo.up().context.record.data.NAME;
-								combo.store.clearFilter();
-								combo.store.filterBy(function(rec){
-									return rec.data.typ == name;
-								})
+							select: function(comp,record,index) {
+								if(comp.getValue() == "&nbsp;") comp.setValue("");
+							},
+							expand:function(combo){
+								if(combo.up().context?.record?.data?.NAME != null) {
+									const name = combo.up().context.record.data.NAME;
+									combo.store.clearFilter();
+									combo.store.filterBy(function(rec){
+										return rec.data.typ == name || rec.data.typ == "*";
+									});
+								}
 							}
 						}
-                    }
+					}
 				},
 				{
 					header: 'Joiner',
@@ -1291,11 +1297,21 @@ APModDataSpy.exportToCSV = (grid) => {
 }
 
 APModDataSpy.filterValues = [
+{"typ":"*","value":"&nbsp;"},
+{"typ":"workorderstatus","value":"R"},
+{"typ":"workorderstatus","value":"IP"},
+{"typ":"workorderstatus","value":"C"},
+{"typ":"workorderstatus","value":"CANC"},
+{"typ":"workordertype","value":"PM"},
+{"typ":"workordertype","value":"SC"},
+{"typ":"workordertype","value":"FPM"},
 {"typ":"workordertype","value":"PR"},
 {"typ":"workordertype","value":"BRKD"},
 {"typ":"workordertype","value":"CM"},
 {"typ":"equipment","value":"AR.ZONE.2"},
 {"typ":"equipment","value":"AR.ZONE.3"},
+{"typ":"equipment","value":"BLDG"},
+{"typ":"equipment","value":"CBM"},
 {"typ":"equipmentdesc","value":"pakivaa02"},
 {"typ":"equipmentdesc","value":"pakivaa03"},
 {"typ":"shift","value":"DS41"},
@@ -1307,7 +1323,11 @@ APModDataSpy.filterValues = [
 {"typ":"schedstartdate","value":"#DATE"},
 {"typ":"schedstartdate","value":"#DATE W"},
 {"typ":"schedstartdate","value":"#DATE D +7"},
-{"typ":"schedstartdate","value":"#DATE W +1"}
+{"typ":"schedstartdate","value":"#DATE W +1"},
+{"typ":"schedenddate","value":"#DATE"},
+{"typ":"schedenddate","value":"#DATE W"},
+{"typ":"schedenddate","value":"#DATE D +7"},
+{"typ":"schedenddate","value":"#DATE W +1"}
 ];
 
 //window.addEventListener("load", APModDataSpy.load);

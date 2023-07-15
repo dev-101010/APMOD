@@ -101,15 +101,15 @@ Und alle Einträge auf die diese Prüfung zutrifft werden dann angezeigt.
 
 Field Name hat mehrere doppelte Eigenschaften, z.B:
 
-Status -> workorderstatus -> Der Workorderstatus Datenbankseitig. -> Value: R, IP, C, CANC
+Status -> workorderstatus -> Der Workorderstatus Datenbankseitig. -> Value: "R", "IP", "C", "CANC"
 
-Status -> workorderstatus_display -> Der Workorderstatus ausgeschreiben in der ausgewählten Sprache. -> Value: Open, In Progress, Completed, Canceled
+Status -> workorderstatus_display -> Der Workorderstatus ausgeschreiben in der ausgewählten Sprache. -> Value: "Open", "In Progress", "Completed", "Canceled"
 
 <br />
 
-Type -> workordertype -> Der Workordertyp Datenbankseitig. -> Value: PM, SC, FPM, PR, BRKD, CM
+Type -> workordertype -> Der Workordertyp Datenbankseitig. -> Value: "PM", "SC", "FPM", "PR", "BRKD", "CM"
 
-Type -> workordertype_display -> Der Workordertyp ausgeschreiben in der ausgewählten Sprache. -> Value: Prev. Maint., Systemcheck, Followup, Project, Breakdown, Corrective
+Type -> workordertype_display -> Der Workordertyp ausgeschreiben in der ausgewählten Sprache. -> Value: "Prev. Maint.", "Systemcheck", "Followup", "Project", "Breakdown", "Corrective"
 
 <br />
 
@@ -123,13 +123,13 @@ Leider ist APMOD hier etwas umständlicher zu handhaben als APM selber, aber and
 
 Eine zusätzliche Möglichkeit der Value die eingeführt wurde sind Variablen fürs Datum:
 
-#DATE -> Kann im Filter verwendet werden und gibt immer das aktuelle Datum.
+"#DATE" -> Kann im Filter verwendet werden und gibt immer das aktuelle Datum.
 
-#DATE D +3 -> Gibt das Datum von Heute plus 3 Tage.
+"#DATE D +3" -> Gibt das Datum von Heute plus 3 Tage.
 
-#DATE W -> Gibt das Datum vom Ende der aktuellen Woche. (Sonntag)
+"#DATE W" -> Gibt das Datum vom Ende der aktuellen Woche. (Sonntag)
 
-#DATE W +2 -> Gibt das Datum vom Ende der übernächsten Woche. (Sonntag)
+"#DATE W +2" -> Gibt das Datum vom Ende der übernächsten Woche. (Sonntag)
 
 ----
 

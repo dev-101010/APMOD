@@ -176,11 +176,15 @@ APModDataSpy.injectBuildHeaderFilter = (l, a, b) => {
 			a++;
 			
 			for (const filter of rec.data.filter) {
+				let value = filter.VALUE.toString();
+				if(value.startsWith('#')) {
+					value = APModDataSpy.onDate(value);
+				}
 				b['MADDON_FILTER_ALIAS_NAME_' + a] = filter.NAME;
 				b['MADDON_FILTER_OPERATOR_' + a] = filter.OPERATOR;
 				b['MADDON_FILTER_JOINER_' + a] = filter.JOINER;
 				b['MADDON_FILTER_SEQNUM_' + a] = a + '';
-				b['MADDON_FILTER_VALUE_' + a] = filter.VALUE;
+				b['MADDON_FILTER_VALUE_' + a] = value;
 				b['MADDON_LPAREN_' + a] = filter.LPAREN;
 				b['MADDON_RPAREN_' + a] = filter.RPAREN;
 				a++;
@@ -198,6 +202,65 @@ APModDataSpy.injectBuildHeaderFilter = (l, a, b) => {
 		}
 	}
 	return [a, b];
+}
+
+APModDataSpy.onFunction = (value) => {
+	if(value.startsWith('#DATE')) {
+		return  APModDataSpy.onDate(value);
+	}
+}
+
+APModDataSpy.onDate = (s) => {
+	const array = s.split(' ');
+	const today = new Date();
+	
+	if(array.length == 1) {
+		return APModDataSpy.DateFormat(today);
+	}
+	
+	if (array.length == 2) {
+		if(array[1] == "D") {
+			return APModDataSpy.DateFormat(today);
+		}
+		if(array[1] == "W") {
+			const week = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7 - today.getDay());
+			return APModDataSpy.DateFormat(week);
+		}
+		if(array[1] == "M") {
+			const month = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+			return APModDataSpy.DateFormat(month);
+		}
+		if(array[1] == "Y") {
+			const year = new Date(today.getFullYear() + 1, 1, 0);
+			return APModDataSpy.DateFormat(year);
+		}
+	}
+	
+	if (array.length == 3 && ( array[2].startsWith('+') || array[2].startsWith('-') ) ) {
+		const num = parseInt(array[2]);
+		if(array[1] == "D" && typeof num === "number" ) {
+			const days = new Date(today.getFullYear(), today.getMonth(), today.getDate() + num);
+			return APModDataSpy.DateFormat(days);
+		}
+		if(array[1] == "W" && typeof num === "number") {
+			const weeks = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7 + (7 * num) - today.getDay());
+			return APModDataSpy.DateFormat(weeks);
+		}
+		if(array[1] == "M" && typeof num === "number") {
+			const months = new Date(today.getFullYear(), today.getMonth() + 1 + num, 0);
+			return APModDataSpy.DateFormat(months);
+		}
+		if(array[1] == "Y" && typeof num === "number") {
+			const years = new Date(today.getFullYear() + 1 + num, 0, 0);
+			return APModDataSpy.DateFormat(years);
+		}
+	}
+	
+	return APModDataSpy.DateFormat(new Date(0,0,1));
+}
+
+APModDataSpy.DateFormat = (date) => {
+	return Ext.Date.format(date, 'd-M-Y');
 }
 
 APModDataSpy.getCustomDataSpy = (grid) => {
@@ -286,6 +349,11 @@ APModDataSpy.createPopupPanel = (grid,data) => {
 		field: ['name', 'label'],
 		data: gridFields.sort((a, b) => a.label.localeCompare(b.label))
 	});
+	
+	const filterValueStore = Ext.create('Ext.data.Store', {
+		field: ['typ', 'value'],
+		data: APModDataSpy.filterValues
+	});
 
 	const posList = [];
 	const max = newRec ? selRec.store.data.length + 1 : selRec.store.data.length;
@@ -337,7 +405,7 @@ APModDataSpy.createPopupPanel = (grid,data) => {
 						'text-align': 'center'
 					},
 				},
-				items: [APModDataSpy.filterPanel(filterStore, filterAliasStore)],
+				items: [APModDataSpy.filterPanel(filterStore, filterAliasStore, filterValueStore)],
 			}, {
 				title: 'Sort',
 				layout: 'fit',
@@ -566,7 +634,7 @@ APModDataSpy.createPopupPanel = (grid,data) => {
 	});
 }
 
-APModDataSpy.filterPanel = (filterStore, filterAliasStore) => {
+APModDataSpy.filterPanel = (filterStore, filterAliasStore, filterValueStore) => {
 	return Ext.create('Ext.Panel', {
 		name: "FilterPanel",
 		layout: {
@@ -653,7 +721,8 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore) => {
 			flex: 1,
 			height: '100%',
 			store: filterStore,
-			columns: [{
+			columns: [
+				{
 					xtype: 'rownumberer',
 					name: "FilterRowNumber",
 					sortable: false,
@@ -715,10 +784,34 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore) => {
 					sortable: false,
 					menuDisabled: true,
 					flex: 1,
-					editor: {
-						xtype: 'textfield',
+					renderer: function(value, metadata, record) {
+						value = value?value:"";
+						APModDataSpy.tooltipRenderer(value, metadata, record);
+						return value;
 					},
-					align: 'center'
+					align: 'center',
+					editor: {
+						xtype: 'combobox',
+						editable: true,
+						forceSelection: false,
+						store: filterValueStore,
+						displayField: 'value',
+						valueField: 'value',
+						listeners:{
+							select: function(comp,record,index) {
+								if(comp.getValue() == "&nbsp;") comp.setValue("");
+							},
+							expand:function(combo){
+								if(combo.up().context?.record?.data?.NAME != null) {
+									const name = combo.up().context.record.data.NAME;
+									combo.store.clearFilter();
+									combo.store.filterBy(function(rec){
+										return rec.data.typ == name || rec.data.typ == "*";
+									});
+								}
+							}
+						}
+					}
 				},
 				{
 					header: 'Joiner',
@@ -752,6 +845,15 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore) => {
 			],
 		}]
 	});
+}
+
+APModDataSpy.tooltipRenderer = (value, metaData) => {
+	let v = value.toString();
+	let text = value.toString();
+	if(v.startsWith('#')) {
+		text = APModDataSpy.onFunction(v);
+	}
+	metaData.tdAttr = 'data-qtip="' + text + '"';
 }
 
 APModDataSpy.sortPanel = (sortStore, filterAliasStore) => {
@@ -1193,5 +1295,39 @@ APModDataSpy.exportToCSV = (grid) => {
 	element.click();
 	document.body.removeChild(element);
 }
+
+APModDataSpy.filterValues = [
+{"typ":"*","value":"&nbsp;"},
+{"typ":"workorderstatus","value":"R"},
+{"typ":"workorderstatus","value":"IP"},
+{"typ":"workorderstatus","value":"C"},
+{"typ":"workorderstatus","value":"CANC"},
+{"typ":"workordertype","value":"PM"},
+{"typ":"workordertype","value":"SC"},
+{"typ":"workordertype","value":"FPM"},
+{"typ":"workordertype","value":"PR"},
+{"typ":"workordertype","value":"BRKD"},
+{"typ":"workordertype","value":"CM"},
+{"typ":"equipment","value":"AR.ZONE.2"},
+{"typ":"equipment","value":"AR.ZONE.3"},
+{"typ":"equipment","value":"BLDG"},
+{"typ":"equipment","value":"CBM"},
+{"typ":"equipmentdesc","value":"pakivaa02"},
+{"typ":"equipmentdesc","value":"pakivaa03"},
+{"typ":"shift","value":"DS41"},
+{"typ":"shift","value":"DS42"},
+{"typ":"shift","value":"DS43"},
+{"typ":"shift","value":"DS4A"},
+{"typ":"shift","value":"DS4B"},
+{"typ":"shift","value":"DS4C"},
+{"typ":"schedstartdate","value":"#DATE"},
+{"typ":"schedstartdate","value":"#DATE W"},
+{"typ":"schedstartdate","value":"#DATE D +7"},
+{"typ":"schedstartdate","value":"#DATE W +1"},
+{"typ":"schedenddate","value":"#DATE"},
+{"typ":"schedenddate","value":"#DATE W"},
+{"typ":"schedenddate","value":"#DATE D +7"},
+{"typ":"schedenddate","value":"#DATE W +1"}
+];
 
 //window.addEventListener("load", APModDataSpy.load);

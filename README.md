@@ -1,4 +1,4 @@
-# APMod (1.0.9)
+# APMod (1.1.0)
 
 Fügt verschiedene zusätzliche Funktionen in die APM Website ein:
 
@@ -91,11 +91,46 @@ Wichtig ist auch, dass die Klammern alle geschlossen sind.
 
 ![dataspy_edit_filter.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_filter.png)
 
+```diff
 Für diejenigen die sich schon mal mit programmieren beschäftigt haben. In diesem Filter steht einfach:
-
 ( equipment.contains("AR.ZONE.2") || equipmentdesc.contains("pakivaa02") ) && shift.contains("DS42")
-
 Und alle Einträge auf die diese Prüfung zutrifft werden dann angezeigt.
+```
+
+<br />
+
+"Field Name" hat leider mehrere doppelte Eigenschaften, z.B:
+
+Status -> workorderstatus -> Der Workorderstatus datenbankseitig, unabhänig der Sprache. -> Value: "R", "IP", "C", "CANC"
+
+Status -> workorderstatus_display -> Der Workorderstatus ausgeschreiben in der ausgewählten Sprache. -> Value: "Open", "In Progress", "Completed", "Canceled"
+
+<br />
+
+Type -> workordertype -> Der Workordertyp datenbankseitig, unabhänig der Sprache. -> Value: "PM", "SC", "FPM", "PR", "BRKD", "CM"
+
+Type -> workordertype_display -> Der Workordertyp ausgeschreiben in der ausgewählten Sprache. -> Value: "Prev. Maint.", "Systemcheck", "Followup", "Project", "Breakdown", "Corrective"
+
+<br />
+
+Leider ist APMOD hier etwas umständlicher zu handhaben als APM selber, aber anders wäre es viel komplizierter und viel mehr Aufwand, der sich nicht lohnen würde.
+
+<br />
+
+Andere Eigenschaften wie z.B. Equipment sind etwas einfacher, sie haben immer die selbe Value, in allen Sprachen.
+
+
+<br />
+
+Eine zusätzliche Möglichkeit der Value die eingeführt wurde sind Variablen fürs Datum:
+
+"#DATE" -> Kann im Filter verwendet werden und gibt immer das aktuelle Datum.
+
+"#DATE D +3" -> Gibt das Datum von Heute plus 3 Tage.
+
+"#DATE W" -> Gibt das Datum vom Ende der aktuellen Woche. (Sonntag)
+
+"#DATE W +2" -> Gibt das Datum vom Ende der übernächsten Woche. (Sonntag)
 
 ----
 

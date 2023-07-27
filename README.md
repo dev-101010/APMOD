@@ -70,7 +70,7 @@ und als letztes werden dann noch die im Header eingetragenen Werte gefiltert (gr
 ![dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy.png)
 
 ----
-Hier gibt es einige Filter zum importieren:
+Hier gibt es einige vorgefertigte Filter zum importieren:
 
 https://github.com/dev-101010/APMOD-Filter
 

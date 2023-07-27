@@ -137,6 +137,10 @@ Eine zusätzliche Möglichkeit der Value die eingeführt wurde sind Variablen f�
 
 "#DATE W +2" -> Gibt das Datum vom Ende der übernächsten Woche. (Sonntag)
 
+Gleiches für den Login:
+
+"#LOGIN"
+
 ----
 
 Hier geht es um die Sortierung, man kann nach jeder Spalte sotieren, von A -> Z oder von Z -> A.

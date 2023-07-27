@@ -5,6 +5,15 @@ const APModDataSpy = {
 APModDataSpy.load = () => {
 	if (typeof Ext === 'undefined' || typeof EAM === 'undefined') return;
 	EAM.APModDataSpy = APModDataSpy;
+	APModDataSpy.login = "UNKNOWN";
+	if(EAM?.AppData?._appData?.installParams?.user != null)
+	{
+		const mail = EAM.AppData._appData.installParams.user;
+		if(mail != null && mail.includes("@"))
+		{
+			APModDataSpy.login = mail.split("@")[0];
+		}
+	}
 
 	Ext.data.Store.prototype.dsGetData = function() {
 		const arr = [];
@@ -178,7 +187,7 @@ APModDataSpy.injectBuildHeaderFilter = (l, a, b) => {
 			for (const filter of rec.data.filter) {
 				let value = filter.VALUE.toString();
 				if(value.startsWith('#')) {
-					value = APModDataSpy.onDate(value);
+					value = APModDataSpy.onFunction(value);
 				}
 				b['MADDON_FILTER_ALIAS_NAME_' + a] = filter.NAME;
 				b['MADDON_FILTER_OPERATOR_' + a] = filter.OPERATOR;
@@ -207,6 +216,9 @@ APModDataSpy.injectBuildHeaderFilter = (l, a, b) => {
 APModDataSpy.onFunction = (value) => {
 	if(value.startsWith('#DATE')) {
 		return  APModDataSpy.onDate(value);
+	}
+	if(value.startsWith('#LOGIN')) {
+		return  APModDataSpy.login;
 	}
 }
 

@@ -137,7 +137,7 @@ Eine zusätzliche Möglichkeit der Value die eingeführt wurde sind Variablen f�
 
 "#DATE W +2" -> Gibt das Datum vom Ende der übernächsten Woche. (Sonntag)
 
-Gleiches für den Login:
+Gleiches für den Login des aktuellen Users:
 
 "#LOGIN"
 

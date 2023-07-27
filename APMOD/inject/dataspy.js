@@ -1339,7 +1339,8 @@ APModDataSpy.filterValues = [
 {"typ":"schedenddate","value":"#DATE"},
 {"typ":"schedenddate","value":"#DATE W"},
 {"typ":"schedenddate","value":"#DATE D +7"},
-{"typ":"schedenddate","value":"#DATE W +1"}
+{"typ":"schedenddate","value":"#DATE W +1"},
+{"typ":"assignedto","value":"#LOGIN"}
 ];
 
 //window.addEventListener("load", APModDataSpy.load);

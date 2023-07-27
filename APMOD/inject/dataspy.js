@@ -640,6 +640,13 @@ APModDataSpy.createPopupPanel = (grid,data) => {
 					handler: function() {
 						APModDataSpy.importJsonToNew(grid);
 					},
+				},	{
+					minWidth: 80,
+					text: 'Web Filter',
+					xtype: 'button',
+					handler: function() {
+						APModDataSpy.importWebJsonToNew(grid);
+					},
 				}]
 			}
 		]
@@ -1189,6 +1196,11 @@ APModDataSpy.importJsonToNew = (grid) => {
 		}
 	}
 	input.click();
+}
+
+APModDataSpy.importWebJsonToNew = (grid) => {
+	window.open("https://github.com/dev-101010/APMOD-Filter", '_blank').focus();
+	//https://api.github.com/repos/dev-101010/APMOD-Filter/contents
 }
 
 APModDataSpy.defaultFilter = {

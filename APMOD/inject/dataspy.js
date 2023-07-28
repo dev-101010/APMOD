@@ -534,16 +534,25 @@ APModDataSpy.createPopupPanel = (grid,data) => {
 					disabled: newRec,
 					handler: function() {
 						if (!newRec) {
-							dsCombo.store.remove(selRec);
-							APModDataSpy.popup.disable();
-							APModDataSpy.saveFilterToLocalStorage(grid,dsCombo.store.dsGetData());
-							new Ext.util.DelayedTask(function() {
-								APModDataSpy.popup.destroy();
-								APModDataSpy.popup = null;
-								dsCombo.select("No Filter");
-								const record = dsCombo.getStore().findRecord('value', "No Filter");
-								dsCombo.fireEvent('select', dsCombo, [record]);
-							}).delay(200);
+							Ext.Msg.show({
+								 title:'Delete filter?',
+								 msg : 'Are you sure you want to delete this filter?',
+								 buttons: Ext.Msg.YESNO,
+								 fn : function(button){
+									if (button === 'yes'){
+										dsCombo.store.remove(selRec);
+										APModDataSpy.popup.disable();
+										APModDataSpy.saveFilterToLocalStorage(grid,dsCombo.store.dsGetData());
+										new Ext.util.DelayedTask(function() {
+											APModDataSpy.popup.destroy();
+											APModDataSpy.popup = null;
+											dsCombo.select("No Filter");
+											const record = dsCombo.getStore().findRecord('value', "No Filter");
+											dsCombo.fireEvent('select', dsCombo, [record]);
+										}).delay(200);
+									}
+								 }
+							});
 						}
 					},
 				}, {
@@ -705,8 +714,18 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore, filterValueStore) => 
 					const grid = this.up('panel[name="FilterPanel"]').down('gridpanel[name="filterGridPanel"]')
 					const selectedRecord = grid.getSelectionModel().getSelection()[0];
 					const row = grid.store.indexOf(selectedRecord);
-					if (row >= 0)
-						grid.store.removeAt(row);
+					if (row >= 0) {
+						Ext.Msg.show({
+							 title:'Delete row?',
+							 msg : 'Are you sure you want to delete row '+(row+1)+'?',
+							 buttons: Ext.Msg.YESNO,
+							 fn : function(button){
+								if (button === 'yes'){
+									grid.store.removeAt(row);
+								}
+							 }
+						});
+				}
 				},
 			}, {
 				width: 28,

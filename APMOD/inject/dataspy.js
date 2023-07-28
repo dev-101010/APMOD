@@ -393,6 +393,7 @@ APModDataSpy.createPopupPanel = (grid,data) => {
 		height: 600,
 		minWidth: 900,
 		minHeight: 600,
+		modal: true,
 		closable: false,
 		maximizable: false,
 		layout: 'fit',
@@ -725,7 +726,7 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore, filterValueStore) => 
 								}
 							 }
 						});
-				}
+					}
 				},
 			}, {
 				width: 28,

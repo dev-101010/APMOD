@@ -65,12 +65,20 @@ APModFiller.getRad = (target,x,y,apModFields) => {
 			const values = entries[0].data.split('|');
 			let i = 0;
 			for(const field of apModFields) {
-				field.inputEl.dom.value = values[i] != null ? values[i] : "";
+				let value = values[i];
+				if(value.startsWith('#')) {
+					value = APModDataSpy.onFunction(value);
+				}
+				field.inputEl.dom.value = value != null ? value : "";
 				i++;
 			}
 			APModPopup.openPopup("Values inserted.");
 		} else {
-			target.value = entries[0].data;
+			let value = entries[0].data;
+			if(value.startsWith('#')) {
+				value = APModDataSpy.onFunction(value);
+			}
+			target.value = value != null ? value : "";
 			APModPopup.openPopup("Value inserted.");
 		}
 	} else if (entries.length > 1) {
@@ -99,12 +107,20 @@ APModFiller.getRad = (target,x,y,apModFields) => {
 						const values = item.data.split('|');
 						let i = 0;
 						for(const field of apModFields) {
-							field.inputEl.dom.value = values[i] != null ? values[i] : "";
+							let value = values[i];
+							if(value.startsWith('#')) {
+								value = APModDataSpy.onFunction(value);
+							}
+							field.inputEl.dom.value = value != null ? value : "";
 							i++;
 						}
 						APModPopup.openPopup("Values inserted.");
 					} else {
-						input.value = item.data;
+						let value = item.data;
+						if(value.startsWith('#')) {
+							value = APModDataSpy.onFunction(value);
+						}
+						input.value = value != null ? value : "";
 						APModPopup.openPopup("Value inserted.");
 					}
 				}
@@ -318,6 +334,7 @@ APModFiller.createPopupPanel = (store) => {
 		height: 600,
 		minWidth: 600,
 		minHeight: 300,
+		modal: true,
 		closable: false,
 		maximizable: false,
 		name: "FillerWindow",
@@ -546,8 +563,18 @@ APModFiller.fillerPanel = (fillerStore) => {
 					const grid = this.up('panel[name="FillerPanel"]').down('gridpanel[name="fillerGridPanel"]')
 					const selectedRecord = grid.getSelectionModel().getSelection()[0];
 					const row = grid.store.indexOf(selectedRecord);
-					if (row >= 0)
-						grid.store.removeAt(row);
+					if (row >= 0) {
+						Ext.Msg.show({
+							 title:'Delete row?',
+							 msg : 'Are you sure you want to delete row '+(row+1)+'?',
+							 buttons: Ext.Msg.YESNO,
+							 fn : function(button){
+								if (button === 'yes'){
+									grid.store.removeAt(row);
+								}
+							 }
+						});
+					}
 				},
 			}, {
 				width: 28,
@@ -638,8 +665,8 @@ APModFiller.fillerPanel = (fillerStore) => {
 
 APModFiller.store.data = [{
 		"field": "employee",
-		"data": "login",
-		"title": "",
+		"data": "#LOGIN",
+		"title": "Me",
 		"depth":0,
 	},
 	{
@@ -660,6 +687,12 @@ APModFiller.store.data = [{
 		"title": "",
 		"depth":0,
 	},
+	{
+		"field":"datework",
+		"data":"#DATE",
+		"title":"Today",
+		"depth":0
+	}
 ];
 
 APModFiller.store.settings = {"wheelSize":200,"fontSize":38};

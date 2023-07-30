@@ -80,7 +80,7 @@ APModDataSpy.injectDataspy = (dsStore) => {
 		DSclass.prototype.apmodDataSpyOrigInitComponent = DSclass.prototype.initComponent;
 		DSclass.prototype.initComponent = function() {
 			this.apmodDataSpyOrigInitComponent.apply(this, []);
-			if (this.gridURL == "WSJOBS.xmlhttp") {
+			if (this.gridURL == "WSJOBS.xmlhttp" || "EWSUSR.LST.xmlhttp") {
 				const grid = this.getGrid();
 				grid.apModStore = APModDataSpy.loadFilter(grid);
 				const customDataSpyCombo = grid.customDataSpyCombo = APModDataSpy.getCustomDataSpy(grid);

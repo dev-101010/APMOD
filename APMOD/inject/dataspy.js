@@ -1,9 +1,11 @@
 const APModDataSpy = {
-	popup: null
+	popup: null,
+	gridURLs: ["WSJOBS.xmlhttp","EWSUSR.LST.xmlhttp"]
 };
 
 APModDataSpy.load = () => {
 	if (typeof Ext === 'undefined' || typeof EAM === 'undefined') return;
+	
 	EAM.APModDataSpy = APModDataSpy;
 	APModDataSpy.login = "UNKNOWN";
 	if(EAM?.AppData?._appData?.installParams?.user != null)
@@ -29,6 +31,11 @@ APModDataSpy.load = () => {
 	APModDataSpy.injectReadOnlyGrid();
 }
 
+APModDataSpy.external_EUPBS1_reset = () => {
+	vColNo = 0;
+	vColNoCode = 0;
+}
+
 APModDataSpy.loadFilter = (grid) => {
 	const gridURL = grid.gridURL;
 	
@@ -39,26 +46,26 @@ APModDataSpy.loadFilter = (grid) => {
 			sort: [],
 			filter: [],
 			field: []
-		});		
+		});
 		return Ext.create('Ext.data.Store', { field: ['name', 'sort', 'filter', 'field'], data: out } );
 	}
 
 	const lStorage = JSON.parse(localStorage.getItem("APModDataSpy"));
 	
 	let storage = null;
-	if(lStorage != null && typeof lStorage === 'object')
+	if(lStorage != null && typeof lStorage === 'object' && lStorage[gridURL] != null && typeof lStorage[gridURL] === 'object')
 		storage = lStorage[gridURL];
 
 	let def = null;
-	if(APModDataSpyDefaultData != null && typeof APModDataSpyDefaultData === 'object')
+	if(APModDataSpyDefaultData != null && typeof APModDataSpyDefaultData === 'object' && APModDataSpyDefaultData[gridURL] != null && typeof APModDataSpyDefaultData[gridURL] === 'object')
 		def = APModDataSpyDefaultData[gridURL];
 
 	let out = null;
 
-	if (storage != null && typeof storage === 'object' && Array.isArray(storage))
-		out = storage;
-	else if (def != null && typeof def === 'object' && Array.isArray(def))
-		out = def;
+	if (storage != null && Array.isArray(storage))
+		out = Ext.clone(storage);
+	else if (def != null &&  Array.isArray(def))
+		out = Ext.clone(def);
 	else
 		out = [];
 
@@ -80,7 +87,7 @@ APModDataSpy.injectDataspy = (dsStore) => {
 		DSclass.prototype.apmodDataSpyOrigInitComponent = DSclass.prototype.initComponent;
 		DSclass.prototype.initComponent = function() {
 			this.apmodDataSpyOrigInitComponent.apply(this, []);
-			if (this.gridURL == "WSJOBS.xmlhttp") {
+			if (APModDataSpy.gridURLs.includes(this.gridURL)) {
 				const grid = this.getGrid();
 				grid.apModStore = APModDataSpy.loadFilter(grid);
 				const customDataSpyCombo = grid.customDataSpyCombo = APModDataSpy.getCustomDataSpy(grid);
@@ -108,7 +115,7 @@ APModDataSpy.injectReadOnlyGrid = () => {
 		ROGclass.prototype.apmodReadOnlyGridOrigInitComponent = ROGclass.prototype.initComponent;
 		ROGclass.prototype.initComponent = function() {
 			this.apmodReadOnlyGridOrigInitComponent.apply(this, []);
-			if (this.gridURL == "WSJOBS.xmlhttp") {
+			if (APModDataSpy.gridURLs.includes(this.gridURL)) {
 				const list = this.getDockedItems('toolbar[dock="bottom"]');
 				if(list.length > 0) {
 					const botToolbar = this.getDockedItems('toolbar[dock="bottom"]')[0];
@@ -290,6 +297,7 @@ APModDataSpy.getCustomDataSpy = (grid) => {
 		value: grid.apModStore.data.items[0],
 		listeners: {
 			select: (combo, records, eOpts) => {
+				APModDataSpy.external_EUPBS1_reset();
 				combo.grid.refreshGridFields(combo.grid.originalGridFields);
 				combo.grid.runDataspy(null);
 			}
@@ -355,7 +363,6 @@ APModDataSpy.createPopupPanel = (grid,data) => {
 		data: newRec ? newData.field : selRec.data.field
 	});
 
-	//const gridFields = Ext.clone(grid.originalGridFields).filter(field => field.filterable == "+");
 	const gridFields = Ext.clone(grid.originalGridFields);
 	const filterAliasStore = Ext.create('Ext.data.Store', {
 		field: ['name', 'label'],
@@ -384,8 +391,6 @@ APModDataSpy.createPopupPanel = (grid,data) => {
 	const pos = newRec ? selRec.store.data.length : selRec.store.indexOf(selRec);
 
 	let dsChangeName = newRec ? APModDataSpy.getNewName(grid,newData.name || "New Filter") : selRec.data.name;
-
-	const fullDataSet = dsCombo.store.dsGetData();
 
 	return new Ext.create('Ext.window.Window', {
 		title: 'Dataspy Edit',

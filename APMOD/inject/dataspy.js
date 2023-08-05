@@ -87,6 +87,7 @@ APModDataSpy.injectDataspy = (dsStore) => {
 		DSclass.prototype.apmodDataSpyOrigInitComponent = DSclass.prototype.initComponent;
 		DSclass.prototype.initComponent = function() {
 			this.apmodDataSpyOrigInitComponent.apply(this, []);
+			//console.log(this.getGrid().gridURL);
 			if (APModDataSpy.gridURLs.includes(this.gridURL)) {
 				const grid = this.getGrid();
 				grid.apModStore = APModDataSpy.loadFilter(grid);
@@ -955,8 +956,18 @@ APModDataSpy.sortPanel = (sortStore, filterAliasStore) => {
 					const grid = this.up('panel[name="SortPanel"]').down('gridpanel[name="sortGridPanel"]')
 					const selectedRecord = grid.getSelectionModel().getSelection()[0];
 					const row = grid.store.indexOf(selectedRecord);
-					if (row >= 0)
-						grid.store.removeAt(row);
+					if (row >= 0) {
+						Ext.Msg.show({
+							 title:'Delete row?',
+							 msg : 'Are you sure you want to delete row '+(row+1)+'?',
+							 buttons: Ext.Msg.YESNO,
+							 fn : function(button){
+								if (button === 'yes'){
+									grid.store.removeAt(row);
+								}
+							 }
+						});
+					}
 				},
 			}, {
 				width: 28,
@@ -1087,8 +1098,18 @@ APModDataSpy.fieldPanel = (fieldStore, filterAliasStore) => {
 					const grid = this.up('panel[name="FieldPanel"]').down('gridpanel[name="fieldGridPanel"]')
 					const selectedRecord = grid.getSelectionModel().getSelection()[0];
 					const row = grid.store.indexOf(selectedRecord);
-					if (row >= 0)
-						grid.store.removeAt(row);
+					if (row >= 0) {
+						Ext.Msg.show({
+							 title:'Delete row?',
+							 msg : 'Are you sure you want to delete row '+(row+1)+'?',
+							 buttons: Ext.Msg.YESNO,
+							 fn : function(button){
+								if (button === 'yes'){
+									grid.store.removeAt(row);
+								}
+							 }
+						});
+					}
 				},
 			}, {
 				width: 28,

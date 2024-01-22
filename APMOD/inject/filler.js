@@ -39,15 +39,15 @@ APModFiller.inputClick = (e) => {
 	const x = e.clientX;
 	const y = e.clientY;
 
-	if (e.ctrlKey && !e.altKey && target.tagName == "INPUT" && target.type == "text") {
+	if (e.ctrlKey && !e.altKey && ( ( target.tagName == "INPUT" && target.type == "text" ) || target.type == "textarea" ) ) {
 		APModFiller.getRad(target,x,y,null);
 	}
 
-	if (e.shiftKey && target.tagName == "INPUT" && target.type == "text") {
+	if (e.shiftKey && ( ( target.tagName == "INPUT" && target.type == "text" ) || target.type == "textarea" ) ) {
 		APModFiller.overRad(target,x,y,null);
 	}
 	
-	if (e.altKey && e.ctrlKey && target.tagName == "INPUT" && target.type == "text") {
+	if (e.altKey && e.ctrlKey && ( ( target.tagName == "INPUT" && target.type == "text" ) || target.type == "textarea" ) ) {
 		APModFiller.delRad(target,x,y,null);
 	}
 }
@@ -143,7 +143,7 @@ APModFiller.overRad = (target,x,y,apModFields) => {
 	} else {
 		v = target.value;
 	}
-	const value = v;
+	const value = v.replace(/[\r\n\t'"]+/g," ");
 	const name = target.name;
 	
 	if( value != null && typeof value === 'string' && value.length > 0 ) {

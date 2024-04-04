@@ -47,5 +47,5 @@ APModCopyWo.load = () => {
 
 APModCopyWo.copy = (woNumber) => {
     navigator.clipboard.writeText(woNumber);
-	
+	if(APModPopup) APModPopup.openPopup(woNumber);
   };

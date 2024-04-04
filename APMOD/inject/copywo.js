@@ -4,6 +4,8 @@ const APModCopyWo = {
 };
 
 APModCopyWo.load = () => {
+	if (window.location.hostname !== 't.corp.amazon.com') return;
+	
 	APModCopyWo.observer = new MutationObserver((rec) => {
       const comments = document.querySelectorAll(".plain-text-display");
 

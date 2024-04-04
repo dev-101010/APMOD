@@ -25,6 +25,7 @@ APModCopyWo.load = () => {
             const link = document.createElement('a');
             link.href = '#';
             link.innerText = woNumber;
+		link.style.cursor = 'pointer';
             link.onclick = () => {
               APModCopyWo.copy(woNumber);
               return false;

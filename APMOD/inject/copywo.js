@@ -1,5 +1,4 @@
 const APModCopyWo = {
-	mark:false,
 	observer:null
 };
 
@@ -17,20 +16,30 @@ APModCopyWo.load = () => {
             "Work order is created for this ticket with EAM(APM) work order number:"
           )
         ) {
-          if (!APModCopyWo.mark) {
+          const b = document.getElementById("APModCopyWoButton");
+          if (!b) {
             const array = e.innerHTML.split(" ");
             const woNumber = array.pop();
-            APModCopyWo.mark = true;
+            e.innerHTML = e.innerHTML.replace(woNumber, "");
 
-            const link = document.createElement('a');
-            link.href = '#';
-            link.innerText = woNumber;
-		link.style.cursor = 'pointer';
-            link.onclick = () => {
-              APModCopyWo.copy(woNumber);
-              return false;
-            };
-            e.innerHTML = e.innerHTML.replace(woNumber, link.outerHTML);
+            const link = e.appendChild(document.createElement("button"));
+            link.id = "APModCopyWoButton";
+            link.textContent = woNumber;
+            link.type="button";
+            link.addEventListener('click', function(e) { APModCopyWo.copy(woNumber); });
+            link.style.cursor = 'pointer';
+            link.style["background-color"] = 'transparent';
+            link.style["color"] = 'inherit';
+              link.style["margin-block"] = 0;
+              link.style["margin-inline"] = 0;
+              link.style["padding-block"] = 0;
+              link.style["padding-inline"] = 0;
+              link.style["font-family"] = 'inherit';
+              link.style["font-size"] = '100%';
+              link.style["line-height"] = 1.15;
+            link.style["border-block"] = 0;
+            link.style["border-inline"] = 0;
+            link.style["border-block-end"] = "1px dashed currentColor";
           }
         }
       }
@@ -49,11 +58,11 @@ APModCopyWo.load = () => {
 APModCopyWo.copy = (woNumber) => {
     navigator.clipboard.writeText(woNumber);
 	if(APModPopup) APModPopup.openPopup("Copied:" + woNumber);
-	const array = JSON.parse(GM.getValue( "copyWoArray", "[]" ));
+	/*const array = JSON.parse(GM_getValue( "copyWoArray", "[]" ));
 	const index = array.indexOf(woNumber);
         if (index !== -1) {
             array.splice(index, 1);
         }
         array.unshift(woNumber);
-	GM.setValue( "copyWoArray", JSON.stringify(array) );
+	GM_setValue( "copyWoArray", JSON.stringify(array) );*/
   };

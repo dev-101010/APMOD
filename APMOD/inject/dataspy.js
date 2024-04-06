@@ -5,7 +5,7 @@ const APModDataSpy = {
 
 APModDataSpy.load = () => {
 	if (typeof Ext === 'undefined' || typeof EAM === 'undefined') return;
-	
+
 	EAM.APModDataSpy = APModDataSpy;
 	APModDataSpy.login = "UNKNOWN";
 	if(EAM?.AppData?._appData?.installParams?.user != null)
@@ -228,6 +228,28 @@ APModDataSpy.onFunction = (value) => {
 	if(value.startsWith('#LOGIN')) {
 		return  APModDataSpy.login;
 	}
+    if(value.startsWith('#TICKETWO')) {
+        return APModDataSpy.onTicketWo(value);
+    }
+}
+
+APModDataSpy.onTicketWo = (s) => {
+	const array = s.split(' ');
+    let outArray = [];
+
+	if(typeof GM_getValue !== 'undefined') {
+        const data = GM_getValue( "copyWoArray", "[]" );
+        outArray = JSON.parse(data);
+    }
+
+	if (array.length > 0 && array[1]) {
+        const num = parseInt(array[1],10);
+        let idx = num - 1;
+        idx = idx >= 0 ? idx : 0;
+		return (typeof outArray[idx] === 'undefined' ? 0 : outArray[idx]);
+	}
+
+	return (typeof outArray[0] === 'undefined' ? 0 : outArray[0]);
 }
 
 APModDataSpy.onDate = (s) => {
@@ -1411,7 +1433,17 @@ APModDataSpy.filterValues = [
 {"typ":"schedenddate","value":"#DATE W"},
 {"typ":"schedenddate","value":"#DATE D +7"},
 {"typ":"schedenddate","value":"#DATE W +1"},
-{"typ":"assignedto","value":"#LOGIN"}
+{"typ":"assignedto","value":"#LOGIN"},
+{"typ":"workordernum","value":"#TICKETWO 1"},
+{"typ":"workordernum","value":"#TICKETWO 2"},
+{"typ":"workordernum","value":"#TICKETWO 3"},
+{"typ":"workordernum","value":"#TICKETWO 4"},
+{"typ":"workordernum","value":"#TICKETWO 5"},
+{"typ":"workordernum","value":"#TICKETWO 6"},
+{"typ":"workordernum","value":"#TICKETWO 7"},
+{"typ":"workordernum","value":"#TICKETWO 8"},
+{"typ":"workordernum","value":"#TICKETWO 9"},
+{"typ":"workordernum","value":"#TICKETWO 10"}
 ];
 
 //window.addEventListener("load", APModDataSpy.load);

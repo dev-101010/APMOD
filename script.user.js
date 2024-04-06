@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         APMod
 // @namespace    https://github.com/dev-101010/APMOD/
-// @version      1.2.4
+// @version      1.2.5
 // @description  APMod fügt Filter und Ausfüllhilfen in APM ein welche die Arbeit erleichtern.
 // @author       dev-101010
 // @match        https://eam.eu1.inforcloudsuite.com/*
@@ -9,6 +9,8 @@
 // @icon         https://raw.githubusercontent.com/dev-101010/APMOD/main/APMOD/icon.png
 // @grant        GM_addStyle
 // @grant        GM_getResourceText
+// @grant        GM_getValue
+// @grant        GM_setValue
 // @resource     STYLE1 https://raw.githubusercontent.com/dev-101010/APMOD/main/APMOD/inject/style.css
 // @resource     STYLE2 https://raw.githubusercontent.com/dev-101010/APMOD/main/APMOD/inject/radialmenu.css
 // @require      https://raw.githubusercontent.com/dev-101010/APMOD/main/APMOD/inject/copywo.js
@@ -30,5 +32,7 @@ window.addEventListener("load", ()=> {
     if(APModDataSpy!=null)APModDataSpy.load();
     if(APModFiller!=null)APModFiller.load();
     if(APModSelector!=null)APModSelector.load();
-    if(APModCopyWo!=null)APModCopyWo.load();
+    if(APModCopyWo!=null) {
+        APModCopyWo.load();
+    }
 });

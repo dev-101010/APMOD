@@ -4,7 +4,7 @@ const APModCopyWo = {
 
 APModCopyWo.load = () => {
 	if (window.location.hostname !== 't.corp.amazon.com') return;
-	
+
 	APModCopyWo.observer = new MutationObserver((rec) => {
       const comments = document.querySelectorAll(".plain-text-display");
 
@@ -26,7 +26,9 @@ APModCopyWo.load = () => {
             link.id = "APModCopyWoButton";
             link.textContent = woNumber;
             link.type="button";
-            link.addEventListener('click', function(e) { APModCopyWo.copy(woNumber); });
+            link.addEventListener('click', function(e) {
+                APModCopyWo.copy(woNumber);
+            });
             link.style.cursor = 'pointer';
             link.style["background-color"] = 'transparent';
             link.style["color"] = 'inherit';
@@ -58,11 +60,15 @@ APModCopyWo.load = () => {
 APModCopyWo.copy = (woNumber) => {
     navigator.clipboard.writeText(woNumber);
 	if(APModPopup) APModPopup.openPopup("Copied:" + woNumber);
-	/*const array = JSON.parse(GM_getValue( "copyWoArray", "[]" ));
-	const index = array.indexOf(woNumber);
+
+    if(typeof GM_getValue != 'undefined') {
+        const data = GM_getValue( "copyWoArray", "[]" );
+        const array = JSON.parse(data);
+        const index = array.indexOf(woNumber);
         if (index !== -1) {
             array.splice(index, 1);
         }
         array.unshift(woNumber);
-	GM_setValue( "copyWoArray", JSON.stringify(array) );*/
+        GM_setValue( "copyWoArray", JSON.stringify(array) );
+    }
   };

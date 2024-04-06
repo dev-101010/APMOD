@@ -69,6 +69,7 @@ APModCopyWo.copy = (woNumber) => {
             array.splice(index, 1);
         }
         array.unshift(woNumber);
+	if(array.lenght > 100) array.length -= 1;
         GM_setValue( "copyWoArray", JSON.stringify(array) );
     }
   };

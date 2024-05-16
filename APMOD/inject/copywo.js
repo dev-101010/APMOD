@@ -61,7 +61,7 @@ APModCopyWo.copy = (woNumber) => {
     navigator.clipboard.writeText(woNumber);
 	if(APModPopup) APModPopup.openPopup("Copied:" + woNumber);
 
-    if(typeof GM_getValue != 'undefined') {
+    if(typeof GM_getValue !== 'undefined') {
         const data = GM_getValue( "copyWoArray", "[]" );
         const array = JSON.parse(data);
         const index = array.indexOf(woNumber);

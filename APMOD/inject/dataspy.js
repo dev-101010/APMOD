@@ -32,8 +32,10 @@ APModDataSpy.load = () => {
 }
 
 APModDataSpy.external_EUPBS1_reset = () => {
-	vColNo = 0;
-	vColNoCode = 0;
+    if(typeof vColNo !== 'undefined')
+        vColNo = 0;
+    if(typeof vColNoCode !== 'undefined')
+        vColNoCode = 0;
 }
 
 APModDataSpy.loadFilter = (grid) => {

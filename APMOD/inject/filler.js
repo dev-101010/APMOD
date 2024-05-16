@@ -490,7 +490,7 @@ APModFiller.importJsonToNew = (apModData) => {
 			}
 
 			if (data != null && apModData != null && Array.isArray(data) && Array.isArray(apModData) ) {
-				for(entry of data) {
+				for(let entry of data) {
 					if(apModData.find(e => e.field == entry.field && e.data == entry.data) != null) continue;
 					apModData.push(entry);
 				}

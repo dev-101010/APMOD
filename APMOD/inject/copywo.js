@@ -58,18 +58,37 @@ APModCopyWo.load = () => {
 };
 
 APModCopyWo.copy = (woNumber) => {
-    navigator.clipboard.writeText(woNumber);
-	if(APModPopup) APModPopup.openPopup("Copied:" + woNumber);
-
+    let popupText = "";
     if(typeof GM_getValue !== 'undefined') {
-        const data = GM_getValue( "copyWoArray", "[]" );
-        const array = JSON.parse(data);
-        const index = array.indexOf(woNumber);
-        if (index !== -1) {
-            array.splice(index, 1);
+        const clipEnabled = GM_getValue( "copyWoClipboardEnabled", true );
+        const woEnabled = GM_getValue( "copyWoArrayEnabled", true );
+
+        if(clipEnabled) {
+            navigator.clipboard.writeText(woNumber);
+            popupText += woNumber+" set to Clipboard.";
         }
-        array.unshift(woNumber);
-	if(array.lenght > 100) array.pop();
-        GM_setValue( "copyWoArray", JSON.stringify(array) );
+
+        if(woEnabled) {
+            const data = GM_getValue( "copyWoArray", "[]" );
+            const array = JSON.parse(data);
+            const index = array.indexOf(woNumber);
+            if (index !== -1) {
+                array.splice(index, 1);
+            }
+            array.unshift(woNumber);
+            if(array.lenght > 100) array.pop();
+            GM_setValue( "copyWoArray", JSON.stringify(array) );
+            if(popupText !== "") {
+                popupText += "<br>"+woNumber+" added to APM WO List.";
+            }
+            else {
+                popupText = woNumber+" added to APM WO List.";
+            }
+        }
+    } else {
+        navigator.clipboard.writeText(woNumber);
+        popupText += woNumber+" set to Clipboard.";
     }
+    if(APModPopup && popupText !== "")
+        APModPopup.openPopup(popupText);
   };

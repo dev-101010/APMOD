@@ -84,7 +84,7 @@ APModFiller.getRad = (target,x,y,apModFields) => {
 	} else if (entries.length > 1) {
 		
 		const entriesByDepthArray = [];
-		for(entry of entries)
+		for(let entry of entries)
 		{
 			if(entry.depth == null || entry.depth < 0 || entry.depth > 9 ) entry.depth = 0;
 			if (entriesByDepthArray[entry.depth] == null) entriesByDepthArray[entry.depth] = [];
@@ -231,7 +231,7 @@ APModFiller.delRad = (target,x,y,apModFields) => {
 	if (entries.length > 0 ) {
 		
 		const entriesByDepthArray = [];
-		for(entry of entries)
+		for(let entry of entries)
 		{
 			if(entry.depth == null || entry.depth < 0 || entry.depth > 9 ) entry.depth = 0;
 			if (entriesByDepthArray[entry.depth] == null) entriesByDepthArray[entry.depth] = [];

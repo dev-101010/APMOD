@@ -1,5 +1,6 @@
 const APModDataSpy = {
 	popup: null,
+    popupWo: null,
 	gridURLs: ["WSJOBS.xmlhttp","EWSUSR.LST.xmlhttp"]
 };
 
@@ -27,6 +28,7 @@ APModDataSpy.load = () => {
 		return arr;
 	}
 
+    APModDataSpy.injectMainToolbar();
 	APModDataSpy.injectDataspy();
 	APModDataSpy.injectReadOnlyGrid();
 }
@@ -234,6 +236,109 @@ APModDataSpy.onFunction = (value) => {
         return APModDataSpy.onTicketWo(value);
     }
 }
+
+APModDataSpy.injectMainToolbar = () => {
+	if (typeof EAM?.view?.common?.MainToolbar === 'undefined') return;
+	const TBclass = EAM.view.common.MainToolbar;
+	if (TBclass.prototype.APModDataSpyOrigInitComponent == null) {
+		TBclass.prototype.APModDataSpyOrigInitComponent = TBclass.prototype.initComponent;
+		TBclass.prototype.initComponent = function() {
+			this.APModDataSpyOrigInitComponent.apply(this, []);
+            if(typeof GM_getValue != 'undefined') {
+                this.insert(this.items.length, APModDataSpy.createCopyWoButton());
+            }
+		}
+	}
+}
+
+APModDataSpy.createCopyWoButton = () => {
+	return Ext.create('Ext.Button', {
+		text: '📋',
+		tooltip: "CopyWo Menu",
+		handler: function() {
+			if (APModDataSpy.popupWo == null) {
+                APModDataSpy.popupWo = APModDataSpy.createCopyWoPopupPanel()
+				if (APModDataSpy.popupWo != null) APModDataSpy.popupWo.show();
+			}
+		}
+	});
+}
+
+APModDataSpy.createCopyWoPopupPanel = () => {
+    const clipEnabled = GM_getValue( "copyWoClipboardEnabled", true );
+    const woEnabled = GM_getValue( "copyWoArrayEnabled", true );
+
+	return new Ext.create('Ext.window.Window', {
+		title: 'CopyWO Options',
+		width: 200,
+		height: 200,
+		minWidth: 200,
+		minHeight: 200,
+		modal: true,
+		closable: false,
+		maximizable: false,
+		name: "CopyWoWindow",
+		layout: {
+            type: 'vbox',
+            align: 'left'
+        },
+		padding: '10 10 10 10',
+		items: [{
+            xtype: 'checkboxfield',
+            boxLabel : 'Copy WO to Clipboard',
+            value: clipEnabled,
+            listeners: {
+                change:    function (cb, newValue, oldValue, eOpts) {
+                    GM_setValue( "copyWoClipboardEnabled", newValue );
+                }
+            }
+        },{
+            xtype: 'checkboxfield',
+            boxLabel : 'Copy WO To APM List',
+            value: woEnabled,
+            listeners: {
+                change:    function (cb, newValue, oldValue, eOpts) {
+                    GM_setValue( "copyWoArrayEnabled", newValue );
+                }
+            }
+        },{
+            xtype: 'button',
+            text : 'Clear APM WO List',
+            handler: function() {
+                GM_setValue( "copyWoArray", "[]" );
+            }
+        }],
+		dockedItems: [{
+			xtype: 'toolbar',
+			dock: 'bottom',
+			ui: 'footer',
+			defaults: {
+				margin: '0 2 0 2'
+			},
+			layout: {
+				pack: 'center'
+			},
+			items: [{
+					xtype: 'tbspacer',
+					flex: 1
+				},
+				{
+					minWidth: 80,
+					text: 'Close',
+					xtype: 'button',
+					handler: function() {
+						APModDataSpy.popupWo.destroy();
+						APModDataSpy.popupWo = null;
+					},
+				}, {
+					xtype: 'tbspacer',
+					flex: 1
+				}
+			],
+		}],
+	});
+}
+
 
 APModDataSpy.onTicketWo = (s) => {
 	const array = s.split(' ');

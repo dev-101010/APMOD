@@ -13,7 +13,7 @@
 
 	"web_accessible_resources": [{
 		"resources": ["inject/selector.js","inject/dataspy.js","inject/dataspyfilter.js","inject/filler.js","inject/popup.js","inject/radialmenu.js","inject/style.css","inject/radialmenu.css","inject/load.js"],
-		"matches": ["https://eam.eu1.inforcloudsuite.com/*"]
+		"matches": ["https://eu1.eam.hxgnsmartcloud.com/*"]
 	  }],
 
 	"action": {

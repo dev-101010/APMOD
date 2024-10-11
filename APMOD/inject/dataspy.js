@@ -229,6 +229,9 @@ APModDataSpy.onFunction = (value) => {
 	if(value.startsWith('#DATE')) {
 		return  APModDataSpy.onDate(value);
 	}
+    if(value.startsWith('#HOUR')) {
+		return  APModDataSpy.onHour(value);
+	}
 	if(value.startsWith('#LOGIN')) {
 		return  APModDataSpy.login;
 	}
@@ -408,8 +411,31 @@ APModDataSpy.onDate = (s) => {
 	return APModDataSpy.DateFormat(new Date(0,0,1));
 }
 
+APModDataSpy.onHour = (s) => {
+	const array = s.split(' ');
+	const today = new Date();
+
+	if(array.length == 1) {
+		return APModDataSpy.DateTimeFormat(today);
+	}
+
+	if (array.length == 2) {
+        const hours = Number.parseInt(array[1]);
+		if(typeof hours === "number") {
+            today.setHours(today.getHours() + hours);
+			return APModDataSpy.DateTimeFormat(today);
+		}
+	}
+
+	return APModDataSpy.DateTimeFormat(new Date(0,0,1));
+}
+
 APModDataSpy.DateFormat = (date) => {
 	return Ext.Date.format(date, 'd-M-Y');
+}
+
+APModDataSpy.DateTimeFormat = (date) => {
+	return Ext.Date.format(date, 'd-M-Y H:i:s');
 }
 
 APModDataSpy.getCustomDataSpy = (grid) => {
@@ -1536,10 +1562,17 @@ APModDataSpy.filterValues = [
 {"typ":"schedstartdate","value":"#DATE W"},
 {"typ":"schedstartdate","value":"#DATE D +7"},
 {"typ":"schedstartdate","value":"#DATE W +1"},
+{"typ":"schedstartdate","value":"#HOUR +1"},
 {"typ":"schedenddate","value":"#DATE"},
 {"typ":"schedenddate","value":"#DATE W"},
 {"typ":"schedenddate","value":"#DATE D +7"},
 {"typ":"schedenddate","value":"#DATE W +1"},
+{"typ":"schedenddate","value":"#HOUR +1"},
+{"typ":"datereported","value":"#DATE"},
+{"typ":"datereported","value":"#DATE W"},
+{"typ":"datereported","value":"#DATE D +7"},
+{"typ":"datereported","value":"#DATE W +1"},
+{"typ":"datereported","value":"#HOUR +1"},
 {"typ":"assignedto","value":"#LOGIN"},
 {"typ":"workordernum","value":"#TICKETWO 1"},
 {"typ":"workordernum","value":"#TICKETWO 2"},

@@ -131,6 +131,8 @@ Eine zusätzliche Möglichkeit der Value die eingeführt wurde sind Variablen f�
 
 "#DATE" -> Kann im Filter verwendet werden und gibt immer das aktuelle Datum.
 
+"#DATE H +1" -> Gibt das Datum/Zeit von Heute plus 1 Stunde.
+
 "#DATE D +3" -> Gibt das Datum von Heute plus 3 Tage.
 
 "#DATE W" -> Gibt das Datum vom Ende der aktuellen Woche. (Sonntag)

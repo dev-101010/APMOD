@@ -394,7 +394,7 @@ APModDataSpy.onDate = (s) => {
 	if (array.length == 3 && ( array[2].startsWith('+') || array[2].startsWith('-') ) ) {
 		const num = parseInt(array[2]);
 		if(array[1] == "H" && typeof num === "number" ) {
-			const hours = new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours() + hours, today.getMinutes(), today.getSeconds());
+			const hours = new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours() + num, today.getMinutes(), today.getSeconds());
 			return APModDataSpy.DateTimeFormat(hours);
 		}
 		if(array[1] == "D" && typeof num === "number" ) {

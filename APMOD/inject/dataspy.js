@@ -371,6 +371,9 @@ APModDataSpy.onDate = (s) => {
 	}
 	
 	if (array.length == 2) {
+		if(array[1] == "H") {
+			return APModDataSpy.DateTimeFormat(today);
+		}
 		if(array[1] == "D") {
 			return APModDataSpy.DateFormat(today);
 		}
@@ -390,6 +393,11 @@ APModDataSpy.onDate = (s) => {
 	
 	if (array.length == 3 && ( array[2].startsWith('+') || array[2].startsWith('-') ) ) {
 		const num = parseInt(array[2]);
+		if(array[1] == "H" && typeof num === "number" ) {
+			const hours = new Date();
+			hours.setHours(hours.getHours() + hours);
+			return APModDataSpy.DateTimeFormat(hours);
+		}
 		if(array[1] == "D" && typeof num === "number" ) {
 			const days = new Date(today.getFullYear(), today.getMonth(), today.getDate() + num);
 			return APModDataSpy.DateFormat(days);
@@ -1559,16 +1567,19 @@ APModDataSpy.filterValues = [
 {"typ":"shift","value":"DS4B"},
 {"typ":"shift","value":"DS4C"},
 {"typ":"schedstartdate","value":"#DATE"},
+{"typ":"schedstartdate","value":"#DATE H +1"},
 {"typ":"schedstartdate","value":"#DATE W"},
 {"typ":"schedstartdate","value":"#DATE D +7"},
 {"typ":"schedstartdate","value":"#DATE W +1"},
 {"typ":"schedstartdate","value":"#HOUR +1"},
 {"typ":"schedenddate","value":"#DATE"},
+{"typ":"schedenddate","value":"#DATE H +1"},
 {"typ":"schedenddate","value":"#DATE W"},
 {"typ":"schedenddate","value":"#DATE D +7"},
 {"typ":"schedenddate","value":"#DATE W +1"},
 {"typ":"schedenddate","value":"#HOUR +1"},
 {"typ":"datereported","value":"#DATE"},
+{"typ":"datereported","value":"#DATE H +1"},
 {"typ":"datereported","value":"#DATE W"},
 {"typ":"datereported","value":"#DATE D +7"},
 {"typ":"datereported","value":"#DATE W +1"},

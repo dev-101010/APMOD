@@ -10,6 +10,10 @@ Installiere in deinem Browser die [Tampermonkey](https://www.tampermonkey.net/in
 
 Lade die Datei "script.user.js" in Tampermonkey. (Oder: [Direct Download Link](https://github.com/dev-101010/APMOD/raw/main/script.user.js))
 
+```diff
+! Der Entwicklermodus in den Browser Erweiterungen muss mittlerweile leider an sein, damit die Mod noch funktioniert.
+```
+
 <br /><br /><br />
 
 ## Installation als Chrome extension:
@@ -25,6 +29,10 @@ Aktiviere den "Entwicklermodus" und klicke danach auf "Enpackte Erweiterung lade
 Gehe zu deinen entpackten Datein und wähle den Ordner "APMOD" aus.
 
 Öffne oder lade APM jetzt neu.
+
+```diff
+! Der Entwicklermodus in den Browser Erweiterungen muss mittlerweile leider an sein, damit die Mod noch funktioniert.
+```
 
 <br /><br /><br />
 

@@ -69,7 +69,7 @@ APModFiller.getRad = (target,x,y,apModFields) => {
 				if(value.startsWith('#')) {
 					value = APModDataSpy.onFunction(value);
 				}
-				field.inputEl.dom.value = value != null ? value : "";
+				field.setValue( value != null ? value : "" );
 				i++;
 			}
 			APModPopup.openPopup("Values inserted.");
@@ -78,6 +78,7 @@ APModFiller.getRad = (target,x,y,apModFields) => {
 			if(value.startsWith('#')) {
 				value = APModDataSpy.onFunction(value);
 			}
+            target.focus();
 			target.value = value != null ? value : "";
 			APModPopup.openPopup("Value inserted.");
 		}
@@ -111,7 +112,7 @@ APModFiller.getRad = (target,x,y,apModFields) => {
 							if(value.startsWith('#')) {
 								value = APModDataSpy.onFunction(value);
 							}
-							field.inputEl.dom.value = value != null ? value : "";
+							field.setValue( value != null ? value : "" );
 							i++;
 						}
 						APModPopup.openPopup("Values inserted.");
@@ -120,6 +121,7 @@ APModFiller.getRad = (target,x,y,apModFields) => {
 						if(value.startsWith('#')) {
 							value = APModDataSpy.onFunction(value);
 						}
+                        input.focus();
 						input.value = value != null ? value : "";
 						APModPopup.openPopup("Value inserted.");
 					}

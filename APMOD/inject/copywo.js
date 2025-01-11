@@ -43,21 +43,22 @@ APModCopyWo.load = () => {
             link.addEventListener('click', function(e) {
                 APModCopyWo.copy(woNumber);
             });
+		  
+            const link3 = e.appendChild(document.createElement("button"));
+            link3.type="button";
+            link3.textContent = "©";
+            link3.title="Copy APM WO link"
+            link3.style.marginLeft = '10px';
+            link3.addEventListener("click", ()=>{
+                navigator.clipboard.writeText("https://eu1.eam.hxgnsmartcloud.com/web/base/logindisp?tenant=AMAZONRMEEU_PRD&FROMEMAIL=YES&SYSTEM_FUNCTION_NAME=WSJOBS&USER_FUNCTION_NAME=WSJOBS&workordernum="+woNumber);
+                if(APModPopup)
+                    APModPopup.openPopup("WO direct link saved to Clipboard.");
+            });
+
             const link2 = e.appendChild(document.createElement("button"));
             link2.type="button";
-            link2.textContent = "➽";
-            link2.style.cursor = 'pointer';
-            link2.style["background-color"] = 'transparent';
-            link2.style["color"] = 'inherit';
-            link2.style["margin-block"] = 0;
-            link2.style["margin-inline"] = 0;
-            link2.style["padding-block"] = 0;
-            link2.style["padding-inline"] = 0;
-            link2.style["font-family"] = 'inherit';
-            link2.style["font-size"] = '100%';
-            link2.style["line-height"] = 1.15;
-            link2.style["border-block"] = 0;
-            link2.style["border-inline"] = 0;
+            link2.textContent = "➤";
+            link2.title="Go to APM WO"
             link2.style.marginLeft = '10px';
             link2.addEventListener("click", ()=>{
                 window.open("https://eu1.eam.hxgnsmartcloud.com/web/base/logindisp?tenant=AMAZONRMEEU_PRD&FROMEMAIL=YES&SYSTEM_FUNCTION_NAME=WSJOBS&USER_FUNCTION_NAME=WSJOBS&workordernum="+woNumber, '_blank');

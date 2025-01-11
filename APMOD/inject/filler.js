@@ -305,6 +305,30 @@ APModFiller.injectRecordView = () => {
 						});
 					}
 				}
+				const URL = "https://eu1.eam.hxgnsmartcloud.com/web/base/logindisp?tenant=AMAZONRMEEU_PRD&FROMEMAIL=YES&SYSTEM_FUNCTION_NAME=WSJOBS&USER_FUNCTION_NAME=WSJOBS&workordernum=";
+		                const description = a.getForm().findField('description');
+		                const workorder = a.getForm().findField('workordernum');
+		                if(description != null && workorder != null) {
+					const parent = description.ownerCt;
+					if(parent?.items?.keys != null) {
+						const pos = parent.items.keys.indexOf(description.id) + 1;
+						parent.insert(pos,{
+							xtype: 'button',
+							name: 'apModCopyWO',
+							text: '©',
+							margin: '0 0 0 20',
+							title: 'Copy APM WO link',
+							listeners: {
+								click: function(cmp,e) {
+				    const woNumber = workorder.value ?? "";
+				    navigator.clipboard.writeText(URL+woNumber);
+				    if(APModPopup)
+					APModPopup.openPopup("WO direct link saved to Clipboard.");
+								},
+							},
+						});
+					}
+				}
 			}
 		}
 	}

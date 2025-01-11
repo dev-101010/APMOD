@@ -44,13 +44,15 @@ APModCopyWo.load = () => {
                 APModCopyWo.copy(woNumber);
             });
 		  
+            const URL = "https://eu1.eam.hxgnsmartcloud.com/web/base/logindisp?tenant=AMAZONRMEEU_PRD&FROMEMAIL=YES&SYSTEM_FUNCTION_NAME=WSJOBS&USER_FUNCTION_NAME=WSJOBS&workordernum=";
+		  
             const link3 = e.appendChild(document.createElement("button"));
             link3.type="button";
             link3.textContent = "©";
             link3.title="Copy APM WO link"
             link3.style.marginLeft = '10px';
             link3.addEventListener("click", ()=>{
-                navigator.clipboard.writeText("https://eu1.eam.hxgnsmartcloud.com/web/base/logindisp?tenant=AMAZONRMEEU_PRD&FROMEMAIL=YES&SYSTEM_FUNCTION_NAME=WSJOBS&USER_FUNCTION_NAME=WSJOBS&workordernum="+woNumber);
+                navigator.clipboard.writeText(URL+woNumber);
                 if(APModPopup)
                     APModPopup.openPopup("WO direct link saved to Clipboard.");
             });
@@ -61,7 +63,7 @@ APModCopyWo.load = () => {
             link2.title="Go to APM WO"
             link2.style.marginLeft = '10px';
             link2.addEventListener("click", ()=>{
-                window.open("https://eu1.eam.hxgnsmartcloud.com/web/base/logindisp?tenant=AMAZONRMEEU_PRD&FROMEMAIL=YES&SYSTEM_FUNCTION_NAME=WSJOBS&USER_FUNCTION_NAME=WSJOBS&workordernum="+woNumber, '_blank');
+                window.open(URL+woNumber, '_blank');
             });
 		  
           }

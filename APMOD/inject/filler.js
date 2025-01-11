@@ -317,7 +317,7 @@ APModFiller.injectRecordView = () => {
 							name: 'apModCopyWO',
 							text: '©',
 							margin: '0 0 0 20',
-							title: 'Copy APM WO link',
+							tooltip: 'Copy APM WO link',
 							listeners: {
 								click: function(cmp,e) {
 				    const woNumber = workorder.value ?? "";

@@ -242,3 +242,9 @@ Standartmäßig ist ein überschreiben ausgeschaltet, damit ihr euch beim Arbeit
 Es gibt allerdings eine Override Checkbox, wenn diese ausgewählt ist wird alles gesetzt egal was vorher ausgewählt war.
 
 ![selector.png](https://github.com/dev-101010/APMOD/blob/main/images/selector.png)
+
+## Kopierhilfe:
+
+Die Kopierhilfe lässt dich durch einfaches STRG + Linksklick Text und Bilder aus Zellen von Tabellen in die Zwischenablage kopieren.
+
+![copy.png](https://github.com/dev-101010/APMOD/blob/main/images/copy.png)

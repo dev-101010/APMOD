@@ -51,23 +51,28 @@ APModFiller.inputClick = (e) => {
 		APModFiller.delRad(target,x,y,null);
 	}
 
-    if (e.ctrlKey && !e.altKey && target.classList.contains("x-grid-cell-inner")) {
-        let textToCopy = "";
-
-        if (target.tagName === "IMG") {
-            textToCopy = target.src;
-        } else {
-            textToCopy = target.innerText.trim();
-        }
-
-        if (textToCopy) {
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                APModPopup.openPopup("Kopiert: " + textToCopy);
-            }).catch(ignore => {
-                APModPopup.openPopup("Fehler beim Kopieren.");
-            });
-        }
-    }
+	if (e.ctrlKey && !e.altKey) {
+	    let textToCopy = "";
+	    const targetClass = "x-grid-cell-inner";
+	
+	    if (target.classList.contains(targetClass)) {
+		textToCopy = target.tagName === "IMG" ? target.src : target.innerText.trim();
+	    } else {
+		let parentWithClass = target.closest("." + targetClass);
+		if (parentWithClass) {
+		    let img = parentWithClass.querySelector("img");
+		    textToCopy = img ? img.src : parentWithClass.innerText.trim();
+		}
+	    }
+	
+	    if (textToCopy) {
+		navigator.clipboard.writeText(textToCopy).then(() => {
+		    APModPopup.openPopup("Kopiert: " + textToCopy);
+		}).catch(ignore => {
+		    APModPopup.openPopup("Fehler beim Kopieren.");
+		});
+	    }
+	}
 }
 
 APModFiller.getRad = (target,x,y,apModFields) => {

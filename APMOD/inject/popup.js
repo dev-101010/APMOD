@@ -1,4 +1,4 @@
-const APModPopup = {};
+const APModPopup = {timeOut:null};
 
 APModPopup.load = () => {
 	
@@ -23,7 +23,10 @@ APModPopup.load = () => {
 APModPopup.openPopup = (text) => {
 	APModPopup.Popup.label.innerHTML = text;
 	APModPopup.Popup.style.display = "flex";
-	setTimeout(APModPopup.closePopup,1500);
+        if(APModPopup.timeOut) {
+	    clearTimeout(APModPopup.timeOut);
+        }
+	APModPopup.timeOut = setTimeout(APModPopup.closePopup,1500);
 }
 
 APModPopup.closePopup = () => {

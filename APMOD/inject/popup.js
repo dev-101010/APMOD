@@ -22,7 +22,7 @@ APModPopup.load = () => {
 
 APModPopup.openPopup = (text) => {
 	APModPopup.Popup.label.innerHTML = text;
-	APModPopup.Popup.style.display = "block";
+	APModPopup.Popup.style.display = "flex";
 	setTimeout(APModPopup.closePopup,1500);
 }
 

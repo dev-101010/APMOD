@@ -8,7 +8,7 @@ APModPopup.load = () => {
 	APModPopup.Popup.id = "fillerPopup";
 	APModPopup.Popup.classList.add("fillerPopup");
 
-	APModPopup.Popup.header = document.createElement("h2");
+	APModPopup.Popup.header = document.createElement("label");
    	APModPopup.Popup.header.innerText = "APMOD";
    	APModPopup.Popup.header.style.color = "black";
    	APModPopup.Popup.appendChild(APModPopup.Popup.header);

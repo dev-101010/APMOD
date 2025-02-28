@@ -247,6 +247,6 @@ Es gibt allerdings eine Override Checkbox, wenn diese ausgewählt ist wird alles
 
 ## Kopierhilfe:
 
-Die Kopierhilfe lässt dich durch einfaches STRG + Linksklick Text und Bilder aus Zellen von Tabellen in die Zwischenablage kopieren.
+Die Kopierhilfe lässt dich durch einfaches STRG + Linksklicken auf Text und Bilder aus Zellen von Tabellen, diese in die Zwischenablage kopieren.
 
 ![copy.png](https://github.com/dev-101010/APMOD/blob/main/images/copy.png)

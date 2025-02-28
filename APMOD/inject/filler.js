@@ -50,6 +50,24 @@ APModFiller.inputClick = (e) => {
 	if (e.altKey && e.ctrlKey && ( ( target.tagName == "INPUT" && target.type == "text" ) || target.type == "textarea" ) ) {
 		APModFiller.delRad(target,x,y,null);
 	}
+
+    if (e.ctrlKey && !e.altKey && target.classList.contains("target-class")) {
+        let textToCopy = "";
+
+        if (target.tagName === "IMG") {
+            textToCopy = target.src;
+        } else {
+            textToCopy = target.innerText.trim();
+        }
+
+        if (textToCopy) {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                console.log("Kopiert:", textToCopy);
+            }).catch(err => {
+                console.error("Fehler beim Kopieren:", err);
+            });
+        }
+    }
 }
 
 APModFiller.getRad = (target,x,y,apModFields) => {

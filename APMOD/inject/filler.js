@@ -51,7 +51,7 @@ APModFiller.inputClick = (e) => {
 		APModFiller.delRad(target,x,y,null);
 	}
 
-    if (e.ctrlKey && !e.altKey && target.classList.contains("target-class")) {
+    if (e.ctrlKey && !e.altKey && target.classList.contains("x-grid-cell-inner")) {
         let textToCopy = "";
 
         if (target.tagName === "IMG") {

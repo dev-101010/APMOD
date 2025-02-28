@@ -26,6 +26,7 @@ APModCopyWo.load = () => {
             link.id = "APModCopyWoButton";
             link.textContent = woNumber;
             link.type="button";
+            link.title="Copy to Clipboard";
             link.style.cursor = 'pointer';
             link.style["background-color"] = 'transparent';
             link.style["color"] = 'inherit';
@@ -41,15 +42,27 @@ APModCopyWo.load = () => {
             link.style["border-block-end"] = "1px dashed currentColor";
             link.style.marginRight = '10px';
             link.addEventListener('click', function(e) {
-                APModCopyWo.copy(woNumber);
+                navigator.clipboard.writeText(woNumber);
+                if(APModPopup) {
+                    APModPopup.openPopup(woNumber+" saved to Clipboard.");
+                }
+            });
+
+            const link4 = e.appendChild(document.createElement("button"));
+            link4.type="button";
+            link4.textContent = "☰";
+            link4.title="Copy to APM list";
+            link4.style.marginLeft = '10px';
+            link4.addEventListener("click", ()=>{
+                APModCopyWo.copyToAPMList(woNumber);
             });
 		  
             const URL = "https://eu1.eam.hxgnsmartcloud.com/web/base/logindisp?tenant=AMAZONRMEEU_PRD&FROMEMAIL=YES&SYSTEM_FUNCTION_NAME=WSJOBS&USER_FUNCTION_NAME=WSJOBS&workordernum=";
-		  
+
             const link3 = e.appendChild(document.createElement("button"));
             link3.type="button";
             link3.textContent = "©";
-            link3.title="Copy APM WO link"
+            link3.title="Copy APM WO link to Clipboard.";
             link3.style.marginLeft = '10px';
             link3.addEventListener("click", ()=>{
                 navigator.clipboard.writeText(URL+woNumber);
@@ -60,7 +73,7 @@ APModCopyWo.load = () => {
             const link2 = e.appendChild(document.createElement("button"));
             link2.type="button";
             link2.textContent = "➤";
-            link2.title="Go to APM WO"
+            link2.title="Go to APM WO";
             link2.style.marginLeft = '10px';
             link2.addEventListener("click", ()=>{
                 window.open(URL+woNumber, '_blank');
@@ -81,38 +94,19 @@ APModCopyWo.load = () => {
     });
 };
 
-APModCopyWo.copy = (woNumber) => {
-    let popupText = "";
+APModCopyWo.copyToAPMList = (woNumber) => {
     if(typeof GM_getValue !== 'undefined') {
-        const clipEnabled = GM_getValue( "copyWoClipboardEnabled", true );
-        const woEnabled = GM_getValue( "copyWoArrayEnabled", true );
-
-        if(clipEnabled) {
-            navigator.clipboard.writeText(woNumber);
-            popupText += woNumber+" set to Clipboard.";
+        const data = GM_getValue( "copyWoArray", "[]" );
+        const array = JSON.parse(data);
+        const index = array.indexOf(woNumber);
+        if (index !== -1) {
+            array.splice(index, 1);
         }
-
-        if(woEnabled) {
-            const data = GM_getValue( "copyWoArray", "[]" );
-            const array = JSON.parse(data);
-            const index = array.indexOf(woNumber);
-            if (index !== -1) {
-                array.splice(index, 1);
-            }
-            array.unshift(woNumber);
-            if(array.lenght > 100) array.pop();
-            GM_setValue( "copyWoArray", JSON.stringify(array) );
-            if(popupText !== "") {
-                popupText += "<br>"+woNumber+" added to APM WO List.";
-            }
-            else {
-                popupText = woNumber+" added to APM WO List.";
-            }
+        array.unshift(woNumber);
+        if(array.lenght > 100) array.pop();
+        GM_setValue( "copyWoArray", JSON.stringify(array) );
+        if(APModPopup) {
+            APModPopup.openPopup(woNumber+" added to APM WO List.");
         }
-    } else {
-        navigator.clipboard.writeText(woNumber);
-        popupText += woNumber+" set to Clipboard.";
     }
-    if(APModPopup && popupText !== "")
-        APModPopup.openPopup(popupText);
-  };
+};

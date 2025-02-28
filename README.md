@@ -243,6 +243,8 @@ Es gibt allerdings eine Override Checkbox, wenn diese ausgewählt ist wird alles
 
 ![selector.png](https://github.com/dev-101010/APMOD/blob/main/images/selector.png)
 
+<br /><br /><br />
+
 ## Kopierhilfe:
 
 Die Kopierhilfe lässt dich durch einfaches STRG + Linksklick Text und Bilder aus Zellen von Tabellen in die Zwischenablage kopieren.

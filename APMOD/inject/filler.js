@@ -62,9 +62,9 @@ APModFiller.inputClick = (e) => {
 
         if (textToCopy) {
             navigator.clipboard.writeText(textToCopy).then(() => {
-                console.log("Kopiert:", textToCopy);
-            }).catch(err => {
-                console.error("Fehler beim Kopieren:", err);
+                APModPopup.openPopup("Kopiert: " + textToCopy);
+            }).catch(ignore => {
+                APModPopup.openPopup("Fehler beim Kopieren.");
             });
         }
     }

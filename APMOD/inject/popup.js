@@ -7,6 +7,13 @@ APModPopup.load = () => {
 	APModPopup.Popup = document.createElement("div");
 	APModPopup.Popup.id = "fillerPopup";
 	APModPopup.Popup.classList.add("fillerPopup");
+
+	APModPopup.Popup.header = document.createElement("h2");
+   	APModPopup.Popup.header.innerText = "APMOD";
+   	APModPopup.Popup.header.style.color = "white";
+   	APModPopup.Popup.header.style.textAlign = "center";
+   	APModPopup.Popup.appendChild(APModPopup.Popup.header);
+	
 	APModPopup.Popup.label = document.createElement("label");
 	APModPopup.Popup.label.style.color = "white";
 	APModPopup.Popup.appendChild(APModPopup.Popup.label);

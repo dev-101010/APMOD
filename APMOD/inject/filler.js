@@ -35,45 +35,81 @@ APModFiller.buttonClick = (cmp,e,fields) => {
 }
 
 APModFiller.inputClick = (e) => {
-	const target = e.target;
-	const x = e.clientX;
-	const y = e.clientY;
+    const target = e.target;
+    const x = e.clientX;
+    const y = e.clientY;
 
-	if (e.ctrlKey && !e.altKey && ( ( target.tagName == "INPUT" && target.type == "text" ) || target.type == "textarea" ) ) {
-		APModFiller.getRad(target,x,y,null);
-	}
+    if (e.ctrlKey && !e.altKey && ((target.tagName == "INPUT" && target.type == "text") || target.type == "textarea")) {
+        APModFiller.getRad(target, x, y, null);
+    }
 
-	if (e.shiftKey && ( ( target.tagName == "INPUT" && target.type == "text" ) || target.type == "textarea" ) ) {
-		APModFiller.overRad(target,x,y,null);
-	}
-	
-	if (e.altKey && e.ctrlKey && ( ( target.tagName == "INPUT" && target.type == "text" ) || target.type == "textarea" ) ) {
-		APModFiller.delRad(target,x,y,null);
-	}
+    if (e.shiftKey && ((target.tagName == "INPUT" && target.type == "text") || target.type == "textarea")) {
+        APModFiller.overRad(target, x, y, null);
+    }
 
-	if (e.ctrlKey && !e.altKey) {
-	    let textToCopy = "";
-	    const targetClass = "x-grid-cell-inner";
-	
-	    if (target.classList.contains(targetClass)) {
-		textToCopy = target.tagName === "IMG" ? target.src : target.innerText.trim();
-	    } else {
-		let parentWithClass = target.closest("." + targetClass);
-		if (parentWithClass) {
-		    let img = parentWithClass.querySelector("img");
-		    textToCopy = img ? img.src : parentWithClass.innerText.trim();
-		}
-	    }
-	
-	    if (textToCopy) {
-		navigator.clipboard.writeText(textToCopy).then(() => {
-		    APModPopup.openPopup("Kopiert: " + textToCopy);
-		}).catch(ignore => {
-		    APModPopup.openPopup("Fehler beim Kopieren.");
-		});
-	    }
-	}
-}
+    if (e.altKey && e.ctrlKey && ((target.tagName == "INPUT" && target.type == "text") || target.type == "textarea")) {
+        APModFiller.delRad(target, x, y, null);
+    }
+
+    if (e.ctrlKey && !e.altKey) {
+        let textToCopy = "";
+        const targetClass = "x-grid-cell-inner";
+
+        let parentWithClass = target.classList.contains(targetClass) 
+            ? target 
+            : target.closest("." + targetClass);
+
+        if (parentWithClass) {
+            let img = parentWithClass.querySelector("img");
+
+            if (img) {
+                // Falls ein Bild gefunden wurde, versuche das Bild zu kopieren
+                APModFiller.copyImageToClipboard(img);
+            } else {
+                // Falls kein Bild, kopiere den Text
+                textToCopy = parentWithClass.innerText.trim();
+                if (textToCopy) {
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        APModPopup.openPopup("Kopiert: " + textToCopy);
+                    }).catch(() => {
+                        APModPopup.openPopup("Fehler beim Kopieren.");
+                    });
+                }
+            }
+        }
+    }
+};
+
+APModFiller.copyImageToClipboard = (img) => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    // Setze Canvas-Größe auf die Originalgröße des Bildes
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+
+    // Zeichne das Bild auf das Canvas
+    ctx.drawImage(img, 0, 0);
+
+    // Konvertiere das Canvas in ein Blob (PNG-Format)
+    canvas.toBlob(blob => {
+        if (!blob) {
+            APModPopup.openPopup("Fehler beim Kopieren des Bildes.");
+            return;
+        }
+
+        const item = new ClipboardItem({ "image/png": blob });
+
+        navigator.clipboard.write([item])
+            .then(() => {
+                APModPopup.openPopup("Bild kopiert!");
+            })
+            .catch(err => {
+                console.error("Fehler beim Kopieren des Bildes:", err);
+                APModPopup.openPopup("Fehler beim Kopieren.");
+            });
+    }, "image/png");
+};
 
 APModFiller.getRad = (target,x,y,apModFields) => {
 	const apModData = Ext.clone(APModFiller.store.data);

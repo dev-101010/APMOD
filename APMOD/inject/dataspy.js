@@ -286,7 +286,7 @@ APModDataSpy.createCopyWoPopupPanel = () => {
             align: 'left'
         },
 		padding: '10 10 10 10',
-		items: [{
+		items: [/*{
             xtype: 'checkboxfield',
             boxLabel : 'Copy WO to Clipboard',
             value: clipEnabled,
@@ -304,7 +304,7 @@ APModDataSpy.createCopyWoPopupPanel = () => {
                     GM_setValue( "copyWoArrayEnabled", newValue );
                 }
             }
-        },{
+        },*/{
             xtype: 'button',
             text : 'Clear APM WO List',
             handler: function() {

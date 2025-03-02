@@ -10,6 +10,7 @@ APModFiller.load = () => {
 
 	APModFiller.injectMainToolbar();
 	APModFiller.injectRecordView();
+	APModFiller.injectListDetailView();
 
 	const storage = JSON.parse(localStorage.getItem("APModFiller"));
 	if (storage != null && typeof storage === 'object' && Array.isArray(storage.data))
@@ -391,6 +392,52 @@ APModFiller.injectRecordView = () => {
 			}
 		}
 	}
+}
+
+APModFiller.injectListDetailView = () => {
+	if (typeof EAM.view?.common?.ListDetailView === 'undefined') return;
+	const RVclass = EAM.view.common.ListDetailView;
+
+	if (RVclass.prototype.amodFillerOrigInitPageLayout == null) {
+		RVclass.prototype.amodFillerOrigInitPageLayout = RVclass.prototype.initPageLayout;
+		RVclass.prototype.initPageLayout = function(c, e, b) {
+			this.amodFillerOrigInitPageLayout.apply(this, [c, e, b]);
+			const a = this;
+		    if (this.tabURL == "WSJOBS.BOO") {
+			const employee = a.getForm().findField('employee');
+			const octype = a.getForm().findField('octype');
+			const hrswork = a.getForm().findField('hrswork');
+			const datework = a.getForm().findField('datework');
+			const booactivity = a.getForm().findField('booactivity');
+			if(employee != null && octype != null && hrswork != null && datework != null && booactivity != null) {
+				const parent = hrswork.ownerCt;
+				if(parent?.items?.keys != null) {
+					const pos = parent.items.keys.indexOf(hrswork.id) + 1;
+					parent.insert(pos,{
+						xtype: 'button',
+						name: 'apModFillTime',
+						text: 'Fill Time',
+						margin: '0 0 0 150',
+						listeners: {
+							click: function(cmp,e) {
+							    const fields = [hrswork, employee];
+							    if (!e.shiftKey && !e.altKey) {
+								booactivity.setValue(booactivity.store.data.last());
+								booactivity.fireEvent('select', booactivity, booactivity.store.data.last().data.display, null, true);
+								octype.setValue("N");
+								datework.setValue(APModDataSpy.onFunction("#DATE"));
+								APModFiller.buttonClick(cmp,e,fields);
+							    } else {
+								APModFiller.buttonClick(cmp,e,fields);
+							    }
+						},
+					},
+				});
+			}
+		}
+            }
+        }
+    }
 }
 
 APModFiller.createFillerButton = () => {

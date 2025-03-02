@@ -422,10 +422,16 @@ APModFiller.injectListDetailView = () => {
 							click: function(cmp,e) {
 							    const fields = [hrswork, employee];
 							    if (!e.shiftKey && !e.altKey) {
-								booactivity.setValue(booactivity.store.data.last());
-								booactivity.fireEvent('select', booactivity, booactivity.store.data.last().data.display, null, true);
-								octype.setValue("N");
-								datework.setValue(APModDataSpy.onFunction("#DATE"));
+								if(!booactivity.value) {
+									booactivity.setValue(booactivity.store.data.last());
+									booactivity.fireEvent('select', booactivity, booactivity.store.data.last().data.display, null, true);
+								    }
+								    if(!octype.value) {
+									octype.setValue("N");
+								    }
+								    if(!datework.value) {
+									datework.setValue(APModDataSpy.onFunction("#DATE"));
+								    }
 								APModFiller.buttonClick(cmp,e,fields);
 							    } else {
 								APModFiller.buttonClick(cmp,e,fields);

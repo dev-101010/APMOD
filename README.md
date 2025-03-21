@@ -251,4 +251,4 @@ Die Kopierhilfe lässt dich durch einfaches ALT + Linksklicken auf Text und Bild
 
 ![copy.png](https://github.com/dev-101010/APMOD/blob/main/images/copy.png)
 
-Ausserdem wird Text es in einer internen Liste abgelegt, welche man durch ALT + Linksklick in ein Eingebefeld aufrufen und die Werte wieder einfügen kann.
+Ausserdem wird kopierter Text in einer internen Liste abgelegt, welche man durch ALT + Linksklick in ein Eingebefeld aufrufen und die Werte wieder einfügen kann.

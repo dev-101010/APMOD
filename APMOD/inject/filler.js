@@ -1,6 +1,8 @@
 const APModFiller = {
 	popup: null,
 	store: {},
+    popup2: null,
+    store2: []
 };
 
 APModFiller.load = () => {
@@ -14,7 +16,11 @@ APModFiller.load = () => {
 
 	const storage = JSON.parse(localStorage.getItem("APModFiller"));
 	if (storage != null && typeof storage === 'object' && Array.isArray(storage.data))
-		APModFiller.store = storage;
+		Object.assign(APModFiller.store, storage);
+
+    const storage2 = JSON.parse(localStorage.getItem("APModCopy"));
+	if (storage2 != null && typeof storage2 === 'object' && Array.isArray(storage2.history))
+		Object.assign(APModFiller.store2, storage2.history);
 }
 
 APModFiller.buttonClick = (cmp,e,fields) => {
@@ -52,29 +58,30 @@ APModFiller.inputClick = (e) => {
         APModFiller.delRad(target, x, y, null);
     }
 
-    if (e.ctrlKey && !e.altKey) {
-        let textToCopy = "";
-        const targetClass = "x-grid-cell-inner";
+    if(APModFiller.popup2) APModFiller.popup2.style.display = "none";
+    if (!e.ctrlKey && e.altKey && ((target.tagName == "INPUT" && target.type == "text") || target.type == "textarea")) {
+        const storage2 = JSON.parse(localStorage.getItem("APModCopy"));
+        if (storage2 != null && typeof storage2 === 'object' && Array.isArray(storage2.history))
+            APModFiller.store2 = storage2.history;
+        APModFiller.showContextMenu(e, target);
+    }
 
-        let parentWithClass = target.classList.contains(targetClass) 
-            ? target 
-            : target.closest("." + targetClass);
+    if (!e.ctrlKey && e.altKey) {
+        const targetClass = "x-grid-cell-inner";
+        let parentWithClass = target.classList.contains(targetClass) ? target : target.closest("." + targetClass);
 
         if (parentWithClass) {
             let img = parentWithClass.querySelector("img");
-
             if (img) {
-                // Falls ein Bild gefunden wurde, versuche das Bild zu kopieren
                 APModFiller.copyImageToClipboard(img);
             } else {
-                // Falls kein Bild, kopiere den Text
-                textToCopy = parentWithClass.innerText.trim();
+                const textToCopy = parentWithClass.innerText.trim();
                 if (textToCopy) {
-                    navigator.clipboard.writeText(textToCopy).then(() => {
-                        APModPopup.openPopup("Kopiert: " + textToCopy);
-                    }).catch(() => {
-                        APModPopup.openPopup("Fehler beim Kopieren.");
-                    });
+                    navigator.clipboard.writeText(textToCopy);
+                    APModFiller.store2.unshift({ type: "text", content: textToCopy, timestamp: Date.now() });
+                    if (APModFiller.store2.length > APModFiller.store.settings.copyEntries) APModFiller.store2.pop();
+                    localStorage.setItem("APModCopy", JSON.stringify({"history":APModFiller.store2}));
+                    APModPopup.openPopup("Kopiert: " + textToCopy);
                 }
             }
         }
@@ -85,14 +92,11 @@ APModFiller.copyImageToClipboard = (img) => {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
 
-    // Setze Canvas-Größe auf die Originalgröße des Bildes
     canvas.width = img.naturalWidth;
     canvas.height = img.naturalHeight;
 
-    // Zeichne das Bild auf das Canvas
     ctx.drawImage(img, 0, 0);
 
-    // Konvertiere das Canvas in ein Blob (PNG-Format)
     canvas.toBlob(blob => {
         if (!blob) {
             APModPopup.openPopup("Fehler beim Kopieren des Bildes.");
@@ -111,6 +115,77 @@ APModFiller.copyImageToClipboard = (img) => {
             });
     }, "image/png");
 };
+
+APModFiller.showContextMenu = (event, inputElement) => {
+    if (!APModFiller.popup2) {
+        APModFiller.popup2 = document.createElement("ul");
+        APModFiller.popup2.id = "APModCopyMenu";
+        APModFiller.popup2.style.position = "absolute";
+        APModFiller.popup2.style.background = "#fff";
+        APModFiller.popup2.style.border = "1px solid #ccc";
+        APModFiller.popup2.style.padding = "5px";
+        APModFiller.popup2.style.boxShadow = "2px 2px 10px rgba(0,0,0,0.2)";
+        APModFiller.popup2.style.listStyle = "none";
+        APModFiller.popup2.style.zIndex = "1000";
+        APModFiller.popup2.style.maxHeight = "200px";
+        APModFiller.popup2.style.overflowY = "auto";
+        document.body.appendChild(APModFiller.popup2);
+    }
+
+    APModFiller.popup2.innerHTML = "";
+    if(APModFiller.store2.length > 0) {
+        APModFiller.store2.forEach((item, key, arr) => {
+            APModFiller.addContextLine(inputElement, item, Object.is(arr.length - 1, key))
+        });
+
+        APModFiller.popup2.style.left = `${event.pageX}px`;
+        APModFiller.popup2.style.top = `${event.pageY}px`;
+        APModFiller.popup2.style.display = "block";
+    } else {
+        APModFiller.popup2.style.display = "none";
+        APModPopup.openPopup("Copy history empty.");
+    }
+}
+
+APModFiller.addContextLine = (ele, item, last) => {
+    let timestamp = document.createElement("span");
+    timestamp.style.display = "block";
+    timestamp.style.fontSize = "10px";
+    timestamp.style.padding = "5px";
+    timestamp.style.color = "#666";
+    const timeDiff = Math.floor((Date.now() - item.timestamp) / 1000);
+    if (timeDiff < 3600) {
+        timestamp.textContent = `${Math.floor(timeDiff / 60)} m`;
+    } else if (timeDiff < 86400) {
+        timestamp.textContent = `${Math.floor(timeDiff / 3600)} h`;
+    } else {
+        timestamp.textContent = `${Math.floor(timeDiff / 86400)} d`;
+    }
+    let cont = document.createElement("span");
+    cont.style.padding = "5px";
+    cont.textContent = item.content.length > 27 ? item.content.substring(0, 27) + "..." : item.content;
+
+    let li = document.createElement("li");
+    li.title = item.content;
+    li.style.display = "flex";
+    li.style.cursor = "pointer";
+    if (!last) li.style.borderBottom = "1px solid #ddd";
+    li.addEventListener("click", () => {
+        ele.value += item.content;
+        APModFiller.popup2.style.display = "none";
+        APModPopup.openPopup("Value inserted.");
+    });
+    li.addEventListener("mouseover", () => {
+        li.style.background = "#dddddd";
+    });
+    li.addEventListener("mouseout", () => {
+        li.style.background = "transparent";
+    });
+
+    li.appendChild(timestamp);
+    li.appendChild(cont);
+    APModFiller.popup2.appendChild(li);
+}
 
 APModFiller.getRad = (target,x,y,apModFields) => {
 	const apModData = Ext.clone(APModFiller.store.data);
@@ -490,6 +565,20 @@ APModFiller.createPopupPanel = (store) => {
 				pack: 'end'
 			},
 			items: [
+                {
+					xtype: 'label',
+					text: 'Copy entries:',
+				},
+				{
+					minWidth: 40,
+					maxWidth: 40,
+					name: "copyEntriesTextField",
+					xtype: 'textfield',
+					value: store.settings.copyEntries,
+					maskRe: /[0-9]/,
+					maxLength: 3
+				},
+                { xtype: 'tbspacer', width: 50 },
 				{
 					xtype: 'label',
 					text: 'Wheel Size:',
@@ -554,6 +643,8 @@ APModFiller.createPopupPanel = (store) => {
 					handler: function() {
 						const wSTF= this.up('window[name="FillerWindow"]').down('textfield[name="wheelSizeTextField"]');
 						const fSTF = this.up('window[name="FillerWindow"]').down('textfield[name="fontSizeTextField"]');
+                        const cpTF = this.up('window[name="FillerWindow"]').down('textfield[name="copyEntriesTextField"]');
+						APModFiller.store.settings.copyEntries = typeof cpTF.value === 'string' && cpTF.value > 0 ? parseInt(cpTF.value) : 30;
 						APModFiller.store.settings.wheelSize = typeof wSTF.value === 'string' && wSTF.value > 0 ? parseInt(wSTF.value) : 200;
 						APModFiller.store.settings.fontSize = typeof fSTF.value === 'string' && fSTF.value > 0 ? parseInt(fSTF.value) : 38;
 						APModFiller.store.data = fillerStore.dsGetData();
@@ -833,7 +924,7 @@ APModFiller.store.data = [{
 	}
 ];
 
-APModFiller.store.settings = {"wheelSize":200,"fontSize":38};
+APModFiller.store.settings = {"wheelSize":200,"fontSize":38,"copyEntries":30};
 
 APModFiller.save = () => {
 	localStorage.setItem("APModFiller", JSON.stringify(APModFiller.store));

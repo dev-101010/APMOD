@@ -1,0 +1,28 @@
+// language: javascript
+(function overrideSpecificWindowByItemId() {
+  if (!window.Ext?.ClassManager) return;
+
+  var TARGET_ITEM_ID = 'copy-wo-window'; // <-- your unique itemId
+  var Cls = Ext.ClassManager.get('Ext.window.Window');
+  if (!Cls) return;
+
+  Ext.override(Cls, {
+    // run after the original initComponent
+    initComponent: Ext.Function.createSequence(
+      Cls.prototype.initComponent,
+      function () {
+        // guard: only for the exact target window
+        if (this.itemId !== TARGET_ITEM_ID || this.__apmod_inited) return;
+        this.__apmod_inited = true; // idempotency
+
+        // --- your custom init logic here ---
+        // e.g., tweak size/title, add buttons, wire events, etc.
+        this.setTitle((this.title ? this.title + ' · ' : '') + 'APMod');
+        var fbar = this.getDockedItems && this.getDockedItems('toolbar[dock="bottom"]')[0];
+        if (fbar) {
+          fbar.add({ text: 'Export', handler: () => console.log('export…') });
+        }
+      }
+    )
+  });
+})();

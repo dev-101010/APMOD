@@ -93,8 +93,9 @@ APModFiller.injectRecordView = () => {
                         function durationText(val) {
                             const n = val != null ? parseInt(val, 10) : null;
                             if (n === 1 || n === '1') return '1 day overdue';
-                            if (n === 2 || n === '2') return '2 days overdue';
-                            if (n === 4 || n === 5 || n === '4' || n === '5') return '30 days overdue';
+                            if (n === 2 || n === '2') return '7 days overdue';
+                            if (n === 4 || n === '4') return '30 days overdue';
+                            if (n === 5 || n === '5') return '30 days overdue';
                             return '';
                         }
 

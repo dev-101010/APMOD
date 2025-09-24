@@ -9,101 +9,145 @@ editor.setValue(data.contentHtml || '');
 
 ----------------------------------------
 
-// Assume your combo has itemId: 'myCombo' and uses valueField: 'value'
-const combo = Ext.ComponentQuery.query('#myCombo')[0];
+APModFiller.injectRecordView = () => {
+    if (typeof EAM.view?.common?.RecordView === 'undefined') return;
+    const RVclass = EAM.view.common.RecordView;
 
-combo.on('afterrender', function (c) {
-  const store = c.getStore();
-  const valueField = c.valueField || 'value';
+    if (RVclass.prototype.amodFillerOrigInitPageLayout == null) {
+        RVclass.prototype.amodFillerOrigInitPageLayout = RVclass.prototype.initPageLayout;
+        RVclass.prototype.initPageLayout = function(c, e, b) {
+            this.amodFillerOrigInitPageLayout.apply(this, [c, e, b]);
+            const a = this;
+            if (this.tabURL == "WSJOBS.HDR") {
+                const problemcode = a.getForm().findField('problemcode');
+                const failurecode = a.getForm().findField('failurecode');
+                const causecode = a.getForm().findField('causecode');
+                if(problemcode != null && failurecode != null && causecode != null) {
+                    const parent = causecode.ownerCt;
+                    if(parent?.items?.keys != null) {
+                        const pos = parent.items.keys.indexOf(causecode.id) + 1;
+                        parent.insert(pos,{
+                            xtype: 'button',
+                            name: 'apModCloseCodes',
+                            text: 'Fill Close Codes',
+                            margin: '0 0 0 150',
+                            listeners: {
+                                click: function(cmp,e) {
+                                    const fields = [ problemcode, failurecode, causecode ];
+                                    APModFiller.buttonClick(cmp,e,fields);
+                                },
+                            },
+                        });
+                    }
+                }
+                const URL = "https://eu1.eam.hxgnsmartcloud.com/web/base/logindisp?tenant=AMAZONRMEEU_PRD&FROMEMAIL=YES&SYSTEM_FUNCTION_NAME=WSJOBS&USER_FUNCTION_NAME=WSJOBS&workordernum=";
+                const description = a.getForm().findField('description');
+                const workorder = a.getForm().findField('workordernum');
+                if(description != null && workorder != null) {
+                    const parent = description.ownerCt;
+                    if(parent?.items?.keys != null) {
+                        const pos = parent.items.keys.indexOf(description.id) + 1;
+                        parent.insert(pos,{
+                            xtype: 'button',
+                            name: 'apModCopyWO',
+                            text: '©',
+                            margin: '0 0 0 20',
+                            tooltip: 'Copy APM WO link',
+                            listeners: {
+                                click: function(cmp,e) {
+                                    const woNumber = workorder.value ?? "";
+                                    navigator.clipboard.writeText(URL+woNumber);
+                                    if(APModPopup)
+                                        APModPopup.openPopup("WO direct link saved to Clipboard.");
+                                },
+                            },
+                        });
+                    }
+                }
+                // Inline version: no IIFE; drop directly inside your WSJOBS.HDR block
+                const combo = a.getForm().findField('NAME_DER_COMBO'); // TODO: replace with real field name
+                if (combo && combo.ownerCt) {
+                    const parent = combo.ownerCt;
+                    const store = combo.getStore && combo.getStore();
+                    const valueField = combo.valueField || 'value';
 
-  Ext.suspendLayouts();
+                    // Avoid wiring twice if initPageLayout can run multiple times
+                    if (!combo.apmDurationWired && store) {
+                        combo.apmDurationWired = true;
 
-  // Step 1: If current selection is 3, try to map to 4 (or fallback)
-  if (c.getValue() === 3) {
-    const rec4 = store.findRecord(valueField, 4, 0, false, true, true);
-    if (rec4) {
-      c.setValue(4);
-    } else {
-      const first = store.first();
-      if (first) c.setValue(first.get(valueField));
-      else c.reset();
+                        // Insert label only if not already present right after the combo
+                        const insertIndex = parent.items.indexOf ? parent.items.indexOf(combo) + 1 :
+                            (parent.items.keys ? parent.items.keys.indexOf(combo.id) + 1 : null);
+
+                        let label = parent.down('#durationLabel');
+                        if (!label && insertIndex != null) {
+                            label = parent.insert(insertIndex, {
+                                xtype: 'displayfield',
+                                itemId: 'durationLabel',
+                                value: '',
+                                margin: '0 0 0 12'
+                            });
+                        }
+
+                        // Helpers stay local to this block
+                        function durationText(val) {
+                            const n = val != null ? parseInt(val, 10) : null;
+                            if (n === 1 || n === '1') return '1 day overdue';
+                            if (n === 2 || n === '2') return '2 days overdue';
+                            if (n === 4 || n === 5 || n === '4' || n === '5') return '30 days overdue';
+                            return '';
+                        }
+
+                        function updateLabel() {
+                            if (label) label.setValue(durationText(combo.getValue()));
+                        }
+
+                        function applyRule() {
+                            Ext.suspendLayouts();
+
+                            // Step 1: remap 3 -> 4 if currently selected
+                            const cur = combo.getValue();
+                            if (cur === 3 || cur === '3') {
+                                const has4 =
+                                    store.findExact(valueField, 4) !== -1 ||
+                                    store.findExact(valueField, '4') !== -1;
+                                if (has4) {
+                                    combo.setValue(4);
+                                } else {
+                                    const first = store.first && store.first();
+                                    if (first) combo.setValue(first.get(valueField));
+                                    else combo.reset();
+                                }
+                            }
+
+                            // Step 2: remove value 3 from the store
+                            let idx;
+                            while ((idx = store.findExact(valueField, 3)) !== -1) store.removeAt(idx);
+                            while ((idx = store.findExact(valueField, '3')) !== -1) store.removeAt(idx);
+
+                            Ext.resumeLayouts(true);
+
+                            updateLabel();
+                        }
+
+                        // Initial application (after render if needed)
+                        if (combo.rendered) {
+                            applyRule();
+                        } else {
+                            combo.on('afterrender', applyRule, { single: true });
+                        }
+
+                        // Keep label in sync
+                        combo.on('change', updateLabel);
+                        combo.on('select', updateLabel);
+
+                        // Handle late/remote loads as well
+                        if (store.on) {
+                            store.on('load', applyRule);
+                        }
+                    }
+                }
+            }
+        }
     }
-  }
-
-  // Step 2: Remove 3 from the store
-  let rec3;
-  while ((rec3 = store.findRecord(valueField, 3, 0, false, true, true))) {
-    store.remove(rec3);
-  }
-
-  Ext.resumeLayouts(true);
-});
-
-
------------------------------------------
-
-// Dynamically add a label after a hardcoded combo and keep it in sync
-(function () {
-  // Locate your existing combo (adjust the selector to your case)
-  const combo = Ext.ComponentQuery.query('#myCombo')[0];
-  if (!combo || !combo.ownerCt) return;
-
-  combo.on('afterrender', function (c) {
-    const parent = c.ownerCt;
-    const store = c.getStore();
-    const valueField = c.valueField || 'value';
-
-    // Insert position: right after the combo in the same container
-    const insertIndex = parent.items.indexOf(c) + 1;
-
-    // Create the dynamic label
-    const label = parent.insert(insertIndex, {
-      xtype: 'displayfield',
-      itemId: 'durationLabel',
-      value: '',
-      margin: '0 0 0 12' // spacing; with vbox/anchor this ends up below, with hbox it's beside
-    });
-
-    // Map selected value -> text
-    function durationText(val) {
-      const n = val != null ? parseInt(val, 10) : null;
-      if (n === 1) return '1 day';
-      if (n === 2) return '2 days';
-      if (n === 4 || n === 5) return '30 days';
-      return '';
-    }
-
-    function updateLabel() {
-      label.setValue(durationText(c.getValue()));
-    }
-
-    Ext.suspendLayouts();
-
-    // Step 1: if current selection is 3, remap to 4 (or fallback)
-    const cur = c.getValue();
-    if (cur === 3 || cur === '3') {
-      const has4 =
-        store.findExact(valueField, 4) !== -1 ||
-        store.findExact(valueField, '4') !== -1;
-      if (has4) {
-        c.setValue(4);
-      } else {
-        const first = store.first();
-        if (first) c.setValue(first.get(valueField));
-        else c.reset();
-      }
-    }
-
-    // Step 2: remove any '3' entries from the store
-    let idx;
-    while ((idx = store.findExact(valueField, 3)) !== -1) store.removeAt(idx);
-    while ((idx = store.findExact(valueField, '3')) !== -1) store.removeAt(idx);
-
-    Ext.resumeLayouts(true);
-
-    // Initialize and keep in sync
-    updateLabel();
-    c.on('change', updateLabel);
-    c.on('select', updateLabel);
-  });
-})();
+}

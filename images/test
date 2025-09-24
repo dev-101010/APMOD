@@ -79,11 +79,11 @@ APModFiller.injectRecordView = () => {
                         const insertIndex = parent.items.indexOf ? parent.items.indexOf(combo) + 1 :
                             (parent.items.keys ? parent.items.keys.indexOf(combo.id) + 1 : null);
 
-                        let label = parent.down('#durationLabel');
+                        let label = parent.down('#apModPriorityOverdueLabel');
                         if (!label && insertIndex != null) {
                             label = parent.insert(insertIndex, {
                                 xtype: 'displayfield',
-                                itemId: 'durationLabel',
+                                itemId: 'apModPriorityOverdueLabel',
                                 value: '',
                                 margin: '0 0 0 12'
                             });
@@ -91,17 +91,35 @@ APModFiller.injectRecordView = () => {
 
                         // Helpers stay local to this block
                         function durationText(val) {
-                            const n = val != null ? parseInt(val, 10) : null;
-                            if (n === 1 || n === '1') return '1 day overdue';
-                            if (n === 2 || n === '2') return '7 days overdue';
-                            if (n === 3 || n === '3') return 'don't use !!!';
-                            if (n === 4 || n === '4') return '30 days overdue';
-                            if (n === 5 || n === '5') return '30 days overdue';
-                            return '';
+                          const n = toInt(val);
+                          switch (n) {
+                            case 1: return '1 day overdue';
+                            case 2: return '7 days overdue';
+                            case 3: return "don't use !!!";
+                            case 4:
+                            case 5: return '30 days overdue';
+                            default: return '';
+                          }
+                        }
+
+                        function toInt(val) {
+                              if (val == null) return null;
+                              if (typeof val === 'number' && Number.isFinite(val)) return val;
+                              if (typeof val === 'string') {
+                                const n = parseInt(val.trim(), 10);
+                                return Number.isFinite(n) ? n : null;
+                              }
+                              return null;
                         }
 
                         function updateLabel() {
-                            if (label) label.setValue(durationText(combo.getValue()));
+                          if (!label) return;
+                          const v = combo.getValue();
+                          label.setValue(durationText(v));
+                        
+                          const danger = toInt(v) === 3;
+                          // Works on displayfield as well:
+                          label.setFieldStyle('color:' + (danger ? '#c00' : ''));
                         }
 
                         function applyRule() {

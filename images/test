@@ -38,3 +38,72 @@ combo.on('afterrender', function (c) {
 
   Ext.resumeLayouts(true);
 });
+
+
+-----------------------------------------
+
+// Dynamically add a label after a hardcoded combo and keep it in sync
+(function () {
+  // Locate your existing combo (adjust the selector to your case)
+  const combo = Ext.ComponentQuery.query('#myCombo')[0];
+  if (!combo || !combo.ownerCt) return;
+
+  combo.on('afterrender', function (c) {
+    const parent = c.ownerCt;
+    const store = c.getStore();
+    const valueField = c.valueField || 'value';
+
+    // Insert position: right after the combo in the same container
+    const insertIndex = parent.items.indexOf(c) + 1;
+
+    // Create the dynamic label
+    const label = parent.insert(insertIndex, {
+      xtype: 'displayfield',
+      itemId: 'durationLabel',
+      value: '',
+      margin: '0 0 0 12' // spacing; with vbox/anchor this ends up below, with hbox it's beside
+    });
+
+    // Map selected value -> text
+    function durationText(val) {
+      const n = val != null ? parseInt(val, 10) : null;
+      if (n === 1) return '1 day';
+      if (n === 2) return '2 days';
+      if (n === 4 || n === 5) return '30 days';
+      return '';
+    }
+
+    function updateLabel() {
+      label.setValue(durationText(c.getValue()));
+    }
+
+    Ext.suspendLayouts();
+
+    // Step 1: if current selection is 3, remap to 4 (or fallback)
+    const cur = c.getValue();
+    if (cur === 3 || cur === '3') {
+      const has4 =
+        store.findExact(valueField, 4) !== -1 ||
+        store.findExact(valueField, '4') !== -1;
+      if (has4) {
+        c.setValue(4);
+      } else {
+        const first = store.first();
+        if (first) c.setValue(first.get(valueField));
+        else c.reset();
+      }
+    }
+
+    // Step 2: remove any '3' entries from the store
+    let idx;
+    while ((idx = store.findExact(valueField, 3)) !== -1) store.removeAt(idx);
+    while ((idx = store.findExact(valueField, '3')) !== -1) store.removeAt(idx);
+
+    Ext.resumeLayouts(true);
+
+    // Initialize and keep in sync
+    updateLabel();
+    c.on('change', updateLabel);
+    c.on('select', updateLabel);
+  });
+})();

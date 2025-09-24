@@ -7,3 +7,34 @@ const json = JSON.stringify({ contentHtml: html }); // store/send this
 const data = JSON.parse(jsonFromServer);
 editor.setValue(data.contentHtml || '');
 
+----------------------------------------
+
+// Assume your combo has itemId: 'myCombo' and uses valueField: 'value'
+const combo = Ext.ComponentQuery.query('#myCombo')[0];
+
+combo.on('afterrender', function (c) {
+  const store = c.getStore();
+  const valueField = c.valueField || 'value';
+
+  Ext.suspendLayouts();
+
+  // Step 1: If current selection is 3, try to map to 4 (or fallback)
+  if (c.getValue() === 3) {
+    const rec4 = store.findRecord(valueField, 4, 0, false, true, true);
+    if (rec4) {
+      c.setValue(4);
+    } else {
+      const first = store.first();
+      if (first) c.setValue(first.get(valueField));
+      else c.reset();
+    }
+  }
+
+  // Step 2: Remove 3 from the store
+  let rec3;
+  while ((rec3 = store.findRecord(valueField, 3, 0, false, true, true))) {
+    store.remove(rec3);
+  }
+
+  Ext.resumeLayouts(true);
+});

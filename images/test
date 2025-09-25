@@ -77,7 +77,7 @@ APModFiller.injectRecordView = () => {
             tooltip: 'Copy APM WO link',
             listeners: {
               click: function() {
-                const woNumber = workorder.value ?? "";
+                const woNumber = workorder.getValue() ?? "";
                 navigator.clipboard.writeText(URL + woNumber);
                 if (APModPopup) APModPopup.openPopup("WO direct link saved to Clipboard.");
               }

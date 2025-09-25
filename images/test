@@ -1,0 +1,43 @@
+// After defining combo.updateDurationLabel = updateLabel;
+if (!combo.apmSetValuePatched) {
+  combo.apmSetValuePatched = true;
+
+  const origSetValue = combo.setValue;
+  combo.setValue = function () {
+    const res = origSetValue.apply(this, arguments);
+    if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
+    return res;
+  };
+
+  if (combo.clearValue) {
+    const origClearValue = combo.clearValue;
+    combo.clearValue = function () {
+      const res = origClearValue.apply(this, arguments);
+      if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
+      return res;
+    };
+  }
+
+  if (combo.reset) {
+    const origReset = combo.reset;
+    combo.reset = function () {
+      const res = origReset.apply(this, arguments);
+      if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
+      return res;
+    };
+  }
+
+  // Optional for very custom flows:
+  if (combo.setRawValue) {
+    const origSetRaw = combo.setRawValue;
+    combo.setRawValue = function () {
+      const res = origSetRaw.apply(this, arguments);
+      if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
+      return res;
+    };
+  }
+}
+
+// If you keep the patch, you can drop these to avoid double-calls:
+// combo.on('change', updateLabel);
+// combo.on('select', updateLabel);

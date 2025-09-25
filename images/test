@@ -140,6 +140,7 @@ APModFiller.injectRecordView = () => {
 
         form.on('beforeaction', function(f, action) {
           if (action.type !== 'submit') return;
+          console.log(form.getFields());
 
           withLayoutsPaused(function() {
 

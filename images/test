@@ -9,165 +9,158 @@ editor.setValue(data.contentHtml || '');
 
 ----------------------------------------
 
+// NOTE: normal text in German, code & comments in English.
 APModFiller.injectRecordView = () => {
-    if (typeof EAM.view?.common?.RecordView === 'undefined') return;
-    const RVclass = EAM.view.common.RecordView;
+  if (typeof EAM.view?.common?.RecordView === 'undefined') return;
+  const RVclass = EAM.view.common.RecordView;
 
-    if (RVclass.prototype.amodFillerOrigInitPageLayout == null) {
-        RVclass.prototype.amodFillerOrigInitPageLayout = RVclass.prototype.initPageLayout;
-        RVclass.prototype.initPageLayout = function(c, e, b) {
-            this.amodFillerOrigInitPageLayout.apply(this, [c, e, b]);
-            const a = this;
-            if (this.tabURL == "WSJOBS.HDR") {
-                const problemcode = a.getForm().findField('problemcode');
-                const failurecode = a.getForm().findField('failurecode');
-                const causecode = a.getForm().findField('causecode');
-                if(problemcode != null && failurecode != null && causecode != null) {
-                    const parent = causecode.ownerCt;
-                    if(parent?.items?.keys != null) {
-                        const pos = parent.items.keys.indexOf(causecode.id) + 1;
-                        parent.insert(pos,{
-                            xtype: 'button',
-                            name: 'apModCloseCodes',
-                            text: 'Fill Close Codes',
-                            margin: '0 0 0 150',
-                            listeners: {
-                                click: function(cmp,e) {
-                                    const fields = [ problemcode, failurecode, causecode ];
-                                    APModFiller.buttonClick(cmp,e,fields);
-                                },
-                            },
-                        });
-                    }
-                }
-                const URL = "https://eu1.eam.hxgnsmartcloud.com/web/base/logindisp?tenant=AMAZONRMEEU_PRD&FROMEMAIL=YES&SYSTEM_FUNCTION_NAME=WSJOBS&USER_FUNCTION_NAME=WSJOBS&workordernum=";
-                const description = a.getForm().findField('description');
-                const workorder = a.getForm().findField('workordernum');
-                if(description != null && workorder != null) {
-                    const parent = description.ownerCt;
-                    if(parent?.items?.keys != null) {
-                        const pos = parent.items.keys.indexOf(description.id) + 1;
-                        parent.insert(pos,{
-                            xtype: 'button',
-                            name: 'apModCopyWO',
-                            text: '©',
-                            margin: '0 0 0 20',
-                            tooltip: 'Copy APM WO link',
-                            listeners: {
-                                click: function(cmp,e) {
-                                    const woNumber = workorder.value ?? "";
-                                    navigator.clipboard.writeText(URL+woNumber);
-                                    if(APModPopup)
-                                        APModPopup.openPopup("WO direct link saved to Clipboard.");
-                                },
-                            },
-                        });
-                    }
-                }
-                // Inline version: no IIFE; drop directly inside your WSJOBS.HDR block
-                const combo = a.getForm().findField('NAME_DER_COMBO'); // TODO: replace with real field name
-                if (combo && combo.ownerCt) {
-                    const parent = combo.ownerCt;
-                    const store = combo.getStore && combo.getStore();
-                    const valueField = combo.valueField || 'value';
+  if (RVclass.prototype.amodFillerOrigInitPageLayout == null) {
+    RVclass.prototype.amodFillerOrigInitPageLayout = RVclass.prototype.initPageLayout;
 
-                    // Avoid wiring twice if initPageLayout can run multiple times
-                    if (!combo.apmDurationWired && store) {
-                        combo.apmDurationWired = true;
+    RVclass.prototype.initPageLayout = function(c, e, b) {
+      this.amodFillerOrigInitPageLayout.apply(this, [c, e, b]);
+      const a = this;
 
-                        // Insert label only if not already present right after the combo
-                        const insertIndex = parent.items.indexOf ? parent.items.indexOf(combo) + 1 :
-                            (parent.items.keys ? parent.items.keys.indexOf(combo.id) + 1 : null);
+      if (this.tabURL !== "WSJOBS.HDR") return;
 
-                        let label = parent.down('#apModPriorityOverdueLabel');
-                        if (!label && insertIndex != null) {
-                            label = parent.insert(insertIndex, {
-                                xtype: 'displayfield',
-                                itemId: 'apModPriorityOverdueLabel',
-                                value: '',
-                                margin: '0 0 0 12'
-                            });
-                        }
-
-                        // Helpers stay local to this block
-                        function durationText(val) {
-                          const n = toInt(val);
-                          switch (n) {
-                            case 1: return '1 day overdue';
-                            case 2: return '7 days overdue';
-                            case 3: return "don't use !!!";
-                            case 4:
-                            case 5: return '30 days overdue';
-                            default: return '';
-                          }
-                        }
-
-                        function toInt(val) {
-                              if (val == null) return null;
-                              if (typeof val === 'number' && Number.isFinite(val)) return val;
-                              if (typeof val === 'string') {
-                                const n = parseInt(val.trim(), 10);
-                                return Number.isFinite(n) ? n : null;
-                              }
-                              return null;
-                        }
-
-                        function updateLabel() {
-                          if (!label) return;
-                          const v = combo.getValue();
-                          label.setValue(durationText(v));
-                        
-                          const danger = toInt(v) === 3;
-                          // Works on displayfield as well:
-                          label.setFieldStyle('color:' + (danger ? '#c00' : ''));
-                        }
-
-                        function applyRule() {
-                            Ext.suspendLayouts();
-
-                            // Step 1: remap 3 -> 4 if currently selected
-                            const cur = combo.getValue();
-                            if (cur === 3 || cur === '3') {
-                                const has4 =
-                                    store.findExact(valueField, 4) !== -1 ||
-                                    store.findExact(valueField, '4') !== -1;
-                                if (has4) {
-                                    combo.setValue(4);
-                                } else {
-                                    const first = store.first && store.first();
-                                    if (first) combo.setValue(first.get(valueField));
-                                    else combo.reset();
-                                }
-                            }
-
-                            // Step 2: remove value 3 from the store
-                            let idx;
-                            while ((idx = store.findExact(valueField, 3)) !== -1) store.removeAt(idx);
-                            while ((idx = store.findExact(valueField, '3')) !== -1) store.removeAt(idx);
-
-                            Ext.resumeLayouts(true);
-
-                            updateLabel();
-                        }
-
-                        // Initial application (after render if needed)
-                        if (combo.rendered) {
-                            applyRule();
-                        } else {
-                            combo.on('afterrender', applyRule, { single: true });
-                        }
-
-                        // Keep label in sync
-                        combo.on('change', updateLabel);
-                        combo.on('select', updateLabel);
-
-                        // Handle late/remote loads as well
-                        if (store.on) {
-                            store.on('load', applyRule);
-                        }
-                    }
-                }
-            }
+      // ---------------- helpers ----------------
+      function toInt(val) {
+        if (val == null) return null;
+        if (typeof val === 'number' && Number.isFinite(val)) return val;
+        if (typeof val === 'string') {
+          const n = parseInt(val.trim(), 10);
+          return Number.isFinite(n) ? n : null;
         }
-    }
-}
+        return null;
+      }
+      function withLayoutsPaused(fn) {
+        Ext.suspendLayouts();
+        try { fn(); } finally { Ext.resumeLayouts(true); }
+      }
+
+      // ------------- existing buttons -------------
+      const problemcode = a.getForm().findField('problemcode');
+      const failurecode = a.getForm().findField('failurecode');
+      const causecode   = a.getForm().findField('causecode');
+
+      if (problemcode && failurecode && causecode) {
+        const parent = causecode.ownerCt;
+        if (parent?.items?.keys) {
+          const pos = parent.items.keys.indexOf(causecode.id) + 1;
+          parent.insert(pos, {
+            xtype: 'button',
+            name: 'apModCloseCodes',
+            text: 'Fill Close Codes',
+            margin: '0 0 0 150',
+            listeners: {
+              click: function(cmp, e) {
+                APModFiller.buttonClick(cmp, e, [problemcode, failurecode, causecode]);
+              }
+            }
+          });
+        }
+      }
+
+      const URL = "https://eu1.eam.hxgnsmartcloud.com/web/base/logindisp?tenant=AMAZONRMEEU_PRD&FROMEMAIL=YES&SYSTEM_FUNCTION_NAME=WSJOBS&USER_FUNCTION_NAME=WSJOBS&workordernum=";
+      const description = a.getForm().findField('description');
+      const workorder   = a.getForm().findField('workordernum');
+
+      if (description && workorder) {
+        const parent = description.ownerCt;
+        if (parent?.items?.keys) {
+          const pos = parent.items.keys.indexOf(description.id) + 1;
+          parent.insert(pos, {
+            xtype: 'button',
+            name: 'apModCopyWO',
+            text: '©',
+            margin: '0 0 0 20',
+            tooltip: 'Copy APM WO link',
+            listeners: {
+              click: function() {
+                const woNumber = workorder.value ?? "";
+                navigator.clipboard.writeText(URL + woNumber);
+                if (APModPopup) APModPopup.openPopup("WO direct link saved to Clipboard.");
+              }
+            }
+          });
+        }
+      }
+
+      // ------------- combo UI (optional) -------------
+      // TODO: set the real field name here:
+      const combo = a.getForm().findField('NAME_DER_COMBO');
+      if (combo && combo.ownerCt && !combo.apmUiWired) {
+        combo.apmUiWired = true;
+
+        const parent = combo.ownerCt;
+        const insertIndex = parent.items.indexOf
+          ? parent.items.indexOf(combo) + 1
+          : (parent.items.keys ? parent.items.keys.indexOf(combo.id) + 1 : null);
+
+        const labelItemId = combo.getId() + '-apModPriorityOverdueLabel';
+        let label = parent.down('#' + labelItemId);
+        if (!label && insertIndex != null) {
+          label = parent.insert(insertIndex, {
+            xtype: 'displayfield',
+            itemId: labelItemId,
+            value: '',
+            margin: '0 0 0 12'
+          });
+        }
+
+        function durationText(v) {
+          switch (toInt(v)) {
+            case 1: return '1 day overdue';
+            case 2: return '7 days overdue';
+            case 3: return "don't use !!!";
+            case 4:
+            case 5: return '30 days overdue';
+            default: return '';
+          }
+        }
+        function updateLabel() {
+          if (!label) return;
+          const v = combo.getValue();
+          label.setValue(durationText(v));
+          label.setFieldStyle('color:' + (toInt(v) === 3 ? '#c00' : ''));
+        }
+        // expose for submit hook
+        combo.updateDurationLabel = updateLabel;
+
+        combo.on('change', updateLabel);
+        combo.on('select', updateLabel);
+        if (combo.rendered) updateLabel();
+        else combo.on('afterrender', updateLabel, { single: true });
+      }
+
+      // ------------- centralized submit policy -------------
+      const form = a.getForm();
+      if (!form.apmSubmitHookWired) {
+        form.apmSubmitHookWired = true;
+
+        form.on('beforeaction', function(f, action) {
+          if (action.type !== 'submit') return;
+
+          withLayoutsPaused(function() {
+
+            // example default if empty:
+            const desc = f.findField('description');
+            if (desc && (!desc.getValue() || String(desc.getValue()).trim() === '')) {
+              desc.setValue('N/A');
+            }
+
+            // (B) combo-specific rule: if 3 -> set to 4 (no abort)
+            const c = combo && !combo.destroyed ? combo : null;
+            if (c && toInt(c.getValue()) === 3) {
+              c.setValue(4);
+              if (typeof c.updateDurationLabel === 'function') c.updateDurationLabel();
+              if (c.clearInvalid) c.clearInvalid();
+              if (window.Ext && Ext.toast) Ext.toast('Priority "3" was changed to "4" before saving.');
+            }
+
+          });
+        });
+      }
+    };
+  }
+};

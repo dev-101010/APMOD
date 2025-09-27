@@ -202,7 +202,8 @@ RadialMenu.prototype.createCenter = function (svg, title, icon, size) {
 
     var centerCircle = self.createCircle(0, 0, self.innerRadius - self.sectorSpace / 3);
     g.appendChild(centerCircle);
-    if (text) {
+	
+    if (title) {
         var text = self.createText(0,0, title);
         g.appendChild(text);
     }
@@ -274,9 +275,9 @@ RadialMenu.prototype.createMenu = function (classValue, levelItems, nested) {
     }
 
     if (nested) {
-        self.createCenter(svg, 'Close', '#return', 8);
+        self.createCenter(svg, '', '#return', 8);
     } else {
-        self.createCenter(svg, 'Close', '#close', 7);
+        self.createCenter(svg, '', '#close', 7);
     }
 
     svg.addEventListener('mousedown', function (event) {
@@ -456,7 +457,7 @@ RadialMenu.prototype.appendSectorPath = function (startAngleDeg, endAngleDeg, sv
 
         if (item.icon) {
             var use = self.createUseTag(centerPoint.x, centerPoint.y, item.icon);
-            if (item.title) {
+            if (label) {
                 use.setAttribute('transform', 'translate(-5,-8)');
             } else {
                 use.setAttribute('transform', 'translate(-5,-5)');
@@ -636,4 +637,5 @@ RadialMenu.setClassAndWaitForTransition = function (node, newClass) {
 RadialMenu.nextTick = function (fn) {
     setTimeout(fn, 10);
 };
+
 

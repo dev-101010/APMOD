@@ -442,8 +442,9 @@ RadialMenu.prototype.appendSectorPath = function (startAngleDeg, endAngleDeg, sv
         g.setAttribute('data-id', item.id);
         g.setAttribute('data-index', index);
 
-		if (item.title) {
-            var text = self.createText(centerPoint.x, centerPoint.y, item.title);
+		var label = self.getDisplayLabel(item);
+		if (label) {
+            var text = self.createText(centerPoint.x, centerPoint.y, label);
             if (item.icon) {
                 text.setAttribute('transform', 'translate(0,8)');
             } else {
@@ -491,6 +492,17 @@ RadialMenu.prototype.createSectorCmds = function (startAngleDeg, endAngleDeg) {
     return path;
 };
 
+RadialMenu.prototype.sanitizeForLabel = function (s, maxLen) {
+  const str = String(s ?? '').replace(/\s+/g, ' ').trim();
+  return (maxLen && str.length > maxLen) ? (str.slice(0, maxLen - 1) + '…') : str;
+};
+
+RadialMenu.prototype.getDisplayLabel = function (item) {
+  const alias = this.sanitizeForLabel(item?.title, 40);
+  if (alias) return alias;
+  const raw = item && (item.data ?? item.value);
+  return this.sanitizeForLabel(raw, 40);
+};
 
 RadialMenu.prototype.createText = function (x, y, title) {
     var self = this;
@@ -499,7 +511,7 @@ RadialMenu.prototype.createText = function (x, y, title) {
     text.setAttribute('x', RadialMenu.numberToString(x));
     text.setAttribute('y', RadialMenu.numberToString(y));
     text.setAttribute('font-size', self.textSize+'%');
-    text.innerHTML = title;
+    text.textContent = title || ''; // instead of innerHTML
     return text;
 };
 
@@ -624,3 +636,4 @@ RadialMenu.setClassAndWaitForTransition = function (node, newClass) {
 RadialMenu.nextTick = function (fn) {
     setTimeout(fn, 10);
 };
+

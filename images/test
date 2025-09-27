@@ -41,3 +41,73 @@ if (!combo.apmSetValuePatched) {
 // If you keep the patch, you can drop these to avoid double-calls:
 // combo.on('change', updateLabel);
 // combo.on('select', updateLabel);
+
+------------------------------------------------
+
+onClick: function(input, type, item) {
+  // Helper: show alias dialog, then save
+  const askAndSave = (saveFn, defaultAlias) => {
+    Ext.Msg.prompt(
+      'Alias',
+      'Optional: set an alias for this entry',
+      function(btn, text) {
+        if (btn !== 'ok') return;
+        const title = (text && text.trim().length > 0) ? text.trim() : defaultAlias;
+        saveFn(title);
+      },
+      this,
+      false,                 // multiline false → single-line alias
+      defaultAlias           // default value in the input
+    );
+  };
+
+  if (item.oId === -1) {
+    // NEW entry → default alias is the preview
+    askAndSave(function(title){
+      APModFiller.store.data.push({
+        field: name,
+        data: value,
+        title: title,
+        depth: item.depth,
+      });
+      APModFiller.save();
+      APModPopup.openPopup("Value added.");
+    }, aliasPreview);
+  } else {
+    // OVERRIDE → default to existing title, fall back to preview
+    const existing = APModFiller.store.data[item.oId] || {};
+    const defaultAlias = (existing.title && existing.title.length) ? existing.title : aliasPreview;
+    askAndSave(function(title){
+      APModFiller.store.data[item.oId] = {
+        field: name,
+        data: value,
+        title: title,
+        depth: item.depth,
+      };
+      APModFiller.save();
+      APModPopup.openPopup("Value overridden.");
+    }, defaultAlias);
+  }
+}
+
+if (entries.length < 1) {
+  Ext.Msg.prompt(
+    'Alias',
+    'Optional: set an alias for this entry',
+    function(btn, text) {
+      if (btn !== 'ok') return;
+      const title = (text && text.trim().length > 0) ? text.trim() : aliasPreview;
+      APModFiller.store.data.push({
+        field: name,
+        data: value,
+        title: title,
+        depth: 0,
+      });
+      APModFiller.save();
+      APModPopup.openPopup("Value stored.");
+    },
+    this,
+    false,
+    aliasPreview
+  );
+}

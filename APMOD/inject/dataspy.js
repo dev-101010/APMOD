@@ -729,7 +729,7 @@ APModDataSpy.createPopupPanel = (grid,data) => {
 											APModDataSpy.popup.destroy();
 											APModDataSpy.popup = null;
 											dsCombo.select("No Filter");
-											const record = dsCombo.getStore().findRecord('value', "No Filter");
+											const record = dsCombo.getStore().findRecord('name', "No Filter");
 											dsCombo.fireEvent('select', dsCombo, [record]);
 										}).delay(200);
 									}
@@ -780,7 +780,7 @@ APModDataSpy.createPopupPanel = (grid,data) => {
 							APModDataSpy.popup.destroy();
 							APModDataSpy.popup = null;
 							dsCombo.select(dsChangeName);
-							const record = dsCombo.getStore().findRecord('value', dsChangeName);
+							const record = dsCombo.getStore().findRecord('name', dsChangeName);
 							dsCombo.fireEvent('select', dsCombo, [record]);
 						}).delay(200);
 					},
@@ -1579,5 +1579,6 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 

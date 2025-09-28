@@ -139,18 +139,18 @@ APModDataSpy.injectCodeInFunction = (fn, behind, code, param) => {
 	if (fn == null || behind == null || code == null) return fn;
 	const strFn = fn.toString();
 	if (strFn.includes(code)) return fn;
-	const pos = strFn.sIndexOf(';', behind),
+	const pos = APModDataSpy.sIndexOf(strFn, ';', behind),
 		strNewFn = [strFn.slice(0, pos), code, strFn.slice(pos)].join('');
 	const first = strNewFn.indexOf('{'),
 		last = strNewFn.lastIndexOf('}');
 	return new Function(param, strNewFn.substring(first + 1, last));
 }
 
-String.prototype.sIndexOf = function(find, count) {
+APModDataSpy.sIndexOf = function(strFn, find, count) {
 	if (typeof find !== "string" || find.length < 1 || typeof count !== "number" || count < 1) return 0;
 	let c = 1;
-	for (let i = 0; i < this.length; i++) {
-		if (this[i] === find && count === c++) return i + 1;
+	for (let i = 0; i < strFn.length; i++) {
+		if (strFn[i] === find && count === c++) return i + 1;
 	}
 	return 0;
 }
@@ -1580,6 +1580,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

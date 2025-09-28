@@ -494,15 +494,17 @@ RadialMenu.prototype.createSectorCmds = function (startAngleDeg, endAngleDeg) {
 };
 
 RadialMenu.prototype.sanitizeForLabel = function (s, maxLen) {
-  const str = String(s ?? '').replace(/\s+/g, ' ').trim();
+  const str = String(s ?? '')
+    .replace(/\r\n?/g, '\n') // normalize CRLF -> LF
+    .replace(/\s+/g, ' ')
+    .trim();
   return (maxLen && str.length > maxLen) ? (str.slice(0, maxLen - 1) + '…') : str;
 };
 
-RadialMenu.prototype.getDisplayLabel = function (item) {
-  const alias = this.sanitizeForLabel(item?.title, 40);
-  if (alias) return alias;
-  const raw = item && (item.data ?? item.value);
-  return this.sanitizeForLabel(raw, 40);
+RadialMenu.prototype.getDisplayLabel = function (item, length = 40) {
+  if (!item || typeof item !== 'object') return 'Unknown';
+  const s = (x) => this.sanitizeForLabel(x, length);
+  return s(item.title) || s(item.data) || 'Unknown';
 };
 
 RadialMenu.prototype.createText = function (x, y, title) {
@@ -637,5 +639,6 @@ RadialMenu.setClassAndWaitForTransition = function (node, newClass) {
 RadialMenu.nextTick = function (fn) {
     setTimeout(fn, 10);
 };
+
 
 

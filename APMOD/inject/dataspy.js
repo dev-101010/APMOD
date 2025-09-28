@@ -272,7 +272,7 @@ APModDataSpy.createCopyWoPopupPanel = () => {
     const clipEnabled = GM_getValue( "copyWoClipboardEnabled", true );
     const woEnabled = GM_getValue( "copyWoArrayEnabled", true );
 
-	return new Ext.create('Ext.window.Window', {
+	return Ext.create('Ext.window.Window', {
 		title: 'CopyWO Options',
 		width: 200,
 		height: 200,
@@ -394,23 +394,23 @@ APModDataSpy.onDate = (s) => {
 	
 	if (array.length == 3 && ( array[2].startsWith('+') || array[2].startsWith('-') ) ) {
 		const num = parseInt(array[2]);
-		if(array[1] == "H" && typeof num === "number" ) {
+		if(array[1] == "H" && typeof num === "number" && Number.isFinite(num)) {
 			const hours = new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours() + num, today.getMinutes(), today.getSeconds());
 			return APModDataSpy.DateTimeFormat(hours);
 		}
-		if(array[1] == "D" && typeof num === "number" ) {
+		if(array[1] == "D" && typeof num === "number" && Number.isFinite(num)) {
 			const days = new Date(today.getFullYear(), today.getMonth(), today.getDate() + num);
 			return APModDataSpy.DateFormat(days);
 		}
-		if(array[1] == "W" && typeof num === "number") {
+		if(array[1] == "W" && typeof num === "number" && Number.isFinite(num)) {
 			const weeks = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7 + (7 * num) - today.getDay());
 			return APModDataSpy.DateFormat(weeks);
 		}
-		if(array[1] == "M" && typeof num === "number") {
+		if(array[1] == "M" && typeof num === "number" && Number.isFinite(num)) {
 			const months = new Date(today.getFullYear(), today.getMonth() + 1 + num, 0);
 			return APModDataSpy.DateFormat(months);
 		}
-		if(array[1] == "Y" && typeof num === "number") {
+		if(array[1] == "Y" && typeof num === "number" && Number.isFinite(num)) {
 			const years = new Date(today.getFullYear() + 1 + num, 0, 0);
 			return APModDataSpy.DateFormat(years);
 		}
@@ -429,7 +429,7 @@ APModDataSpy.onHour = (s) => {
 
 	if (array.length == 2) {
         const hours = Number.parseInt(array[1]);
-		if(typeof hours === "number") {
+		if(typeof hours === "number" && Number.isFinite(hours)) {
             today.setHours(today.getHours() + hours);
 			return APModDataSpy.DateTimeFormat(today);
 		}
@@ -458,7 +458,7 @@ APModDataSpy.getCustomDataSpy = (grid) => {
 		grid: grid,
 		editable: false,
 		hideLabel: true,
-		value: grid.apModStore.data.items[0],
+		value: (grid.apModStore.getAt(0) && grid.apModStore.getAt(0).get('name')) || 'No Filter',
 		listeners: {
 			select: (combo, records, eOpts) => {
 				APModDataSpy.external_EUPBS1_reset();
@@ -556,7 +556,7 @@ APModDataSpy.createPopupPanel = (grid,data) => {
 
 	let dsChangeName = newRec ? APModDataSpy.getNewName(grid,newData.name || "New Filter") : selRec.data.name;
 
-	return new Ext.create('Ext.window.Window', {
+	return Ext.create('Ext.window.Window', {
 		title: 'Dataspy Edit',
 		width: 900,
 		height: 600,
@@ -1580,6 +1580,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

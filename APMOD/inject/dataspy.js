@@ -80,7 +80,7 @@ APModDataSpy.loadFilter = (grid) => {
 		field: []
 	});
 	
-	return Ext.create('Ext.data.Store', { field: ['name', 'sort', 'filter', 'field'], data: out } );
+	return Ext.create('Ext.data.Store', { fields: ['name', 'sort', 'filter', 'field'], data: out } );
 }
 
 APModDataSpy.injectDataspy = (dsStore) => {
@@ -1580,6 +1580,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

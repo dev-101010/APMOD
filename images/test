@@ -1,3 +1,5 @@
+filler.js
+
 // After defining combo.updateDurationLabel = updateLabel;
 if (!combo.apmSetValuePatched) {
   combo.apmSetValuePatched = true;
@@ -111,3 +113,9 @@ if (entries.length < 1) {
     aliasPreview
   );
 }
+
+--------------------------------------
+
+entferenen:
+1x const value = v.replace(/[\r\n\t'"]+/g," "); -> const value = v;
+3x instance.title = instance.title != null && typeof instance.title === 'string' && instance.title.length > 0 ? instance.title : instance.data;

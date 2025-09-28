@@ -83,14 +83,6 @@ RadialMenu.prototype.close = function () {
 			if(self.holder)
 				self.holder.remove();
 		}, 200);
-
-		//self.currentMenu.remove();
-		//self.currentMenu = null;
-		/*self.currentMenu.setAttribute('class', 'menu outer');
-		RadialMenu.setClassAndWaitForTransition(self.currentMenu, 'menu inner').then(function () {
-			self.currentMenu.remove();
-			self.currentMenu = null;
-		});*/
 	}
 };
 
@@ -639,6 +631,7 @@ RadialMenu.setClassAndWaitForTransition = function (node, newClass) {
 RadialMenu.nextTick = function (fn) {
     setTimeout(fn, 10);
 };
+
 
 
 

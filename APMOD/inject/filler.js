@@ -10,9 +10,19 @@ APModFiller.load = () => {
 
     document.addEventListener('click', APModFiller.inputClick, false);
 
+    Ext.data.Store.prototype.fiGetData = function(){
+	  const arr = [];
+	  this.data.items.forEach(({data: recordData})=>{
+	    const { field, data, depth, title } = recordData; // pick only used props
+	    arr.push({ field, data:data, depth, title });
+	  });
+	  return arr;
+	};
+
     APModFiller.injectMainToolbar();
     APModFiller.injectRecordView();
     APModFiller.injectListDetailView();
+    APModFiller.injectComment();
 
     const storage = JSON.parse(localStorage.getItem("APModFiller"));
     if (storage != null && typeof storage === 'object' && Array.isArray(storage.data))
@@ -191,7 +201,6 @@ APModFiller.getRad = (target,x,y,apModFields) => {
     const apModData = Ext.clone(APModFiller.store.data);
 
     const entries = apModData.filter((instance, index) => {
-        instance.title = instance.title != null && typeof instance.title === 'string' && instance.title.length > 0 ? instance.title : instance.data;
         return instance.field === target.name;
     });
 
@@ -280,13 +289,12 @@ APModFiller.overRad = (target,x,y,apModFields) => {
     } else {
         v = target.value;
     }
-    const value = v.replace(/[\r\n\t'"]+/g," ");
+    const value = v;
     const name = target.name;
 
     if( value != null && typeof value === 'string' && value.length > 0 ) {
 
         const entries = apModData.filter((instance, index) => {
-            instance.title = instance.title != null && typeof instance.title === 'string' && instance.title.length > 0 ? instance.title : instance.data;
             instance.oId = index;
             return instance.field === name;
         });
@@ -321,39 +329,73 @@ APModFiller.overRad = (target,x,y,apModFields) => {
                 allItems: entriesByDepthArray,
                 target: target,
                 onClick: function(input,type,item) {
-                    if(item.oId === -1) {
-                        APModFiller.store.data.push({
-                            "field": name,
-                            "data": value,
-                            "title": "",
-                            "depth": item.depth,
-                        });
-                        APModFiller.save();
-                        APModPopup.openPopup("Value added.");
-                    } else {
-                        APModFiller.store.data[item.oId] = {
-                            "field": name,
-                            "data": value,
-                            "title": "",
-                            "depth": item.depth,
-                        }
-                        APModFiller.save();
-                        APModPopup.openPopup("Value overridden.");
-                    }
+                    // Helper: show alias dialog, then save
+                    const askAndSave = (saveFn, defaultAlias) => {
+                        Ext.Msg.prompt(
+                            'Alias',
+                            'Optional: set an alias for this entry',
+                            function(btn, text) {
+                                if (btn !== 'ok') return;
+                                const title = (text && text.trim().length > 0) ? text.trim() : defaultAlias;
+                                saveFn(title);
+                            },
+                            this,
+                            false,                 // multiline false → single-line alias
+                            defaultAlias           // default value in the input
+                        );
+                    };
+
+                   if (item.oId === -1) {
+                       // NEW entry → default alias is the preview
+                       askAndSave(function(title){
+                           APModFiller.store.data.push({
+                               field: name,
+                               data: value,
+                               title: title,
+                               depth: item.depth,
+                           });
+                           APModFiller.save();
+                           APModPopup.openPopup("Value added.");
+                       }, "Alias");
+                   } else {
+                       // OVERRIDE → default to existing title, fall back to preview
+                       const existing = APModFiller.store.data[item.oId] || {};
+                       const defaultAlias = (existing.title && existing.title.length) ? existing.title : "Alias";
+                       askAndSave(function(title){
+                           APModFiller.store.data[item.oId] = {
+                               field: name,
+                               data: value,
+                               title: title,
+                               depth: item.depth,
+                           };
+                           APModFiller.save();
+                           APModPopup.openPopup("Value overridden.");
+                       }, item.title);
+                   }
                 }
             }).open();
         }
 
         if (entries.length < 1) {
-
-            APModFiller.store.data.push({
-                "field": name,
-                "data": value,
-                "title": "",
-                "depth": 0,
-            });
-            APModFiller.save();
-            APModPopup.openPopup("Value stored.");
+            Ext.Msg.prompt(
+                'Alias',
+                'Optional: set an alias for this entry',
+                function(btn, text) {
+                    if (btn !== 'ok') return;
+                    const title = (text && text.trim().length > 0) ? text.trim() : defaultAlias;
+                    APModFiller.store.data.push({
+                        field: name,
+                        data: value,
+                        title: title,
+                        depth: 0,
+                    });
+                    APModFiller.save();
+                    APModPopup.openPopup("Value stored.");
+                },
+                this,
+                false,
+                "Alias"
+            );
         }
     } else { APModPopup.openPopup("Field is empty."); }
 }
@@ -362,7 +404,6 @@ APModFiller.delRad = (target,x,y,apModFields) => {
     const apModData = Ext.clone(APModFiller.store.data);
     const entries = apModData.filter((instance, index) => {
         instance.oId = index;
-        instance.title = instance.title != null && typeof instance.title === 'string' && instance.title.length > 0 ? instance.title : instance.data;
         return instance.field === target.name;
     });
     if (entries.length > 0 ) {
@@ -410,64 +451,195 @@ APModFiller.injectMainToolbar = () => {
 }
 
 APModFiller.injectRecordView = () => {
-    if (typeof EAM.view?.common?.RecordView === 'undefined') return;
-    const RVclass = EAM.view.common.RecordView;
+  if (typeof EAM.view?.common?.RecordView === 'undefined') return;
+  const RVclass = EAM.view.common.RecordView;
 
-    if (RVclass.prototype.amodFillerOrigInitPageLayout == null) {
-        RVclass.prototype.amodFillerOrigInitPageLayout = RVclass.prototype.initPageLayout;
-        RVclass.prototype.initPageLayout = function(c, e, b) {
-            this.amodFillerOrigInitPageLayout.apply(this, [c, e, b]);
-            const a = this;
-            if (this.tabURL == "WSJOBS.HDR") {
-                const problemcode = a.getForm().findField('problemcode');
-                const failurecode = a.getForm().findField('failurecode');
-                const causecode = a.getForm().findField('causecode');
-                if(problemcode != null && failurecode != null && causecode != null) {
-                    const parent = causecode.ownerCt;
-                    if(parent?.items?.keys != null) {
-                        const pos = parent.items.keys.indexOf(causecode.id) + 1;
-                        parent.insert(pos,{
-                            xtype: 'button',
-                            name: 'apModCloseCodes',
-                            text: 'Fill Close Codes',
-                            margin: '0 0 0 150',
-                            listeners: {
-                                click: function(cmp,e) {
-                                    const fields = [ problemcode, failurecode, causecode ];
-                                    APModFiller.buttonClick(cmp,e,fields);
-                                },
-                            },
-                        });
-                    }
-                }
-                const URL = "https://eu1.eam.hxgnsmartcloud.com/web/base/logindisp?tenant=AMAZONRMEEU_PRD&FROMEMAIL=YES&SYSTEM_FUNCTION_NAME=WSJOBS&USER_FUNCTION_NAME=WSJOBS&workordernum=";
-                const description = a.getForm().findField('description');
-                const workorder = a.getForm().findField('workordernum');
-                if(description != null && workorder != null) {
-                    const parent = description.ownerCt;
-                    if(parent?.items?.keys != null) {
-                        const pos = parent.items.keys.indexOf(description.id) + 1;
-                        parent.insert(pos,{
-                            xtype: 'button',
-                            name: 'apModCopyWO',
-                            text: '©',
-                            margin: '0 0 0 20',
-                            tooltip: 'Copy APM WO link',
-                            listeners: {
-                                click: function(cmp,e) {
-                                    const woNumber = workorder.value ?? "";
-                                    navigator.clipboard.writeText(URL+woNumber);
-                                    if(APModPopup)
-                                        APModPopup.openPopup("WO direct link saved to Clipboard.");
-                                },
-                            },
-                        });
-                    }
-                }
+    if (RVclass.prototype.amodFillerOrigBeforeSave == null) {
+        RVclass.prototype.amodFillerOrigBeforeSave = RVclass.prototype.beforeSave;
+
+        RVclass.prototype.beforeSave = function(a) {
+
+            const form = this.getForm();
+
+            const desc = form.findField('description');
+            if (desc && (!desc.getValue() || String(desc.getValue()).trim() === '')) {
+                desc.setValue('N/A');
             }
-        }
+
+            const combo = form.findField('priority');
+            if (combo && combo.getValue() === "3") {
+                combo.setValue("4");
+                const record = form.getRecord();
+                if (record) {
+                    record.set('priority', '4');
+                }
+                if (typeof combo.updateDurationLabel === 'function') combo.updateDurationLabel();
+                if (combo.clearInvalid) combo.clearInvalid();
+                if (window.Ext && Ext.toast) Ext.toast('Priority "3" wurde vor dem Speichern auf "4" gesetzt.');
+            }
+
+            return RVclass.prototype.amodFillerOrigBeforeSave.call(this, a);
+        };
     }
-}
+
+  if (RVclass.prototype.amodFillerOrigInitPageLayout == null) {
+    RVclass.prototype.amodFillerOrigInitPageLayout = RVclass.prototype.initPageLayout;
+
+    RVclass.prototype.initPageLayout = function(c, e, b) {
+      this.amodFillerOrigInitPageLayout.apply(this, [c, e, b]);
+      const a = this;
+
+      if (this.tabURL !== "WSJOBS.HDR") return;
+
+      // ---------------- helpers ----------------
+      function toInt(val) {
+        if (val == null) return null;
+        if (typeof val === 'number' && Number.isFinite(val)) return val;
+        if (typeof val === 'string') {
+          const n = parseInt(val.trim(), 10);
+          return Number.isFinite(n) ? n : null;
+        }
+        return null;
+      }
+      function withLayoutsPaused(fn) {
+        Ext.suspendLayouts();
+        try { fn(); } finally { Ext.resumeLayouts(true); }
+      }
+
+      // ------------- existing buttons -------------
+      const problemcode = a.getForm().findField('problemcode');
+      const failurecode = a.getForm().findField('failurecode');
+      const causecode   = a.getForm().findField('causecode');
+
+      if (problemcode && failurecode && causecode) {
+        const parent = causecode.ownerCt;
+        if (parent?.items?.keys) {
+          const pos = parent.items.keys.indexOf(causecode.id) + 1;
+          parent.insert(pos, {
+            xtype: 'button',
+            name: 'apModCloseCodes',
+            text: 'Fill Close Codes',
+            margin: '0 0 0 150',
+            listeners: {
+              click: function(cmp, e) {
+                APModFiller.buttonClick(cmp, e, [problemcode, failurecode, causecode]);
+              }
+            }
+          });
+        }
+      }
+
+      const URL = "https://eu1.eam.hxgnsmartcloud.com/web/base/logindisp?tenant=AMAZONRMEEU_PRD&FROMEMAIL=YES&SYSTEM_FUNCTION_NAME=WSJOBS&USER_FUNCTION_NAME=WSJOBS&workordernum=";
+      const description = a.getForm().findField('description');
+      const workorder = a.getForm().findField('workordernum');
+
+      if (description && workorder) {
+        const parent = description.ownerCt;
+        if (parent?.items?.keys) {
+          const pos = parent.items.keys.indexOf(description.id) + 1;
+          parent.insert(pos, {
+            xtype: 'button',
+            name: 'apModCopyWO',
+            text: '©',
+            margin: '0 0 0 20',
+            tooltip: 'Copy APM WO link',
+            listeners: {
+              click: function() {
+                const woNumber = workorder.getValue() ?? "";
+                navigator.clipboard.writeText(URL + woNumber);
+                if (APModPopup) APModPopup.openPopup("WO direct link saved to Clipboard.");
+              }
+            }
+          });
+        }
+      }
+
+      // ------------- combo UI (optional) -------------
+      // TODO: set the real field name here:
+      const combo = a.getForm().findField("priority");
+      if (combo && combo.ownerCt && !combo.apmUiWired) {
+        combo.apmUiWired = true;
+
+        const parent = combo.ownerCt;
+        const insertIndex = parent.items.indexOf
+          ? parent.items.indexOf(combo) + 1
+          : (parent.items.keys ? parent.items.keys.indexOf(combo.id) + 1 : null);
+
+        const labelItemId = combo.getId() + '-apModPriorityOverdueLabel';
+        let label = parent.down('#' + labelItemId);
+        if (!label && insertIndex != null) {
+          label = parent.insert(insertIndex, {
+            xtype: 'displayfield',
+            itemId: labelItemId,
+            value: '',
+            margin: '0 0 0 150'
+          });
+        }
+
+        function durationText(v) {
+          switch (toInt(v)) {
+            case 1: return '1 day overdue';
+            case 2: return '7 days overdue';
+            case 3: return "don't use !!!";
+            case 4:
+            case 5: return '30 days overdue';
+            default: return '';
+          }
+        }
+        function updateLabel() {
+          if (!label) return;
+          const v = combo.getValue();
+          label.setValue(durationText(v));
+          label.setFieldStyle('color:' + (toInt(v) === 3 ? '#c00' : '#000'));
+        }
+        // expose for submit hook
+        combo.updateDurationLabel = updateLabel;
+
+         if (!combo.apmSetValuePatched) {
+             combo.apmSetValuePatched = true;
+
+             const origSetValue = combo.setValue;
+             combo.setValue = function () {
+                 const res = origSetValue.apply(this, arguments);
+                 if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
+                 return res;
+             };
+
+             if (combo.clearValue) {
+                 const origClearValue = combo.clearValue;
+                 combo.clearValue = function () {
+                     const res = origClearValue.apply(this, arguments);
+                     if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
+                     return res;
+                 };
+             }
+
+             if (combo.reset) {
+                 const origReset = combo.reset;
+                 combo.reset = function () {
+                     const res = origReset.apply(this, arguments);
+                     if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
+                     return res;
+                 };
+             }
+
+             // Optional for very custom flows:
+             if (combo.setRawValue) {
+                 const origSetRaw = combo.setRawValue;
+                 combo.setRawValue = function () {
+                     const res = origSetRaw.apply(this, arguments);
+                     if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
+                     return res;
+                 };
+             }
+         }
+
+        //if (combo.rendered) updateLabel();
+        //else combo.on('afterrender', updateLabel, { single: true });
+      }
+    };
+  }
+};
 
 APModFiller.injectListDetailView = () => {
     if (typeof EAM.view?.common?.ListDetailView === 'undefined') return;
@@ -553,6 +725,39 @@ APModFiller.injectListDetailView = () => {
     }
 }
 
+APModFiller.injectComment = () => {
+    if (!Ext?.ClassManager) return;
+
+    var TARGET_ITEM_ID = "commentWindow"; // <-- your unique itemId
+    var Cls = Ext.ClassManager.get('Ext.window.Window');
+    if (!Cls) return;
+
+    Ext.override(Cls, {
+        // run after the original initComponent
+        initComponent: Ext.Function.createSequence(
+            Cls.prototype.initComponent,
+            function () {
+                // guard: only for the exact target window
+                if (this.itemId !== TARGET_ITEM_ID || this.__apmod_inited) return;
+                const field = this.down("uxhtmleditor");
+                this.__apmod_inited = true; // idempotency
+                var fbar = this.getDockedItems && this.getDockedItems('toolbar[dock="bottom"]')[0];
+                if (fbar) {
+                    fbar.insert(0,{ text: 'Fill', name: 'apModFillComment', margin: '0 0 0 10',
+                              listeners: {
+                                  click: function(cmp,e) {
+                                      if(field) {
+                                      APModFiller.buttonClick(cmp,e,[field],true);
+                                      }
+                                  },
+                              },
+                             });
+                }
+            }
+        )
+    });
+}
+
 APModFiller.createFillerButton = () => {
     return Ext.create('Ext.Button', {
         text: '✎',
@@ -568,7 +773,7 @@ APModFiller.createFillerButton = () => {
 
 APModFiller.createPopupPanel = (store) => {
     const fillerStore = Ext.create('Ext.data.Store', {
-        field: ['field', 'depth', 'data', 'title'],
+        fields: ['field', 'depth', 'data', 'title'],
         data: store.data,
     });
     fillerStore.sort('field', 'ASC');
@@ -679,7 +884,7 @@ APModFiller.createPopupPanel = (store) => {
                     APModFiller.store.settings.copyEntries = typeof cpTF.value === 'string' && cpTF.value > 0 ? parseInt(cpTF.value) : 30;
                     APModFiller.store.settings.wheelSize = typeof wSTF.value === 'string' && wSTF.value > 0 ? parseInt(wSTF.value) : 200;
                     APModFiller.store.settings.fontSize = typeof fSTF.value === 'string' && fSTF.value > 0 ? parseInt(fSTF.value) : 38;
-                    APModFiller.store.data = fillerStore.dsGetData();
+                    APModFiller.store.data = fillerStore.fiGetData();
                     APModFiller.save();
                     APModFiller.popup.destroy();
                     APModFiller.popup = null;
@@ -701,14 +906,14 @@ APModFiller.createPopupPanel = (store) => {
                         text: 'Export',
                         xtype: 'button',
                         handler: function() {
-                            APModFiller.exportToJsonFile(fillerStore.dsGetData());
+                            APModFiller.exportToJsonFile(fillerStore.fiGetData());
                         },
                     }, {
                         minWidth: 80,
                         text: 'Import',
                         xtype: 'button',
                         handler: function() {
-                            APModFiller.importJsonToNew(fillerStore.dsGetData());
+                            APModFiller.importJsonToNew(fillerStore.fiGetData());
                         },
                     }
                    ],

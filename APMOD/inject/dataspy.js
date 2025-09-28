@@ -512,28 +512,28 @@ APModDataSpy.createPopupPanel = (grid,data) => {
 		newData = APModDataSpy.defaultFilter;
 
 	const filterStore = Ext.create('Ext.data.Store', {
-		field: ['NAME', 'OPERATOR', 'JOINER', 'VALUE', 'LPAREN', 'RPAREN'],
+		fields: ['NAME', 'OPERATOR', 'JOINER', 'VALUE', 'LPAREN', 'RPAREN'],
 		data: newRec ? newData.filter : selRec.data.filter
 	});
 
 	const sortStore = Ext.create('Ext.data.Store', {
-		field: ['NAME', 'TYPE'],
+		fields: ['NAME', 'TYPE'],
 		data: newRec ? newData.sort : selRec.data.sort
 	});
 
 	const fieldStore = Ext.create('Ext.data.Store', {
-		field: ['NAME', 'WIDTH'],
+		fields: ['NAME', 'WIDTH'],
 		data: newRec ? newData.field : selRec.data.field
 	});
 
 	const gridFields = Ext.clone(grid.originalGridFields);
 	const filterAliasStore = Ext.create('Ext.data.Store', {
-		field: ['name', 'label'],
+		fields: ['name', 'label'],
 		data: gridFields.sort((a, b) => a.label.localeCompare(b.label))
 	});
 	
 	const filterValueStore = Ext.create('Ext.data.Store', {
-		field: ['typ', 'value'],
+		fields: ['typ', 'value'],
 		data: APModDataSpy.filterValues
 	});
 
@@ -547,7 +547,7 @@ APModDataSpy.createPopupPanel = (grid,data) => {
 	}
 
 	const posStore = Ext.create('Ext.data.Store', {
-		field: ['value', 'label'],
+		fields: ['value', 'label'],
 		data: posList
 	});
 
@@ -1579,6 +1579,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

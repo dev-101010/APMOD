@@ -51,7 +51,7 @@ APModDataSpy.loadFilter = (grid) => {
 			filter: [],
 			field: []
 		});
-		return Ext.create('Ext.data.Store', { field: ['name', 'sort', 'filter', 'field'], data: out } );
+		return Ext.create('Ext.data.Store', { fields: ['name', 'sort', 'filter', 'field'], data: out } );
 	}
 
 	const lStorage = JSON.parse(localStorage.getItem("APModDataSpy"));
@@ -238,6 +238,7 @@ APModDataSpy.onFunction = (value) => {
     if(value.startsWith('#TICKETWO')) {
         return APModDataSpy.onTicketWo(value);
     }
+	return value;
 }
 
 APModDataSpy.injectMainToolbar = () => {
@@ -451,9 +452,9 @@ APModDataSpy.getCustomDataSpy = (grid) => {
 		displayField: 'name',
 		valueField: 'name',
 		fieldLabel: 'SubDataSpy',
-		sort: 'sort',
-		field: 'field',
-		filter: 'filter',
+		sort: 'sort', //evtl entfernen
+		field: 'field',//evtl entfernen
+		filter: 'filter',//evtl entfernen
 		grid: grid,
 		editable: false,
 		hideLabel: true,
@@ -1579,6 +1580,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

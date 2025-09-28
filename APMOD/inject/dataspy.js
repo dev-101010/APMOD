@@ -1496,50 +1496,32 @@ APModDataSpy.bracketTest = (entries) => {
 	return open.length === 0;
 }
 
-APModDataSpy.exportToCSV = (grid) => {
-	let text = "";
-	const separator = ";";
-	
-	if(grid == null || grid.columnManager == null) return;
-	
-	const columns = grid.columnManager.columns;
-	const columnsCount = columns.length;
-	
-	const rows = grid.store.data.items;
-	const rowsCount = rows.length;
-	
-	if(columnsCount <= 0 || rowsCount <= 0) return;
-	
-	//Columns
-	for (let i = 0; i < columnsCount; i++) {
-		text += columns[i].text + separator;
-	}
-	text = text.substring(0, text.length-1);
-	text += "\r";
-	
-	//Row
-	for (let i = 0; i < rowsCount; i++) {
-		const row = rows[i].data;
-		for (let j = 0; j<columnsCount; j++) {
-			const value = row[columns[j].dataIndex];
-			text += "\"" + value + "\"" + separator;
-		}
-		text = text.substring(0, text.length-1);
-		text += "\r";
-	}
-	
-	if(text == null || typeof text !== 'string' || text.length <= 0) return;
+APModDataSpy.exportToCSV = function(grid){
+  if(!grid || !grid.columnManager) return;
+  const cols = grid.columnManager.columns.filter(c => c.dataIndex && c.isVisible && c.isVisible());
+  const rows = grid.getStore().getRange(); // respects filters/sort
+  if(!cols.length || !rows.length) return;
 
-	const csvData = new Blob([text], { type: 'text/csv' }); 
-	const csvUrl = URL.createObjectURL(csvData);
-	const element = document.createElement("a");
-	element.setAttribute("href",csvUrl);
-	element.setAttribute("download", "grid.csv");
-	element.style.display = "none";
-	document.body.appendChild(element);
-	element.click();
-	document.body.removeChild(element);
-}
+  function esc(v){
+    const s = (v == null ? '' : String(v));
+    return '"' + s.replace(/"/g,'""') + '"';
+  }
+
+  let out = '';
+  // header
+  out += cols.map(c=>esc(c.text)).join(';') + '\r\n';
+  // data
+  rows.forEach(rec=>{
+    out += cols.map(c=>esc(rec.get(c.dataIndex))).join(';') + '\r\n';
+  });
+
+  const blob = new Blob([out], { type:'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'grid.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
 
 APModDataSpy.filterValues = [
 {"typ":"*","value":"&nbsp;"},
@@ -1597,3 +1579,4 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+

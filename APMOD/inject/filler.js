@@ -14,7 +14,7 @@ APModFiller.load = () => {
 	  const arr = [];
 	  this.data.items.forEach(({data: recordData})=>{
 	    const { field, data, depth, title } = recordData; // pick only used props
-	    arr.push({ field, data:data, depth, title });
+	    arr.push({ field, data, depth, title });
 	  });
 	  return arr;
 	};
@@ -1168,3 +1168,4 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+

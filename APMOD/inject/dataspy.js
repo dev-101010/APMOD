@@ -131,6 +131,19 @@ APModDataSpy.injectReadOnlyGrid = () => {
 					}
 				}
 			}
+			console.log(this.gridURL);
+			if (this.gridURL === "TODO") {
+				const store = this.getStore();
+				if(store) {
+					const proxy = store.getProxy();
+					
+					proxy.setExtraParams({
+					  fields: 'employeeId,login,hrs'   // try this first
+					  // $select: 'employeeId,login,hrs' // try if OData-ish
+					  // include: 'employeeId,login'     // as another attempt
+					});
+				}
+			}
 		}
 	}
 }
@@ -1580,6 +1593,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

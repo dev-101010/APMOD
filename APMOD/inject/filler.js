@@ -1138,11 +1138,11 @@ APModFiller.store.data = [{
                          ];
 
 APModFiller.store.priority = {
-	1 = {switchTo:"",label:"1 day"},
-	2 = {switchTo:"",label:"3 days"},
-	3 = {switchTo:"4",label:"don't use"},
-	4 = {switchTo:"",label:"30 days"},
-	5 = {switchTo:"",label:"30 days"}
+	1 : {switchTo:"",label:"1 day"},
+	2 : {switchTo:"",label:"3 days"},
+	3 : {switchTo:"4",label:"don't use"},
+	4 : {switchTo:"",label:"30 days"},
+	5 : {switchTo:"",label:"30 days"}
 }
 
 APModFiller.store.autoFill = [
@@ -1157,6 +1157,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

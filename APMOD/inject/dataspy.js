@@ -131,17 +131,16 @@ APModDataSpy.injectReadOnlyGrid = () => {
 					}
 				}
 			}
-			console.log(this.gridURL);
-			if (this.gridURL === "TODO") {
+
+			if (this.gridURL === "EWSUSR.TAB.xmlhttp") {
 				const store = this.getStore();
 				if(store) {
 					const proxy = store.getProxy();
-					
-					proxy.setExtraParams({
-					  fields: 'employeeId,login,hrs'   // try this first
+					/*proxy.setExtraParams({
+					  fields: 'employee'
 					  // $select: 'employeeId,login,hrs' // try if OData-ish
 					  // include: 'employeeId,login'     // as another attempt
-					});
+					});*/
 				}
 			}
 		}

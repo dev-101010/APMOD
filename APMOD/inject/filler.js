@@ -461,21 +461,26 @@ APModFiller.injectRecordView = () => {
 
             const form = this.getForm();
 
-            const desc = form.findField('description');
-            if (desc && (!desc.getValue() || String(desc.getValue()).trim() === '')) {
-                desc.setValue('N/A');
-            }
+			const autoFillSave = APModFiller.store.autoFill.filter(aF => af.type === "save");
+			for (const aFS of autoFillSave) {
+				const field = form.findField(aFS.field);
+	            if (field && (!field.getValue() || String(field.getValue()).trim() === '')) {
+	                field.setValue(aFS.value);
+	            }
+			}
 
             const combo = form.findField('priority');
-            if (combo && combo.getValue() === "3") {
-                combo.setValue("4");
-                const record = form.getRecord();
-                if (record) {
-                    record.set('priority', '4');
-                }
-                if (typeof combo.updateDurationLabel === 'function') combo.updateDurationLabel();
-                if (combo.clearInvalid) combo.clearInvalid();
-                if (window.Ext && Ext.toast) Ext.toast('Priority "3" wurde vor dem Speichern auf "4" gesetzt.');
+            if (combo) {
+				const data = APModFiller.store.priority[combo.getValue()];
+				if(data && data.switchTo) {
+					combo.setValue(data.switchTo);
+	                const record = form.getRecord();
+	                if (record) {
+	                    record.set('priority', data.switchTo);
+	                }
+	                if (combo.clearInvalid) combo.clearInvalid();
+				}
+				if (typeof combo.updateDurationLabel === 'function') combo.updateDurationLabel();
             }
 
             return RVclass.prototype.amodFillerOrigBeforeSave.call(this, a);
@@ -576,21 +581,10 @@ APModFiller.injectRecordView = () => {
           });
         }
 
-        function durationText(v) {
-          switch (toInt(v)) {
-            case 1: return '1 day overdue';
-            case 2: return '7 days overdue';
-            case 3: return "don't use !!!";
-            case 4:
-            case 5: return '30 days overdue';
-            default: return '';
-          }
-        }
         function updateLabel() {
           if (!label) return;
-          const v = combo.getValue();
-          label.setValue(durationText(v));
-          label.setFieldStyle('color:' + (toInt(v) === 3 ? '#c00' : '#000'));
+		  const data = APModFiller.store.priority[combo.getValue()];
+          label.setValue(data.label || "");
         }
         // expose for submit hook
         combo.updateDurationLabel = updateLabel;
@@ -633,9 +627,6 @@ APModFiller.injectRecordView = () => {
                  };
              }
          }
-
-        //if (combo.rendered) updateLabel();
-        //else combo.on('afterrender', updateLabel, { single: true });
       }
     };
   }
@@ -1161,6 +1152,19 @@ APModFiller.store.data = [{
                           }
                          ];
 
+APModFiller.store.priority = {
+	1 = {switchTo:"",label:"1 day"},
+	2 = {switchTo:"",label:"3 days"},
+	3 = {switchTo:"4",label:"don't use"},
+	4 = {switchTo:"",label:"30 days"},
+	5 = {switchTo:"",label:"30 days"}
+}
+
+APModFiller.store.autoFill = [
+	{type:"save",field:"assignedto",value:"ddrochma"},
+	{type:"save",field:"shift",value:"DS4C"},
+]
+
 APModFiller.store.settings = {"wheelSize":200,"fontSize":38,"copyEntries":30};
 
 APModFiller.save = () => {
@@ -1168,4 +1172,5 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 

@@ -465,10 +465,10 @@ APModFiller.injectRecordView = () => {
 			for (const aFS of autoFillSave) {
 				const field = form.findField(aFS.field);
 	            if (field && (!field.getValue() || String(field.getValue()).trim() === '')) {
-	                field.setValue(aFS.value);
+	                field.setValue(APModDataSpy.onFunction(aFS.value));
                     const record = form.getRecord();
 	                if (record) {
-                        record.set(field.name, aFS.value);
+                        record.set(field.name, APModDataSpy.onFunction(aFS.value));
 	                }
 	            }
 			}
@@ -1161,6 +1161,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

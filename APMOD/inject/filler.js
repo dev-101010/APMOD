@@ -496,21 +496,6 @@ APModFiller.injectRecordView = () => {
 
       if (this.tabURL !== "WSJOBS.HDR") return;
 
-      // ---------------- helpers ----------------
-      function toInt(val) {
-        if (val == null) return null;
-        if (typeof val === 'number' && Number.isFinite(val)) return val;
-        if (typeof val === 'string') {
-          const n = parseInt(val.trim(), 10);
-          return Number.isFinite(n) ? n : null;
-        }
-        return null;
-      }
-      function withLayoutsPaused(fn) {
-        Ext.suspendLayouts();
-        try { fn(); } finally { Ext.resumeLayouts(true); }
-      }
-
       // ------------- existing buttons -------------
       const problemcode = a.getForm().findField('problemcode');
       const failurecode = a.getForm().findField('failurecode');
@@ -1172,5 +1157,6 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 

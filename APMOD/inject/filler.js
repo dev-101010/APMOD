@@ -1150,8 +1150,8 @@ APModFiller.store.priority = {
 }
 
 APModFiller.store.autoFill = [
-	{type:"save",field:"assignedto",value:"ddrochma"},
-	{type:"save",field:"shift",value:"DS4C"},
+	{type:"save",field:"assignedto",value:"#LOGIN"},
+	{type:"save",field:"shift",value:""},
 ]
 
 APModFiller.store.settings = {"wheelSize":200,"fontSize":38,"copyEntries":30};
@@ -1161,6 +1161,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

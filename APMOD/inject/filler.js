@@ -347,6 +347,7 @@ APModFiller.overRad = (target,x,y,apModFields) => {
 
                    if (item.oId === -1) {
                        // NEW entry → default alias is the preview
+					   const defaultAlias = (value && value.length) ? value : "Alias";
                        askAndSave(function(title){
                            APModFiller.store.data.push({
                                field: name,
@@ -356,11 +357,10 @@ APModFiller.overRad = (target,x,y,apModFields) => {
                            });
                            APModFiller.save();
                            APModPopup.openPopup("Value added.");
-                       }, "Alias");
+                       }, defaultAlias);
                    } else {
                        // OVERRIDE → default to existing title, fall back to preview
-                       const existing = APModFiller.store.data[item.oId] || {};
-                       const defaultAlias = (existing.title && existing.title.length) ? existing.title : "Alias";
+                       const defaultAlias = (item.title && item.title.length) ? item.title : (item.data && item.data.length) ? item.data : "Alias";
                        askAndSave(function(title){
                            APModFiller.store.data[item.oId] = {
                                field: name,
@@ -370,13 +370,13 @@ APModFiller.overRad = (target,x,y,apModFields) => {
                            };
                            APModFiller.save();
                            APModPopup.openPopup("Value overridden.");
-                       }, item.title);
+                       }, defaultAlias);
                    }
                 }
             }).open();
-        }
-
-        if (entries.length < 1) {
+        } else {
+			// FIRST ENTRY
+			const defaultAlias = (value && value.length) ? value : "Alias";
             Ext.Msg.prompt(
                 'Alias',
                 'Optional: set an alias for this entry',
@@ -394,7 +394,7 @@ APModFiller.overRad = (target,x,y,apModFields) => {
                 },
                 this,
                 false,
-                "Alias"
+                defaultAlias
             );
         }
     } else { APModPopup.openPopup("Field is empty."); }
@@ -1161,6 +1161,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

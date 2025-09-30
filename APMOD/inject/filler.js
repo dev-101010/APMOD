@@ -463,14 +463,24 @@ APModFiller.injectRecordView = () => {
 
 			const autoFillSave = APModFiller.store.autoFill.filter(aF => aF.type === "save");
 			for (const aFS of autoFillSave) {
-				const field = form.findField(aFS.field);
-	            if (field && (!field.getValue() || String(field.getValue()).trim() === '')) {
-	                field.setValue(APModDataSpy.onFunction(aFS.value));
-                    const record = form.getRecord();
-	                if (record) {
-                        record.set(field.name, APModDataSpy.onFunction(aFS.value));
-	                }
-	            }
+                const field = form.findField(aFS.field);
+                if(aFS.status === "always") {
+                    if (field) {
+                        field.setValue(aFS.value);
+                        const record = form.getRecord();
+                        if (record) {
+                            record.set(field.name, aFS.value);
+                        }
+                    }
+                } else {
+                    if (field && (!field.getValue() || String(field.getValue()).trim() === '')) {
+                        field.setValue(aFS.value);
+                        const record = form.getRecord();
+                        if (record) {
+                            record.set(field.name, aFS.value);
+                        }
+                    }
+                }
 			}
 
             const combo = form.findField('priority');
@@ -1161,9 +1171,6 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
-
-
-
 
 
 

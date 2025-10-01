@@ -1476,6 +1476,8 @@ APModFiller.store.priority = {
 APModFiller.store.autoFill = [
     {type: "save", status: "empty", field: "assignedto", value: "#LOGIN"},
     {type: "save", status: "empty", field: "shift", value: ""},
+    {type: "load", status: "empty", field: "condition", value: "EXNB"},
+    {type: "load", status: "empty", field: "savety", value: "NO"},
 ]
 
 APModFiller.store.settings = {"wheelSize": 200, "fontSize": 38, "copyEntries": 30};
@@ -1485,6 +1487,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

@@ -132,16 +132,10 @@ APModDataSpy.injectReadOnlyGrid = () => {
 				}
 			}
 
-			if (this.gridURL === "EWSUSR.TAB.xmlhttp") {
-				const store = this.getStore();
-				if(store) {
-					const proxy = store.getProxy();
-					/*proxy.setExtraParams({
-					  fields: 'employee'
-					  // $select: 'employeeId,login,hrs' // try if OData-ish
-					  // include: 'employeeId,login'     // as another attempt
-					});*/
-				}
+			if (this.gridURL.includes("EWSUSR.TAB")) {
+				this.on("afterrender", function(){
+				  APModShift.attach(this);
+				});
 			}
 		}
 	}
@@ -1592,6 +1586,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

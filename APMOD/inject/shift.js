@@ -57,8 +57,8 @@ var APModShift = (function () {
   api._ensureModelField = function (store, dataIndex) {
     const model = store && store.getModel && store.getModel();
     if (!model) return;
-    if (!model.prototype.fields.get(dataIndex)) {
-      model.prototype.fields.add(new Ext.data.Field({
+    if (!model.fields.get(dataIndex)) {
+      model.fields.add(new Ext.data.Field({
         name: dataIndex,
         type: "string",
         defaultValue: "",

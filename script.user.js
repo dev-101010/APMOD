@@ -14,6 +14,7 @@
 // @resource     STYLE1 https://raw.githubusercontent.com/dev-101010/APMOD/main/APMOD/inject/style.css
 // @resource     STYLE2 https://raw.githubusercontent.com/dev-101010/APMOD/main/APMOD/inject/radialmenu.css
 // @require      https://raw.githubusercontent.com/dev-101010/APMOD/main/APMOD/inject/copywo.js
+// @require      https://raw.githubusercontent.com/dev-101010/APMOD/main/APMOD/inject/shift.js
 // @require      https://raw.githubusercontent.com/dev-101010/APMOD/main/APMOD/inject/selector.js
 // @require      https://raw.githubusercontent.com/dev-101010/APMOD/main/APMOD/inject/dataspy.js
 // @require      https://raw.githubusercontent.com/dev-101010/APMOD/main/APMOD/inject/dataspyfilter.js
@@ -29,6 +30,7 @@ GM_addStyle (GM_getResourceText("STYLE2"));
 
 window.addEventListener("load", ()=> {
     if(APModPopup!=null)APModPopup.load();
+    if(APModShift!=null)APModShift.load();
     if(APModDataSpy!=null)APModDataSpy.load();
     if(APModFiller!=null)APModFiller.load();
     if(APModSelector!=null)APModSelector.load();

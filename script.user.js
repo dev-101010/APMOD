@@ -23,7 +23,7 @@
 // @require      https://raw.githubusercontent.com/dev-101010/APMOD/main/APMOD/inject/radialmenu.js
 // ==/UserScript==
 
-/* globals APModPopup, APModDataSpy, APModFiller, APModSelector, APModCopyWo */
+/* globals APModPopup, APModDataSpy, APModFiller, APModSelector, APModCopyWo, APModShift */
 
 GM_addStyle (GM_getResourceText("STYLE1"));
 GM_addStyle (GM_getResourceText("STYLE2"));

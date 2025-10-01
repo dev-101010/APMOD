@@ -446,6 +446,8 @@ APModFiller.injectMainToolbar = () => {
         TBclass.prototype.initComponent = function () {
             this.APModFillerOrigInitComponent.apply(this, []);
             this.insert(this.items.length, APModFiller.createFillerButton());
+            this.insert(this.items.length, APModFiller.createPriorityButton());
+            this.insert(this.items.length, APModFiller.createAutoFillButton());
         }
     }
 }
@@ -806,6 +808,215 @@ APModFiller.createFillerButton = () => {
         }
     });
 }
+
+APModFiller.createPriorityButton = () => {
+    return Ext.create('Ext.Button', {
+        text: '№',
+        tooltip: "Priority Menu",
+        handler: function () {
+            APModFiller.openPriorityWindow();
+        }
+    });
+}
+
+APModFiller.createAutoFillButton = () => {
+    return Ext.create('Ext.Button', {
+        text: '📝',
+        tooltip: "Autofill Menu",
+        handler: function () {
+            APModFiller.openAutoFillWindow();
+        }
+    });
+}
+
+/** Opens a window to edit APModFiller.store.priority (object as key->config). */
+APModFiller.openPriorityWindow = function() {
+  // object -> array for grid editing
+  const src = APModFiller.store.priority || {};
+  const rows = Object.keys(src).map(code => ({
+    code,
+    switchTo: (src[code] && src[code].switchTo) || "",
+    label: (src[code] && src[code].label) || ""
+  }));
+
+  const store = new Ext.data.Store({
+    fields: ["code","switchTo","label"],
+    data: rows
+  });
+
+  const grid = Ext.create("Ext.grid.Panel", {
+    border: true,
+    store,
+    columns: [
+      { text: "Code", dataIndex: "code", flex: 1, editor: { xtype: "textfield" } },
+      { text: "Switch To", dataIndex: "switchTo", flex: 1, editor: { xtype: "textfield" } },
+      { text: "Label", dataIndex: "label", flex: 2, editor: { xtype: "textfield" } }
+    ],
+    selModel: "rowmodel",
+    plugins: [ Ext.create("Ext.grid.plugin.RowEditing", { clicksToEdit: 1 }) ],
+    tbar: [
+      { text: "Add", handler: function(){
+          const rec = store.add({ code:"", switchTo:"", label:"" })[0];
+          grid.findPlugin("rowediting").startEdit(rec, 0);
+        }
+      },
+      { text: "Delete", handler: function(){
+          const sel = grid.getSelectionModel().getSelection();
+          if (sel && sel.length) store.remove(sel);
+        }
+      },
+      "->",
+      { text: "Save", handler: function(){
+          // array -> object
+          const out = {};
+          store.each(function(r){
+            const code = String(r.get("code")||"").trim();
+            if (!code) return;
+            out[code] = {
+              switchTo: String(r.get("switchTo")||"").trim(),
+              label: String(r.get("label")||"").trim()
+            };
+          });
+          APModFiller.store.priority = out;
+          APModFiller.save(); // trigger your existing save :contentReference[oaicite:1]{index=1}
+          if (APModPopup) APModPopup.openPopup("Priority saved.");
+        }
+      },
+      { text: "Close", handler: function(){ win.close(); } }
+    ]
+  });
+
+  const win = Ext.create("Ext.window.Window", {
+    title: "Priority Settings",
+    modal: true,
+    width: 700,
+    height: 420,
+    layout: "fit",
+    items: [grid]
+  });
+  win.show();
+};
+
+/** Opens a window to edit APModFiller.store.autoFill (type/status/field/value). */
+APModFiller.openAutoFillWindow = function() {
+  const types = [["save","save"], ["load","load"]];
+  const statuses = [["always","always"], ["empty","empty"]];
+
+  const data = (APModFiller.store.autoFill || []).map(r => ({
+    type: r.type || "save",
+    status: r.status || "empty",
+    field: r.field || "",
+    value: r.value != null ? r.value : ""
+  }));
+
+  const store = new Ext.data.Store({
+    fields: ["type","status","field","value"],
+    data
+  });
+
+  function doSave() {
+    const arr = [];
+    store.each(function(r){
+      const type = r.get("type") || "save";
+      const status = r.get("status") || "empty";
+      const field = String(r.get("field") || "").trim();
+      const value = r.get("value");
+      if (!field) return;
+      arr.push({ type, status, field, value });
+    });
+    APModFiller.store.autoFill = arr;
+    APModFiller.save(); // trigger your existing save :contentReference[oaicite:2]{index=2}
+    if (APModPopup) APModPopup.openPopup("AutoFill saved.");
+  }
+
+  function doExport() {
+    const exportArr = [];
+    store.each(function(r){
+      exportArr.push({
+        type: r.get("type"),
+        status: r.get("status"),
+        field: r.get("field"),
+        value: r.get("value")
+      });
+    });
+    const json = JSON.stringify(exportArr, null, 2);
+    // Use a download (like your exportToJsonFile)
+    const uri = "data:application/json;charset=utf-8," + encodeURIComponent(json);
+    const a = document.createElement("a");
+    a.setAttribute("href", uri);
+    a.setAttribute("download", "autofill.json");
+    a.click();
+  }
+
+  function doImport() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.onchange = e => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = evt => {
+        try {
+          const arr = JSON.parse(String(evt.target.result || "[]"));
+          if (!Array.isArray(arr)) throw new Error("Invalid JSON");
+          store.loadData(arr.map(r => ({
+            type: r.type || "save",
+            status: r.status || "empty",
+            field: r.field || "",
+            value: r.value != null ? r.value : ""
+          })));
+          if (APModPopup) APModPopup.openPopup("Imported (not saved yet).");
+        } catch (e) {
+          Ext.Msg.alert("Import failed", "Invalid JSON.");
+        }
+      };
+      reader.readAsText(file, "UTF-8");
+    };
+    input.click();
+  }
+
+  const grid = Ext.create("Ext.grid.Panel", {
+    border: true,
+    store,
+    columns: [
+      { text: "Type", dataIndex: "type", width: 90,
+        editor: { xtype: "combo", editable:false, store: types, forceSelection:true, triggerAction:"all" } },
+      { text: "Status", dataIndex: "status", width: 110,
+        editor: { xtype: "combo", editable:false, store: statuses, forceSelection:true, triggerAction:"all" } },
+      { text: "Field", dataIndex: "field", flex: 1, editor: { xtype: "textfield" } },
+      { text: "Value", dataIndex: "value", flex: 1, editor: { xtype: "textfield" } }
+    ],
+    selModel: "rowmodel",
+    plugins: [ Ext.create("Ext.grid.plugin.RowEditing", { clicksToEdit: 1 }) ],
+    tbar: [
+      { text: "Add", handler: function(){
+          const rec = store.add({ type:"save", status:"empty", field:"", value:"" })[0];
+          grid.findPlugin("rowediting").startEdit(rec, 0);
+        }
+      },
+      { text: "Delete", handler: function(){
+          const sel = grid.getSelectionModel().getSelection();
+          if (sel && sel.length) store.remove(sel);
+        }
+      },
+      "->",
+      { text: "Import", handler: doImport },
+      { text: "Export", handler: doExport },
+      { text: "Save", handler: doSave },
+      { text: "Close", handler: function(){ win.close(); } }
+    ]
+  });
+
+  const win = Ext.create("Ext.window.Window", {
+    title: "AutoFill Manager",
+    modal: true,
+    width: 800,
+    height: 480,
+    layout: "fit",
+    items: [grid]
+  });
+  win.show();
+};
 
 APModFiller.createPopupPanel = (store) => {
     const fillerStore = Ext.create('Ext.data.Store', {
@@ -1217,4 +1428,5 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 

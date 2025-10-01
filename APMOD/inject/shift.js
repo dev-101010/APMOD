@@ -55,17 +55,33 @@ var APModShift = (function () {
 
   // --- Internal helpers -------------------------------------------------------
   api._ensureModelField = function (store, dataIndex) {
-    const model = store && store.getModel && store.getModel();
-    if (!model) return;
-    if (!model.fields.get(dataIndex)) {
-      model.fields.add(new Ext.data.Field({
+  const model = store && store.getModel && store.getModel();
+  if (!model || !model.fields) return;
+  const fields = model.fields;
+  // Modern ExtJS: fields is a MixedCollection with .get()
+  if (typeof fields.get === 'function') {
+    if (!fields.get(dataIndex)) {
+      fields.add(new Ext.data.Field({
         name: dataIndex,
         type: "string",
         defaultValue: "",
         persist: false
       }));
     }
-  };
+  }
+  // Fallback: if fields is an array (older/extremely custom)
+  else if (Array.isArray(fields)) {
+    const exists = fields.some(f => f.name === dataIndex);
+    if (!exists) {
+      fields.push(new Ext.data.Field({
+        name: dataIndex,
+        type: "string",
+        defaultValue: "",
+        persist: false
+      }));
+    }
+  }
+};
 
   api._attachStoreSync = function (store, cfg) {
     if (!store || store.__apmodShiftNoteSynced) return;

@@ -72,7 +72,7 @@ var APModShift = (function () {
     store.__apmodShiftNoteSynced = true;
 
     // On every remote load, restore from in-memory cache (no storage read here)
-    store.on("load", function () {
+    store.on("datachanged", function () {
       api.refresh(store, cfg);
     });
   };

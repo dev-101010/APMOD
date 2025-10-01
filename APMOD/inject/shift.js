@@ -3,32 +3,57 @@
 // English comments; no icons in code/comments.
 
 var APModShift = (function () {
-  // Public API object
   const api = {};
 
   // --- Defaults (can be overridden in attach options) -------------------------
   api.defaults = {
     storageKey  : "apmod.shift.localNotes",
-    dataIndex   : "_localNote",          // local-only model field
+    dataIndex   : "_localNote",
     columnText  : "Note",
     columnWidth : 180,
-    // Choose a stable business key. Adjust to your dataset if needed.
     keyFn       : function (rec) {
       return rec.get("laborid") || rec.get("id") || rec.internalId;
     }
   };
 
-  // --- Internal helpers (kept inside the object) ------------------------------
-  api._loadMap = function (storageKey) {
-    try { return JSON.parse(localStorage.getItem(storageKey) || "{}") || {}; }
-    catch (e) { return {}; }
+  // --- In-memory cache --------------------------------------------------------
+  api.cache = {};   // { recordKey: "note string" }
+  api._loadedKey = null;
+
+  /** Load once from localStorage into in-memory cache. */
+  api.load = function (storageKey) {
+    const key = storageKey || api.defaults.storageKey;
+    api._loadedKey = key;
+    try {
+      const raw = localStorage.getItem(key);
+      api.cache = raw ? (JSON.parse(raw) || {}) : {};
+    } catch (e) {
+      api.cache = {};
+    }
   };
 
-  api._saveMap = function (storageKey, map) {
-    try { localStorage.setItem(storageKey, JSON.stringify(map || {})); }
-    catch (e) {}
+  /** Persist in-memory cache back to localStorage. */
+  api.save = function (storageKey) {
+    const key = storageKey || api._loadedKey || api.defaults.storageKey;
+    try {
+      localStorage.setItem(key, JSON.stringify(api.cache || {}));
+    } catch (e) { /* ignore */ }
   };
 
+  /** Apply current cache to a store's records. */
+  api.refresh = function (store, cfg) {
+    if (!store) return;
+    const c = cfg || api.defaults;
+    const map = api.cache || {};
+    store.each(function(rec){
+      const k = c.keyFn(rec);
+      if (Object.prototype.hasOwnProperty.call(map, k)) {
+        rec.set(c.dataIndex, String(map[k] || ""));
+      }
+    });
+  };
+
+  // --- Internal helpers -------------------------------------------------------
   api._ensureModelField = function (store, dataIndex) {
     const model = store && store.getModel && store.getModel();
     if (!model) return;
@@ -37,7 +62,7 @@ var APModShift = (function () {
         name: dataIndex,
         type: "string",
         defaultValue: "",
-        persist: false // never write to server
+        persist: false
       }));
     }
   };
@@ -46,14 +71,9 @@ var APModShift = (function () {
     if (!store || store.__apmodShiftNoteSynced) return;
     store.__apmodShiftNoteSynced = true;
 
-    store.on("load", function (s, records) {
-      const map = api._loadMap(cfg.storageKey);
-      Ext.Array.forEach(records, function (rec) {
-        const k = cfg.keyFn(rec);
-        if (Object.prototype.hasOwnProperty.call(map, k)) {
-          rec.set(cfg.dataIndex, String(map[k] || ""));
-        }
-      });
+    // On every remote load, restore from in-memory cache (no storage read here)
+    store.on("load", function () {
+      api.refresh(store, cfg);
     });
   };
 
@@ -62,8 +82,8 @@ var APModShift = (function () {
       text: cfg.columnText,
       dataIndex: cfg.dataIndex,
       width: cfg.columnWidth,
-      sortable: false,        // prevent remote sorting via this column
-      menuDisabled: true,     // hide header menu
+      sortable: false,
+      menuDisabled: true,
       draggable: false,
       editor: { xtype: "textfield", allowBlank: true, selectOnFocus: true },
       renderer: function (v) { return v == null ? "" : String(v); }
@@ -91,12 +111,13 @@ var APModShift = (function () {
       plugin.on("edit", function (ed, ctx) {
         if (!ctx || !ctx.record) return;
         if (!ctx.column || ctx.column.dataIndex !== cfg.dataIndex) return;
+
+        // Update cache and persist once
         const rec = ctx.record;
         const k = cfg.keyFn(rec);
-        const map = api._loadMap(cfg.storageKey);
         const val = String(rec.get(cfg.dataIndex) || "");
-        if (val) map[k] = val; else delete map[k];
-        api._saveMap(cfg.storageKey, map);
+        if (val) api.cache[k] = val; else delete api.cache[k];
+        api.save(cfg.storageKey);
       });
     }
   };
@@ -106,23 +127,17 @@ var APModShift = (function () {
       grid.headerCt.insert(0, col);
       grid.getView().refresh();
     } else if (Array.isArray(grid.columns)) {
-      // If used before render: push into columns array
       grid.columns.unshift(col);
     }
   };
 
   // --- Public method ----------------------------------------------------------
   /**
-   * Attach a local-only editable text column at the left-most position.
-   * Not affected by remote sorting; values are stored locally.
+   * Attach a local-only editable text column (left-most) and wire syncing.
+   * Requires api.load(...) to have run once earlier, or falls back to defaults.
    *
    * @param {Ext.grid.Panel} grid
-   * @param {Object} [options] Optional overrides:
-   *   - storageKey  : string
-   *   - dataIndex   : string
-   *   - columnText  : string
-   *   - columnWidth : number
-   *   - keyFn       : function(record) -> string
+   * @param {Object} [options] { storageKey, dataIndex, columnText, columnWidth, keyFn }
    */
   api.attach = function (grid, options) {
     if (!grid || grid.__apmodShiftAttached) return;
@@ -130,21 +145,22 @@ var APModShift = (function () {
 
     const cfg = Ext.apply({}, options || {}, api.defaults);
 
+    // If user did not call load() yet, do it once with current key.
+    if (!api._loadedKey) api.load(cfg.storageKey);
+
     const store = grid.getStore && grid.getStore();
     if (!store) return;
 
-    // 1) Model field (local-only)
     api._ensureModelField(store, cfg.dataIndex);
-
-    // 2) Restore values after each remote load
     api._attachStoreSync(store, cfg);
 
-    // 3) Insert the column at index 0
     const col = api._makeTextColumn(cfg);
     api._insertColumnLeft(grid, col);
 
-    // 4) Enable cell editing only for this column and persist on edit
     api._ensureCellEditing(grid, cfg);
+
+    // Initial apply of cache to already-loaded data (if any)
+    api.refresh(store, cfg);
   };
 
   return api;

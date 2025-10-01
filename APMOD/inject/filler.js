@@ -471,13 +471,14 @@ APModFiller.injectRecordView = () => {
       // Apply type === "save" rules (same style as your original)
       const autoFillSave = (APModFiller.store.autoFill || []).filter(aF => aF.type === "save");
       for (const aFS of autoFillSave) {
-        const field = this.findField ? this.findField(aFL.field) : null;
+        const field = form.findField ? form.findField(aFS.field) : null;
         if(!field) continue;
           
         if (aFS.status === "always") {
           if (field) {
             const val = APModDataSpy.onFunction(aFS.value);
             field.setValue(val);
+              field.clearInvalid && field.clearInvalid();
             const record = form.getRecord();
             if (record) record.set(field.name, val);
           }
@@ -485,6 +486,7 @@ APModFiller.injectRecordView = () => {
           if (!field.getValue() || String(field.getValue()).trim() === '') {
             const val = APModDataSpy.onFunction(aFS.value);
             field.setValue(val);
+              field.clearInvalid && field.clearInvalid();
             const record = form.getRecord();
             if (record) record.set(field.name, val);
           }
@@ -540,14 +542,16 @@ APModFiller.injectRecordView = () => {
             if (aFL.status === "always") {
                 const val = APModDataSpy.onFunction(aFL.value);
                 field.setValue && field.setValue(val);
+                field.clearInvalid && field.clearInvalid();
                 const rec = this.getRecord && this.getRecord();
                 if (rec && field.name) rec.set(field.name, val);
             } else {
                   if (!field.getValue() || String(field.getValue()).trim() === '') {
                     const val = APModDataSpy.onFunction(aFL.value);
                     field.setValue(val);
-                    const record = form.getRecord();
-                    if (record) record.set(field.name, val);
+                    field.clearInvalid && field.clearInvalid();
+                    const rec = this.getRecord && this.getRecord();
+                    if (rec && field.name) rec.set(field.name, val);
                   }
                 }
           }
@@ -1481,6 +1485,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

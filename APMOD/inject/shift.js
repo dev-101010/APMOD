@@ -7,7 +7,7 @@ var APModShift = (function () {
 
   // --- Defaults (can be overridden in attach options) -------------------------
   api.defaults = {
-    storageKey  : "apmod.shift.localNotes",
+    storageKey  : "APModShift",
     dataIndex   : "_localNote",
     columnText  : "Note",
     columnWidth : 180,

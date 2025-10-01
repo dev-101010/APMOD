@@ -10,14 +10,14 @@ APModFiller.load = () => {
 
     document.addEventListener('click', APModFiller.inputClick, false);
 
-    Ext.data.Store.prototype.fiGetData = function(){
-	  const arr = [];
-	  this.data.items.forEach(({data: recordData})=>{
-	    const { field, data, depth, title } = recordData; // pick only used props
-	    arr.push({ field, data, depth, title });
-	  });
-	  return arr;
-	};
+    Ext.data.Store.prototype.fiGetData = function () {
+        const arr = [];
+        this.data.items.forEach(({data: recordData}) => {
+            const {field, data, depth, title} = recordData; // pick only used props
+            arr.push({field, data, depth, title});
+        });
+        return arr;
+    };
 
     APModFiller.injectMainToolbar();
     APModFiller.injectRecordView();
@@ -33,21 +33,21 @@ APModFiller.load = () => {
         Object.assign(APModFiller.store2, storage2.history);
 }
 
-APModFiller.buttonClick = (cmp,e,fields) => {
+APModFiller.buttonClick = (cmp, e, fields) => {
 
     const x = e.clientX;
     const y = e.clientY;
 
     if (!e.shiftKey && !e.altKey) {
-        APModFiller.getRad(cmp,x,y,fields);
+        APModFiller.getRad(cmp, x, y, fields);
     }
 
     if (e.shiftKey && !e.ctrlKey && !e.altKey) {
-        APModFiller.overRad(cmp,x,y,fields);
+        APModFiller.overRad(cmp, x, y, fields);
     }
 
     if (e.altKey && e.ctrlKey && !e.shiftKey) {
-        APModFiller.delRad(cmp,x,y,null);
+        APModFiller.delRad(cmp, x, y, null);
     }
 }
 
@@ -68,7 +68,7 @@ APModFiller.inputClick = (e) => {
         APModFiller.delRad(target, x, y, null);
     }
 
-    if(APModFiller.popup2) APModFiller.popup2.style.display = "none";
+    if (APModFiller.popup2) APModFiller.popup2.style.display = "none";
     if (!e.ctrlKey && e.altKey && ((target.tagName == "INPUT" && target.type == "text") || target.type == "textarea")) {
         const storage2 = JSON.parse(localStorage.getItem("APModCopy"));
         if (storage2 != null && typeof storage2 === 'object' && Array.isArray(storage2.history))
@@ -88,9 +88,9 @@ APModFiller.inputClick = (e) => {
                 const textToCopy = parentWithClass.innerText.trim();
                 if (textToCopy) {
                     navigator.clipboard.writeText(textToCopy);
-                    APModFiller.store2.unshift({ type: "text", content: textToCopy, timestamp: Date.now() });
+                    APModFiller.store2.unshift({type: "text", content: textToCopy, timestamp: Date.now()});
                     if (APModFiller.store2.length > APModFiller.store.settings.copyEntries) APModFiller.store2.pop();
-                    localStorage.setItem("APModCopy", JSON.stringify({"history":APModFiller.store2}));
+                    localStorage.setItem("APModCopy", JSON.stringify({"history": APModFiller.store2}));
                     APModPopup.openPopup("Kopiert: " + textToCopy);
                 }
             }
@@ -113,16 +113,16 @@ APModFiller.copyImageToClipboard = (img) => {
             return;
         }
 
-        const item = new ClipboardItem({ "image/png": blob });
+        const item = new ClipboardItem({"image/png": blob});
 
         navigator.clipboard.write([item])
             .then(() => {
-            APModPopup.openPopup("Bild kopiert!");
-        })
+                APModPopup.openPopup("Bild kopiert!");
+            })
             .catch(err => {
-            console.error("Fehler beim Kopieren des Bildes:", err);
-            APModPopup.openPopup("Fehler beim Kopieren.");
-        });
+                console.error("Fehler beim Kopieren des Bildes:", err);
+                APModPopup.openPopup("Fehler beim Kopieren.");
+            });
     }, "image/png");
 };
 
@@ -143,7 +143,7 @@ APModFiller.showContextMenu = (event, inputElement) => {
     }
 
     APModFiller.popup2.innerHTML = "";
-    if(APModFiller.store2.length > 0) {
+    if (APModFiller.store2.length > 0) {
         APModFiller.store2.forEach((item, key, arr) => {
             APModFiller.addContextLine(inputElement, item, Object.is(arr.length - 1, key))
         });
@@ -197,7 +197,7 @@ APModFiller.addContextLine = (ele, item, last) => {
     APModFiller.popup2.appendChild(li);
 }
 
-APModFiller.getRad = (target,x,y,apModFields) => {
+APModFiller.getRad = (target, x, y, apModFields) => {
     const apModData = Ext.clone(APModFiller.store.data);
 
     const entries = apModData.filter((instance, index) => {
@@ -205,21 +205,21 @@ APModFiller.getRad = (target,x,y,apModFields) => {
     });
 
     if (entries.length == 1) {
-        if(apModFields != null && entries[0].data != null && typeof entries[0].data === 'string') {
+        if (apModFields != null && entries[0].data != null && typeof entries[0].data === 'string') {
             const values = entries[0].data.split('|');
             let i = 0;
-            for(const field of apModFields) {
+            for (const field of apModFields) {
                 let value = values[i];
-                if(value.startsWith('#')) {
+                if (value.startsWith('#')) {
                     value = APModDataSpy.onFunction(value);
                 }
-                field.setValue( value != null ? value : "" );
+                field.setValue(value != null ? value : "");
                 i++;
             }
             APModPopup.openPopup("Values inserted.");
         } else {
             let value = entries[0].data;
-            if(value.startsWith('#')) {
+            if (value.startsWith('#')) {
                 value = APModDataSpy.onFunction(value);
             }
             target.focus();
@@ -229,9 +229,8 @@ APModFiller.getRad = (target,x,y,apModFields) => {
     } else if (entries.length > 1) {
 
         const entriesByDepthArray = [];
-        for(let entry of entries)
-        {
-            if(entry.depth == null || entry.depth < 0 || entry.depth > 9 ) entry.depth = 0;
+        for (let entry of entries) {
+            if (entry.depth == null || entry.depth < 0 || entry.depth > 9) entry.depth = 0;
             if (entriesByDepthArray[entry.depth] == null) entriesByDepthArray[entry.depth] = [];
             entriesByDepthArray[entry.depth].push(entry);
         }
@@ -246,23 +245,23 @@ APModFiller.getRad = (target,x,y,apModFields) => {
             type: "get",
             allItems: entriesByDepthArray.filter(n => n),
             target: target,
-            onClick: function(input,type,item) {
-                if(input) {
-                    if(apModFields != null && item.data != null && typeof item.data === 'string') {
+            onClick: function (input, type, item) {
+                if (input) {
+                    if (apModFields != null && item.data != null && typeof item.data === 'string') {
                         const values = item.data.split('|');
                         let i = 0;
-                        for(const field of apModFields) {
+                        for (const field of apModFields) {
                             let value = values[i];
-                            if(value.startsWith('#')) {
+                            if (value.startsWith('#')) {
                                 value = APModDataSpy.onFunction(value);
                             }
-                            field.setValue( value != null ? value : "" );
+                            field.setValue(value != null ? value : "");
                             i++;
                         }
                         APModPopup.openPopup("Values inserted.");
                     } else {
                         let value = item.data;
-                        if(value.startsWith('#')) {
+                        if (value.startsWith('#')) {
                             value = APModDataSpy.onFunction(value);
                         }
                         input.focus();
@@ -277,12 +276,12 @@ APModFiller.getRad = (target,x,y,apModFields) => {
     }
 }
 
-APModFiller.overRad = (target,x,y,apModFields) => {
+APModFiller.overRad = (target, x, y, apModFields) => {
     const apModData = Ext.clone(APModFiller.store.data);
 
     let v = "";
-    if(apModFields != null) {
-        for(const field of apModFields) {
+    if (apModFields != null) {
+        for (const field of apModFields) {
             v += "|" + field.value;
         }
         v = v.length > 0 ? v.substring(1) : "";
@@ -292,7 +291,7 @@ APModFiller.overRad = (target,x,y,apModFields) => {
     const value = v;
     const name = target.name;
 
-    if( value != null && typeof value === 'string' && value.length > 0 ) {
+    if (value != null && typeof value === 'string' && value.length > 0) {
 
         const entries = apModData.filter((instance, index) => {
             instance.oId = index;
@@ -302,15 +301,15 @@ APModFiller.overRad = (target,x,y,apModFields) => {
         if (entries.length >= 1) {
 
             const entriesByDepthArray = [];
-            for(const entry of entries) {
-                if(entry.depth == null || entry.depth < 0 || entry.depth > 9 ) entry.depth = 0;
+            for (const entry of entries) {
+                if (entry.depth == null || entry.depth < 0 || entry.depth > 9) entry.depth = 0;
                 if (entriesByDepthArray[entry.depth] == null) entriesByDepthArray[entry.depth] = [];
                 entriesByDepthArray[entry.depth].push(entry);
             }
-            for(let i = 0; i < entriesByDepthArray.length; i++){
-                if(entriesByDepthArray[i] == null || !Array.isArray(entriesByDepthArray[i])) entriesByDepthArray[i] = [];
+            for (let i = 0; i < entriesByDepthArray.length; i++) {
+                if (entriesByDepthArray[i] == null || !Array.isArray(entriesByDepthArray[i])) entriesByDepthArray[i] = [];
             }
-            for(const entry of entriesByDepthArray) {
+            for (const entry of entriesByDepthArray) {
                 const i = entriesByDepthArray.indexOf(entry);
                 entry.push({"field": "", "data": "", "title": "TO NEW", "oId": -1, "depth": i});
             }
@@ -328,13 +327,13 @@ APModFiller.overRad = (target,x,y,apModFields) => {
                 type: "over",
                 allItems: entriesByDepthArray,
                 target: target,
-                onClick: function(input,type,item) {
+                onClick: function (input, type, item) {
                     // Helper: show alias dialog, then save
                     const askAndSave = (saveFn, defaultAlias) => {
                         Ext.Msg.prompt(
                             'Alias',
                             'Optional: set an alias for this entry',
-                            function(btn, text) {
+                            function (btn, text) {
                                 if (btn !== 'ok') return;
                                 const title = (text && text.trim().length > 0) ? text.trim() : defaultAlias;
                                 saveFn(title);
@@ -345,42 +344,42 @@ APModFiller.overRad = (target,x,y,apModFields) => {
                         );
                     };
 
-                   if (item.oId === -1) {
-                       // NEW entry → default alias is the preview
-					   const defaultAlias = (value && value.length) ? value : "Alias";
-                       askAndSave(function(title){
-                           APModFiller.store.data.push({
-                               field: name,
-                               data: value,
-                               title: title,
-                               depth: item.depth,
-                           });
-                           APModFiller.save();
-                           APModPopup.openPopup("Value added.");
-                       }, defaultAlias);
-                   } else {
-                       // OVERRIDE → default to existing title, fall back to preview
-                       const defaultAlias = (item.title && item.title.length) ? item.title : (item.data && item.data.length) ? item.data : "Alias";
-                       askAndSave(function(title){
-                           APModFiller.store.data[item.oId] = {
-                               field: name,
-                               data: value,
-                               title: title,
-                               depth: item.depth,
-                           };
-                           APModFiller.save();
-                           APModPopup.openPopup("Value overridden.");
-                       }, defaultAlias);
-                   }
+                    if (item.oId === -1) {
+                        // NEW entry → default alias is the preview
+                        const defaultAlias = (value && value.length) ? value : "Alias";
+                        askAndSave(function (title) {
+                            APModFiller.store.data.push({
+                                field: name,
+                                data: value,
+                                title: title,
+                                depth: item.depth,
+                            });
+                            APModFiller.save();
+                            APModPopup.openPopup("Value added.");
+                        }, defaultAlias);
+                    } else {
+                        // OVERRIDE → default to existing title, fall back to preview
+                        const defaultAlias = (item.title && item.title.length) ? item.title : (item.data && item.data.length) ? item.data : "Alias";
+                        askAndSave(function (title) {
+                            APModFiller.store.data[item.oId] = {
+                                field: name,
+                                data: value,
+                                title: title,
+                                depth: item.depth,
+                            };
+                            APModFiller.save();
+                            APModPopup.openPopup("Value overridden.");
+                        }, defaultAlias);
+                    }
                 }
             }).open();
         } else {
-			// FIRST ENTRY
-			const defaultAlias = (value && value.length) ? value : "Alias";
+            // FIRST ENTRY
+            const defaultAlias = (value && value.length) ? value : "Alias";
             Ext.Msg.prompt(
                 'Alias',
                 'Optional: set an alias for this entry',
-                function(btn, text) {
+                function (btn, text) {
                     if (btn !== 'ok') return;
                     const title = (text && text.trim().length > 0) ? text.trim() : defaultAlias;
                     APModFiller.store.data.push({
@@ -397,26 +396,27 @@ APModFiller.overRad = (target,x,y,apModFields) => {
                 defaultAlias
             );
         }
-    } else { APModPopup.openPopup("Field is empty."); }
+    } else {
+        APModPopup.openPopup("Field is empty.");
+    }
 }
 
-APModFiller.delRad = (target,x,y,apModFields) => {
+APModFiller.delRad = (target, x, y, apModFields) => {
     const apModData = Ext.clone(APModFiller.store.data);
     const entries = apModData.filter((instance, index) => {
         instance.oId = index;
         return instance.field === target.name;
     });
-    if (entries.length > 0 ) {
+    if (entries.length > 0) {
 
         const entriesByDepthArray = [];
-        for(let entry of entries)
-        {
-            if(entry.depth == null || entry.depth < 0 || entry.depth > 9 ) entry.depth = 0;
+        for (let entry of entries) {
+            if (entry.depth == null || entry.depth < 0 || entry.depth > 9) entry.depth = 0;
             if (entriesByDepthArray[entry.depth] == null) entriesByDepthArray[entry.depth] = [];
             entriesByDepthArray[entry.depth].push(entry);
         }
-        for(let i = 0; i < entriesByDepthArray.length; i++){
-            if(entriesByDepthArray[i] == null || !Array.isArray(entriesByDepthArray[i])) entriesByDepthArray[i] = [];
+        for (let i = 0; i < entriesByDepthArray.length; i++) {
+            if (entriesByDepthArray[i] == null || !Array.isArray(entriesByDepthArray[i])) entriesByDepthArray[i] = [];
         }
 
         new RadialMenu({
@@ -429,7 +429,7 @@ APModFiller.delRad = (target,x,y,apModFields) => {
             type: "del",
             allItems: entriesByDepthArray,
             target: target,
-            onClick: function(input,type,item) {
+            onClick: function (input, type, item) {
                 APModFiller.store.data.splice(item.oId, 1);
                 APModFiller.save();
                 APModPopup.openPopup("Entry deleted.");
@@ -443,7 +443,7 @@ APModFiller.injectMainToolbar = () => {
     const TBclass = EAM.view.common.MainToolbar;
     if (TBclass.prototype.APModFillerOrigInitComponent == null) {
         TBclass.prototype.APModFillerOrigInitComponent = TBclass.prototype.initComponent;
-        TBclass.prototype.initComponent = function() {
+        TBclass.prototype.initComponent = function () {
             this.APModFillerOrigInitComponent.apply(this, []);
             this.insert(this.items.length, APModFiller.createFillerButton());
         }
@@ -454,66 +454,114 @@ APModFiller.injectRecordView = () => {
   if (typeof EAM.view?.common?.RecordView === 'undefined') return;
   const RVclass = EAM.view.common.RecordView;
 
-    if (RVclass.prototype.amodFillerOrigBeforeSave == null) {
-        RVclass.prototype.amodFillerOrigBeforeSave = RVclass.prototype.beforeSave;
+  // --- Patch beforeSave (only for WSJOBS.HDR). Keep original under apmodFillerOrigBeforeSave.
+  if (RVclass.prototype.apmodFillerOrigBeforeSave == null) {
+    RVclass.prototype.apmodFillerOrigBeforeSave = RVclass.prototype.beforeSave;
 
-        RVclass.prototype.beforeSave = function(a) {
+    RVclass.prototype.beforeSave = function(a) {
+      // Guard: restrict to WSJOBS.HDR only
+      if (this.tabURL !== "WSJOBS.HDR") {
+        return RVclass.prototype.apmodFillerOrigBeforeSave.call(this, a);
+      }
 
-            const form = this.getForm();
+      const form = this.getForm();
 
-			const autoFillSave = APModFiller.store.autoFill.filter(aF => aF.type === "save");
-			for (const aFS of autoFillSave) {
-                const field = form.findField(aFS.field);
-                if(aFS.status === "always") {
-                    if (field) {
-                        field.setValue(aFS.value);
-                        const record = form.getRecord();
-                        if (record) {
-                            record.set(field.name, aFS.value);
-                        }
-                    }
-                } else {
-                    if (field && (!field.getValue() || String(field.getValue()).trim() === '')) {
-                        field.setValue(aFS.value);
-                        const record = form.getRecord();
-                        if (record) {
-                            record.set(field.name, aFS.value);
-                        }
-                    }
-                }
-			}
+      // Apply type === "save" rules (same style as your original)
+      const autoFillSave = (APModFiller.store.autoFill || []).filter(aF => aF.type === "save");
+      for (const aFS of autoFillSave) {
+        const field = form.findField(aFS.field);
+        if (aFS.status === "always") {
+          if (field) {
+            field.setValue(aFS.value);
+            const record = form.getRecord();
+            if (record) record.set(field.name, aFS.value);
+          }
+        } else {
+          if (field && (!field.getValue() || String(field.getValue()).trim() === '')) {
+            field.setValue(aFS.value);
+            const record = form.getRecord();
+            if (record) record.set(field.name, aFS.value);
+          }
+        }
+      }
 
-            const combo = form.findField('priority');
-            if (combo) {
-				const data = APModFiller.store.priority[combo.getValue()];
-				if(data && data.switchTo) {
-					combo.setValue(data.switchTo);
-	                const record = form.getRecord();
-	                if (record) {
-	                    record.set('priority', data.switchTo);
-	                }
-	                if (combo.clearInvalid) combo.clearInvalid();
-				}
-				if (typeof combo.updateDurationLabel === 'function') combo.updateDurationLabel();
-            }
+      // Optional: priority handling on save
+      const combo = form.findField('priority');
+      if (combo) {
+        const data = APModFiller.store.priority[combo.getValue()];
+        if (data && data.switchTo) {
+          combo.setValue(data.switchTo);
+          const record = form.getRecord();
+          if (record) record.set('priority', data.switchTo);
+          if (combo.clearInvalid) combo.clearInvalid();
+        }
+        if (typeof combo.updateDurationLabel === 'function') combo.updateDurationLabel();
+      }
 
-            return RVclass.prototype.amodFillerOrigBeforeSave.call(this, a);
-        };
-    }
+      // Pass through to original beforeSave
+      return RVclass.prototype.apmodFillerOrigBeforeSave.call(this, a);
+    };
+  }
 
-  if (RVclass.prototype.amodFillerOrigInitPageLayout == null) {
-    RVclass.prototype.amodFillerOrigInitPageLayout = RVclass.prototype.initPageLayout;
+  // --- Patch initPageLayout. Keep original under apmodFillerOrigInitPageLayout.
+  if (RVclass.prototype.apmodFillerOrigInitPageLayout == null) {
+    RVclass.prototype.apmodFillerOrigInitPageLayout = RVclass.prototype.initPageLayout;
 
     RVclass.prototype.initPageLayout = function(c, e, b) {
-      this.amodFillerOrigInitPageLayout.apply(this, [c, e, b]);
-      const a = this;
+      this.apmodFillerOrigInitPageLayout.apply(this, [c, e, b]);
 
+      // Act only on WSJOBS.HDR
       if (this.tabURL !== "WSJOBS.HDR") return;
 
+      const form = this.getForm();
+      if (!form) return;
+
+      // Patch loadRecord ONCE per form instance. We must use a classic function to keep correct "this".
+      if (!form.__apmodPatchedLoadRecord && typeof form.loadRecord === 'function') {
+        form.__apmodPatchedLoadRecord = true;
+        const origLoadRecord = form.loadRecord;
+
+        form.loadRecord = function(...args) {
+          // Let Ext populate all fields first
+          const res = origLoadRecord.apply(this, args);
+
+          // Apply type === "load" rules (mirror of your beforeSave style)
+          const autoFillLoad = (APModFiller.store.autoFill || []).filter(aF => aF.type === "load");
+          for (const aFL of autoFillLoad) {
+            const field = this.findField ? this.findField(aFL.field) : null;
+            if (!field) continue;
+
+            const isEmpty = !field.getValue() || String(field.getValue()).trim() === '';
+            if (aFL.status === "always" || isEmpty) {
+              field.setValue && field.setValue(aFL.value);
+              const rec = this.getRecord && this.getRecord();
+              if (rec && field.name) rec.set(field.name, aFL.value);
+              field.clearInvalid && field.clearInvalid();
+            }
+          }
+
+          // Optional: priority handling right after load
+          const combo = this.findField && this.findField('priority');
+          if (combo) {
+            const data = APModFiller.store.priority[combo.getValue()];
+            if (data && data.switchTo) {
+              combo.setValue(data.switchTo);
+              const rec = this.getRecord && this.getRecord();
+              if (rec) rec.set('priority', data.switchTo);
+              combo.clearInvalid && combo.clearInvalid();
+            }
+            typeof combo.updateDurationLabel === 'function' && combo.updateDurationLabel();
+          }
+
+          // Keep original return (form instance)
+          return res;
+        };
+      }
+
       // ------------- existing buttons -------------
-      const problemcode = a.getForm().findField('problemcode');
-      const failurecode = a.getForm().findField('failurecode');
-      const causecode   = a.getForm().findField('causecode');
+      const problemcode = form.findField('problemcode');
+      const failurecode = form.findField('failurecode');
+      const causecode   = form.findField('causecode');
 
       if (problemcode && failurecode && causecode) {
         const parent = causecode.ownerCt;
@@ -534,8 +582,8 @@ APModFiller.injectRecordView = () => {
       }
 
       const URL = "https://eu1.eam.hxgnsmartcloud.com/web/base/logindisp?tenant=AMAZONRMEEU_PRD&FROMEMAIL=YES&SYSTEM_FUNCTION_NAME=WSJOBS&USER_FUNCTION_NAME=WSJOBS&workordernum=";
-      const description = a.getForm().findField('description');
-      const workorder = a.getForm().findField('workordernum');
+      const description = form.findField('description');
+      const workorder   = form.findField('workordernum');
 
       if (description && workorder) {
         const parent = description.ownerCt;
@@ -558,9 +606,8 @@ APModFiller.injectRecordView = () => {
         }
       }
 
-      // ------------- combo UI (optional) -------------
-      // TODO: set the real field name here:
-      const combo = a.getForm().findField("priority");
+      // ------------- combo UI -------------
+      const combo = form.findField("priority");
       if (combo && combo.ownerCt && !combo.apmUiWired) {
         combo.apmUiWired = true;
 
@@ -582,50 +629,48 @@ APModFiller.injectRecordView = () => {
 
         function updateLabel() {
           if (!label) return;
-		  const data = APModFiller.store.priority[combo.getValue()];
+          const data = APModFiller.store.priority[combo.getValue()];
           label.setValue(data.label || "");
         }
-        // expose for submit hook
         combo.updateDurationLabel = updateLabel;
 
-         if (!combo.apmSetValuePatched) {
-             combo.apmSetValuePatched = true;
+        if (!combo.apmSetValuePatched) {
+          combo.apmSetValuePatched = true;
 
-             const origSetValue = combo.setValue;
-             combo.setValue = function () {
-                 const res = origSetValue.apply(this, arguments);
-                 if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
-                 return res;
-             };
+          const origSetValue = combo.setValue;
+          combo.setValue = function() {
+            const res = origSetValue.apply(this, arguments);
+            if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
+            return res;
+          };
 
-             if (combo.clearValue) {
-                 const origClearValue = combo.clearValue;
-                 combo.clearValue = function () {
-                     const res = origClearValue.apply(this, arguments);
-                     if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
-                     return res;
-                 };
-             }
+          if (combo.clearValue) {
+            const origClearValue = combo.clearValue;
+            combo.clearValue = function() {
+              const res = origClearValue.apply(this, arguments);
+              if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
+              return res;
+            };
+          }
 
-             if (combo.reset) {
-                 const origReset = combo.reset;
-                 combo.reset = function () {
-                     const res = origReset.apply(this, arguments);
-                     if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
-                     return res;
-                 };
-             }
+          if (combo.reset) {
+            const origReset = combo.reset;
+            combo.reset = function() {
+              const res = origReset.apply(this, arguments);
+              if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
+              return res;
+            };
+          }
 
-             // Optional for very custom flows:
-             if (combo.setRawValue) {
-                 const origSetRaw = combo.setRawValue;
-                 combo.setRawValue = function () {
-                     const res = origSetRaw.apply(this, arguments);
-                     if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
-                     return res;
-                 };
-             }
-         }
+          if (combo.setRawValue) {
+            const origSetRaw = combo.setRawValue;
+            combo.setRawValue = function() {
+              const res = origSetRaw.apply(this, arguments);
+              if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
+              return res;
+            };
+          }
+        }
       }
     };
   }
@@ -637,7 +682,7 @@ APModFiller.injectListDetailView = () => {
 
     if (RVclass.prototype.amodFillerOrigInitPageLayout == null) {
         RVclass.prototype.amodFillerOrigInitPageLayout = RVclass.prototype.initPageLayout;
-        RVclass.prototype.initPageLayout = function(c, e, b) {
+        RVclass.prototype.initPageLayout = function (c, e, b) {
             this.amodFillerOrigInitPageLayout.apply(this, [c, e, b]);
             const a = this;
             if (this.tabURL == "WSJOBS.BOO") {
@@ -646,32 +691,32 @@ APModFiller.injectListDetailView = () => {
                 const hrswork = a.getForm().findField('hrswork');
                 const datework = a.getForm().findField('datework');
                 const booactivity = a.getForm().findField('booactivity');
-                if(employee != null && octype != null && hrswork != null && datework != null && booactivity != null) {
+                if (employee != null && octype != null && hrswork != null && datework != null && booactivity != null) {
                     const parent = hrswork.ownerCt;
-                    if(parent?.items?.keys != null) {
+                    if (parent?.items?.keys != null) {
                         const pos = parent.items.keys.indexOf(hrswork.id) + 1;
-                        parent.insert(pos,{
+                        parent.insert(pos, {
                             xtype: 'button',
                             name: 'apModFillTime',
                             text: 'Fill Time',
                             margin: '0 0 0 150',
                             listeners: {
-                                click: function(cmp,e) {
+                                click: function (cmp, e) {
                                     const fields = [hrswork, employee];
                                     if (!e.shiftKey && !e.altKey) {
-                                        if(!booactivity.value) {
+                                        if (!booactivity.value) {
                                             booactivity.setValue(booactivity.store.data.last());
                                             booactivity.fireEvent('select', booactivity, booactivity.store.data.last().data.display, null, true);
                                         }
-                                        if(!octype.value) {
+                                        if (!octype.value) {
                                             octype.setValue("N");
                                         }
-                                        if(!datework.value) {
+                                        if (!datework.value) {
                                             datework.setValue(APModDataSpy.onFunction("#DATE"));
                                         }
-                                        APModFiller.buttonClick(cmp,e,fields);
+                                        APModFiller.buttonClick(cmp, e, fields);
                                     } else {
-                                        APModFiller.buttonClick(cmp,e,fields);
+                                        APModFiller.buttonClick(cmp, e, fields);
                                     }
                                 },
                             },
@@ -684,26 +729,26 @@ APModFiller.injectListDetailView = () => {
                 const transactionquantity = a.getForm().findField('transactionquantity');
                 const activity = a.getForm().findField('activity');
                 const availableqty = a.getForm().findField('availableqty');
-                if(partcode != null && transactionquantity != null && activity != null && availableqty != null) {
+                if (partcode != null && transactionquantity != null && activity != null && availableqty != null) {
                     const parent = availableqty.ownerCt;
-                    if(parent?.items?.keys != null) {
+                    if (parent?.items?.keys != null) {
                         const pos = parent.items.keys.indexOf(availableqty.id) + 1;
-                        parent.insert(pos,{
+                        parent.insert(pos, {
                             xtype: 'button',
                             name: 'apModFillPart',
                             text: 'Fill Part',
                             margin: '0 0 0 150',
                             listeners: {
-                                click: function(cmp,e) {
+                                click: function (cmp, e) {
                                     const fields = [partcode, transactionquantity];
                                     if (!e.shiftKey && !e.altKey) {
-                                        if(!activity.value) {
+                                        if (!activity.value) {
                                             activity.setValue(activity.store.data.last());
                                             activity.fireEvent('select', activity, activity.store.data.last().data.display, null, true);
                                         }
-                                        APModFiller.buttonClick(cmp,e,fields);
+                                        APModFiller.buttonClick(cmp, e, fields);
                                     } else {
-                                        APModFiller.buttonClick(cmp,e,fields);
+                                        APModFiller.buttonClick(cmp, e, fields);
                                     }
                                 },
                             },
@@ -733,15 +778,16 @@ APModFiller.injectComment = () => {
                 this.__apmod_inited = true; // idempotency
                 var fbar = this.getDockedItems && this.getDockedItems('toolbar[dock="bottom"]')[0];
                 if (fbar) {
-                    fbar.insert(0,{ text: 'Fill', name: 'apModFillComment', margin: '0 0 0 10',
-                              listeners: {
-                                  click: function(cmp,e) {
-                                      if(field) {
-                                      APModFiller.buttonClick(cmp,e,[field],true);
-                                      }
-                                  },
-                              },
-                             });
+                    fbar.insert(0, {
+                        text: 'Fill', name: 'apModFillComment', margin: '0 0 0 10',
+                        listeners: {
+                            click: function (cmp, e) {
+                                if (field) {
+                                    APModFiller.buttonClick(cmp, e, [field], true);
+                                }
+                            },
+                        },
+                    });
                 }
             }
         )
@@ -752,7 +798,7 @@ APModFiller.createFillerButton = () => {
     return Ext.create('Ext.Button', {
         text: '✎',
         tooltip: "Filler Menu",
-        handler: function() {
+        handler: function () {
             if (APModFiller.popup == null) {
                 APModFiller.popup = APModFiller.createPopupPanel(APModFiller.store)
                 if (APModFiller.popup != null) APModFiller.popup.show();
@@ -805,7 +851,7 @@ APModFiller.createPopupPanel = (store) => {
                     maskRe: /[0-9]/,
                     maxLength: 3
                 },
-                { xtype: 'tbspacer', width: 50 },
+                {xtype: 'tbspacer', width: 50},
                 {
                     xtype: 'label',
                     text: 'Wheel Size:',
@@ -823,7 +869,7 @@ APModFiller.createPopupPanel = (store) => {
                     xtype: 'label',
                     text: 'px',
                 },
-                { xtype: 'tbspacer', width: 50 },
+                {xtype: 'tbspacer', width: 50},
                 {
                     xtype: 'label',
                     text: 'Text Size:',
@@ -842,7 +888,7 @@ APModFiller.createPopupPanel = (store) => {
                     text: '%',
                 },
             ],
-        },{
+        }, {
             xtype: 'toolbar',
             dock: 'bottom',
             ui: 'footer',
@@ -856,19 +902,19 @@ APModFiller.createPopupPanel = (store) => {
                 xtype: 'tbspacer',
                 minWidth: 80,
                 maxWidth: 80,
-            },{
+            }, {
                 xtype: 'tbspacer',
                 minWidth: 80,
                 maxWidth: 80,
-            },{
+            }, {
                 xtype: 'tbspacer',
                 flex: 1
-            },{
+            }, {
                 minWidth: 80,
                 text: 'Save',
                 xtype: 'button',
-                handler: function() {
-                    const wSTF= this.up('window[name="FillerWindow"]').down('textfield[name="wheelSizeTextField"]');
+                handler: function () {
+                    const wSTF = this.up('window[name="FillerWindow"]').down('textfield[name="wheelSizeTextField"]');
                     const fSTF = this.up('window[name="FillerWindow"]').down('textfield[name="fontSizeTextField"]');
                     const cpTF = this.up('window[name="FillerWindow"]').down('textfield[name="copyEntriesTextField"]');
                     APModFiller.store.settings.copyEntries = typeof cpTF.value === 'string' && cpTF.value > 0 ? parseInt(cpTF.value) : 30;
@@ -880,33 +926,33 @@ APModFiller.createPopupPanel = (store) => {
                     APModFiller.popup = null;
                 },
             },
-                    {
-                        minWidth: 80,
-                        text: 'Close',
-                        xtype: 'button',
-                        handler: function() {
-                            APModFiller.popup.destroy();
-                            APModFiller.popup = null;
-                        },
-                    }, {
-                        xtype: 'tbspacer',
-                        flex: 1
-                    }, {
-                        minWidth: 80,
-                        text: 'Export',
-                        xtype: 'button',
-                        handler: function() {
-                            APModFiller.exportToJsonFile(fillerStore.fiGetData());
-                        },
-                    }, {
-                        minWidth: 80,
-                        text: 'Import',
-                        xtype: 'button',
-                        handler: function() {
-                            APModFiller.importJsonToNew(fillerStore.fiGetData());
-                        },
-                    }
-                   ],
+                {
+                    minWidth: 80,
+                    text: 'Close',
+                    xtype: 'button',
+                    handler: function () {
+                        APModFiller.popup.destroy();
+                        APModFiller.popup = null;
+                    },
+                }, {
+                    xtype: 'tbspacer',
+                    flex: 1
+                }, {
+                    minWidth: 80,
+                    text: 'Export',
+                    xtype: 'button',
+                    handler: function () {
+                        APModFiller.exportToJsonFile(fillerStore.fiGetData());
+                    },
+                }, {
+                    minWidth: 80,
+                    text: 'Import',
+                    xtype: 'button',
+                    handler: function () {
+                        APModFiller.importJsonToNew(fillerStore.fiGetData());
+                    },
+                }
+            ],
         }],
     });
 }
@@ -937,7 +983,7 @@ APModFiller.importJsonToNew = (apModData) => {
             let data = null;
             try {
                 const test = JSON.parse(content);
-                if (test != null && typeof test === 'object' && Array.isArray(test) && test[0] != null && test[0]["field"] != null && test[0]["data"] != null )
+                if (test != null && typeof test === 'object' && Array.isArray(test) && test[0] != null && test[0]["field"] != null && test[0]["data"] != null)
                     data = test;
                 else
                     throw new Error();
@@ -945,15 +991,15 @@ APModFiller.importJsonToNew = (apModData) => {
                 alert('Ungültige Datei.');
             }
 
-            if (data != null && apModData != null && Array.isArray(data) && Array.isArray(apModData) ) {
-                for(let entry of data) {
-                    if(apModData.find(e => e.field == entry.field && e.data == entry.data) != null) continue;
+            if (data != null && apModData != null && Array.isArray(data) && Array.isArray(apModData)) {
+                for (let entry of data) {
+                    if (apModData.find(e => e.field == entry.field && e.data == entry.data) != null) continue;
                     apModData.push(entry);
                 }
                 const out = Ext.clone(APModFiller.store);
                 out.data = apModData;
                 APModFiller.popup.disable();
-                new Ext.util.DelayedTask(function() {
+                new Ext.util.DelayedTask(function () {
                     APModFiller.popup.destroy();
                     APModFiller.popup = null;
                     APModFiller.popup = APModFiller.createPopupPanel(out);
@@ -986,7 +1032,7 @@ APModFiller.fillerPanel = (fillerStore) => {
                 text: '↑',
                 disabled: true,
                 xtype: 'button',
-                handler: function() {
+                handler: function () {
                     const grid = this.up('panel[name="FillerPanel"]').down('gridpanel[name="fillerGridPanel"]')
                     const selectedRecord = grid.getSelectionModel().getSelection()[0];
                     const row = grid.store.indexOf(selectedRecord);
@@ -1001,7 +1047,7 @@ APModFiller.fillerPanel = (fillerStore) => {
                 text: '↓',
                 disabled: true,
                 xtype: 'button',
-                handler: function() {
+                handler: function () {
                     const grid = this.up('panel[name="FillerPanel"]').down('gridpanel[name="fillerGridPanel"]')
                     const selectedRecord = grid.getSelectionModel().getSelection()[0];
                     const row = grid.store.indexOf(selectedRecord);
@@ -1015,17 +1061,17 @@ APModFiller.fillerPanel = (fillerStore) => {
                 height: 28,
                 text: '🗑',
                 xtype: 'button',
-                handler: function() {
+                handler: function () {
                     const grid = this.up('panel[name="FillerPanel"]').down('gridpanel[name="fillerGridPanel"]')
                     const selectedRecord = grid.getSelectionModel().getSelection()[0];
                     const row = grid.store.indexOf(selectedRecord);
                     if (row >= 0) {
                         Ext.Msg.show({
-                            title:'Delete row?',
-                            msg : 'Are you sure you want to delete row '+(row+1)+'?',
+                            title: 'Delete row?',
+                            msg: 'Are you sure you want to delete row ' + (row + 1) + '?',
                             buttons: Ext.Msg.YESNO,
-                            fn : function(button){
-                                if (button === 'yes'){
+                            fn: function (button) {
+                                if (button === 'yes') {
                                     grid.store.removeAt(row);
                                 }
                             }
@@ -1037,10 +1083,10 @@ APModFiller.fillerPanel = (fillerStore) => {
                 height: 28,
                 text: '+',
                 xtype: 'button',
-                handler: function() {
+                handler: function () {
                     const grid = this.up('panel[name="FillerPanel"]').down('gridpanel[name="fillerGridPanel"]')
                     const selectedRecord = grid.getSelectionModel().getSelection()[0];
-                    grid.store.add( {
+                    grid.store.add({
                         field: selectedRecord ? selectedRecord.data.field : "",
                         data: "",
                         title: '',
@@ -1067,54 +1113,54 @@ APModFiller.fillerPanel = (fillerStore) => {
                 align: 'center',
                 tdCls: 'x-grid-cell-row-numberer-ov'
             },
-                      {
-                          header: 'Field',
-                          dataIndex: 'field',
-                          sortable: false,
-                          menuDisabled: true,
-                          flex: 1,
-                          editor: {
-                              xtype: 'textfield',
-                          },
-                          align: 'center',
-                      },
-                      {
-                          header: 'Data',
-                          dataIndex: 'data',
-                          sortable: false,
-                          menuDisabled: true,
-                          flex: 1,
-                          editor: {
-                              xtype: 'textfield',
-                          },
-                          align: 'center',
-                      },
-                      {
-                          header: 'Depth 0-9',
-                          dataIndex: 'depth',
-                          maxWidth: 80,
-                          sortable: false,
-                          menuDisabled: true,
-                          flex: 1,
-                          editor: {
-                              xtype: 'textfield',
-                              maskRe: /[0-9]/,
-                              maxLength: 1,
-                          },
-                          align: 'center',
-                      },
-                      {
-                          header: 'Alias',
-                          dataIndex: 'title',
-                          sortable: false,
-                          menuDisabled: true,
-                          flex: 1,
-                          editor: {
-                              xtype: 'textfield',
-                          },
-                          align: 'center',
-                      }
-                     ],
+                {
+                    header: 'Field',
+                    dataIndex: 'field',
+                    sortable: false,
+                    menuDisabled: true,
+                    flex: 1,
+                    editor: {
+                        xtype: 'textfield',
+                    },
+                    align: 'center',
+                },
+                {
+                    header: 'Data',
+                    dataIndex: 'data',
+                    sortable: false,
+                    menuDisabled: true,
+                    flex: 1,
+                    editor: {
+                        xtype: 'textfield',
+                    },
+                    align: 'center',
+                },
+                {
+                    header: 'Depth 0-9',
+                    dataIndex: 'depth',
+                    maxWidth: 80,
+                    sortable: false,
+                    menuDisabled: true,
+                    flex: 1,
+                    editor: {
+                        xtype: 'textfield',
+                        maskRe: /[0-9]/,
+                        maxLength: 1,
+                    },
+                    align: 'center',
+                },
+                {
+                    header: 'Alias',
+                    dataIndex: 'title',
+                    sortable: false,
+                    menuDisabled: true,
+                    flex: 1,
+                    editor: {
+                        xtype: 'textfield',
+                    },
+                    align: 'center',
+                }
+            ],
         }]
     });
 }
@@ -1123,55 +1169,51 @@ APModFiller.store.data = [{
     "field": "employee",
     "data": "#LOGIN",
     "title": "Me",
-    "depth":0,
+    "depth": 0,
 },
-                          {
-                              "field": "hrswork",
-                              "data": "1",
-                              "title": "",
-                              "depth":0,
-                          },
-                          {
-                              "field": "udfchar13",
-                              "data": "EXDN",
-                              "title": "",
-                              "depth":0,
-                          },
-                          {
-                              "field": "udfchar24",
-                              "data": "no",
-                              "title": "",
-                              "depth":0,
-                          },
-                          {
-                              "field":"datework",
-                              "data":"#DATE",
-                              "title":"Today",
-                              "depth":0
-                          }
-                         ];
+    {
+        "field": "hrswork",
+        "data": "1",
+        "title": "",
+        "depth": 0,
+    },
+    {
+        "field": "udfchar13",
+        "data": "EXDN",
+        "title": "",
+        "depth": 0,
+    },
+    {
+        "field": "udfchar24",
+        "data": "no",
+        "title": "",
+        "depth": 0,
+    },
+    {
+        "field": "datework",
+        "data": "#DATE",
+        "title": "Today",
+        "depth": 0
+    }
+];
 
 APModFiller.store.priority = {
-	1 : {switchTo:"",label:"1 day"},
-	2 : {switchTo:"",label:"3 days"},
-	3 : {switchTo:"4",label:"don't use"},
-	4 : {switchTo:"",label:"30 days"},
-	5 : {switchTo:"",label:"30 days"}
+    1: {switchTo: "", label: "1 day"},
+    2: {switchTo: "", label: "3 days"},
+    3: {switchTo: "4", label: "don't use"},
+    4: {switchTo: "", label: "30 days"},
+    5: {switchTo: "", label: "30 days"}
 }
 
 APModFiller.store.autoFill = [
-	{type:"save",status:"empty",field:"assignedto",value:"#LOGIN"},
-	{type:"save",status:"empty",field:"shift",value:""},
+    {type: "save", status: "empty", field: "assignedto", value: "#LOGIN"},
+    {type: "save", status: "empty", field: "shift", value: ""},
 ]
 
-APModFiller.store.settings = {"wheelSize":200,"fontSize":38,"copyEntries":30};
+APModFiller.store.settings = {"wheelSize": 200, "fontSize": 38, "copyEntries": 30};
 
 APModFiller.save = () => {
     localStorage.setItem("APModFiller", JSON.stringify(APModFiller.store));
 }
 
 //window.addEventListener("load", APModFiller.load);
-
-
-
-

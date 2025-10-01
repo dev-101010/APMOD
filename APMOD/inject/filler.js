@@ -474,15 +474,17 @@ APModFiller.injectRecordView = () => {
         const field = form.findField(aFS.field);
         if (aFS.status === "always") {
           if (field) {
-            field.setValue(aFS.value);
+            const val = APModDataSpy.onFunction(aFS.value);
+            field.setValue(val);
             const record = form.getRecord();
-            if (record) record.set(field.name, aFS.value);
+            if (record) record.set(field.name, val);
           }
         } else {
           if (field && (!field.getValue() || String(field.getValue()).trim() === '')) {
-            field.setValue(aFS.value);
+            const val = APModDataSpy.onFunction(aFS.value);
+            field.setValue(val);
             const record = form.getRecord();
-            if (record) record.set(field.name, aFS.value);
+            if (record) record.set(field.name, val);
           }
         }
       }
@@ -534,12 +536,19 @@ APModFiller.injectRecordView = () => {
             if (!field) continue;
 
             const isEmpty = !field.getValue() || String(field.getValue()).trim() === '';
-            if (aFL.status === "always" || isEmpty) {
-              field.setValue && field.setValue(aFL.value);
-              const rec = this.getRecord && this.getRecord();
-              if (rec && field.name) rec.set(field.name, aFL.value);
-              field.clearInvalid && field.clearInvalid();
-            }
+            if (aFL.status === "always") {
+                const val = APModDataSpy.onFunction(aFL.value);
+                field.setValue && field.setValue(val);
+                const rec = this.getRecord && this.getRecord();
+                if (rec && field.name) rec.set(field.name, val);
+            } else {
+                  if (!field.getValue() || String(field.getValue()).trim() === '') {
+                    const val = APModDataSpy.onFunction(aFL.value);
+                    field.setValue(val);
+                    const record = form.getRecord();
+                    if (record) record.set(field.name, val);
+                  }
+                }
           }
 
           // Optional: priority handling right after load
@@ -1471,6 +1480,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

@@ -892,7 +892,7 @@ APModFiller.openPriorityWindow = function() {
             };
           });
           APModFiller.store.priority = out;
-          APModFiller.save(); // trigger your existing save :contentReference[oaicite:1]{index=1}
+          APModFiller.save(); // trigger your existing save
           if (APModPopup) APModPopup.openPopup("Priority saved.");
         }
       },
@@ -952,7 +952,7 @@ APModFiller.openAutoFillWindow = function() {
       arr.push({ type, status, field, value });
     });
     APModFiller.store.autoFill = arr;
-    APModFiller.save(); // trigger your existing save :contentReference[oaicite:2]{index=2}
+    APModFiller.save(); // trigger your existing save
     if (APModPopup) APModPopup.openPopup("AutoFill saved.");
   }
 
@@ -1485,6 +1485,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

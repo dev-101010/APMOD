@@ -680,10 +680,10 @@ APModFiller.injectListDetailView = () => {
     if (typeof EAM.view?.common?.ListDetailView === 'undefined') return;
     const RVclass = EAM.view.common.ListDetailView;
 
-    if (RVclass.prototype.amodFillerOrigInitPageLayout == null) {
-        RVclass.prototype.amodFillerOrigInitPageLayout = RVclass.prototype.initPageLayout;
+    if (RVclass.prototype.apmodFillerOrigInitPageLayout == null) {
+        RVclass.prototype.apmodFillerOrigInitPageLayout = RVclass.prototype.initPageLayout;
         RVclass.prototype.initPageLayout = function (c, e, b) {
-            this.amodFillerOrigInitPageLayout.apply(this, [c, e, b]);
+            this.apmodFillerOrigInitPageLayout.apply(this, [c, e, b]);
             const a = this;
             if (this.tabURL == "WSJOBS.BOO") {
                 const employee = a.getForm().findField('employee');
@@ -1217,3 +1217,4 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+

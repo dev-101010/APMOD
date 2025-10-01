@@ -899,8 +899,21 @@ APModFiller.openPriorityWindow = function() {
 
 /** Opens a window to edit APModFiller.store.autoFill (type/status/field/value). */
 APModFiller.openAutoFillWindow = function() {
-  const types = [["save","save"], ["load","load"]];
-  const statuses = [["always","always"], ["empty","empty"]];
+    // --- Friendly labels while keeping internal values ---
+    const TYPE_OPTS   = [["save",  "On save"],       ["load",  "On load"]];
+    const STATUS_OPTS = [["always","Always"],         ["empty", "Field is empty"]];
+    
+    const TYPE_LABEL   = { save: "On save",  load: "On load" };
+    const STATUS_LABEL = { always: "Always", empty: "Field is empty" };
+    
+    const typeStore = new Ext.data.ArrayStore({
+      fields: ["value","label"],
+      data: TYPE_OPTS
+    });
+    const statusStore = new Ext.data.ArrayStore({
+      fields: ["value","label"],
+      data: STATUS_OPTS
+    });
 
   const data = (APModFiller.store.autoFill || []).map(r => ({
     type: r.type || "save",
@@ -979,10 +992,40 @@ APModFiller.openAutoFillWindow = function() {
     border: true,
     store,
     columns: [
-      { text: "Type", dataIndex: "type", width: 90,
-        editor: { xtype: "combo", editable:false, store: types, forceSelection:true, triggerAction:"all" } },
-      { text: "Status", dataIndex: "status", width: 110,
-        editor: { xtype: "combo", editable:false, store: statuses, forceSelection:true, triggerAction:"all" } },
+      {
+  text: "When to autofill?",
+  dataIndex: "type",
+  width: 150,
+  tooltip: "Choose when the rule should apply",
+  editor: {
+    xtype: "combo",
+    queryMode: "local",
+    editable: false,
+    forceSelection: true,
+    triggerAction: "all",
+    store: typeStore,
+    valueField: "value",   // keeps "save"/"load"
+    displayField: "label"  // shows "On save"/"On load"
+  },
+  renderer: function(v){ return TYPE_LABEL[v] || v; }
+},
+{
+  text: "Only autofill if",
+  dataIndex: "status",
+  width: 160,
+  tooltip: "Condition for applying the value",
+  editor: {
+    xtype: "combo",
+    queryMode: "local",
+    editable: false,
+    forceSelection: true,
+    triggerAction: "all",
+    store: statusStore,
+    valueField: "value",   // keeps "always"/"empty"
+    displayField: "label"  // shows "Always"/"Field is empty"
+  },
+  renderer: function(v){ return STATUS_LABEL[v] || v; }
+},
       { text: "Field", dataIndex: "field", flex: 1, editor: { xtype: "textfield" } },
       { text: "Value", dataIndex: "value", flex: 1, editor: { xtype: "textfield" } }
     ],
@@ -1428,5 +1471,6 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 

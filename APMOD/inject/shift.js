@@ -107,36 +107,43 @@ var APModShift = (function () {
   };
 
   api._ensureCellEditing = function (grid, cfg) {
-    let plugin = grid.findPlugin && grid.findPlugin("cellediting");
-    if (!plugin) {
-      plugin = Ext.create("Ext.grid.plugin.CellEditing", { clicksToEdit: 1, pluginId: "cellediting" });
-      grid.plugins = grid.plugins || [];
-      grid.plugins.push(plugin);
-      grid.initPlugin && grid.initPlugin(plugin);
-    }
-
-    if (!plugin.__apmodShiftBeforeEditBound) {
-      plugin.__apmodShiftBeforeEditBound = true;
-      plugin.on("beforeedit", function (editor, e) {
-        return e && e.column && e.column.dataIndex === cfg.dataIndex;
-      });
-    }
-
-    if (!plugin.__apmodShiftEditBound) {
-      plugin.__apmodShiftEditBound = true;
-      plugin.on("edit", function (ed, ctx) {
-        if (!ctx || !ctx.record) return;
-        if (!ctx.column || ctx.column.dataIndex !== cfg.dataIndex) return;
-
-        // Update cache and persist once
-        const rec = ctx.record;
-        const k = cfg.keyFn(rec);
-        const val = String(rec.get(cfg.dataIndex) || "");
-        if (val) api.cache[k] = val; else delete api.cache[k];
-        api.save(cfg.storageKey);
-      });
-    }
-  };
+        let plugin = grid.findPlugin && grid.findPlugin("cellediting");
+        if (!plugin) {
+            plugin = Ext.create("Ext.grid.plugin.CellEditing", { clicksToEdit: 1, pluginId: "cellediting" });
+            grid.plugins = grid.plugins || [];
+            grid.plugins.push(plugin);
+            grid.initPlugin && grid.initPlugin(plugin);
+        }
+        if (!plugin.__apmodShiftBeforeEditBound) {
+            plugin.__apmodShiftBeforeEditBound = true;
+            plugin.on("beforeedit", function (editor, e) {
+                return e && e.column && e.column.dataIndex === cfg.dataIndex;
+            });
+        }
+        if (!plugin.__apmodShiftEditBound) {
+            plugin.__apmodShiftEditBound = true;
+            plugin.on("edit", function (ed, ctx) {
+                if (!ctx || !ctx.record) return;
+                if (!ctx.column || ctx.column.dataIndex !== cfg.dataIndex) return;
+                // Update cache and persist once
+                const rec = ctx.record;
+                const newVal = String(ctx.value || "");
+                rec.set(cfg.dataIndex, newVal);
+                rec.commit();
+                const k = cfg.keyFn(rec);
+                if (newVal) {
+                    api.cache[k] = newVal;
+                } else {
+                    delete api.cache[k];
+                }
+                api.save(cfg.storageKey);
+                const store = rec.store;
+                if (store) {
+                    store.fireEvent('datachanged', store);
+                }
+            });
+        }
+    };
 
   api._insertColumnLeft = function (grid, col) {
     if (grid.headerCt && typeof grid.headerCt.insert === "function") {

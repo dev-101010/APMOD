@@ -1229,7 +1229,7 @@ APModFiller.createPopupPanel = (store) => {
     fillerStore.sort('field', 'ASC');
 
     return new Ext.create('Ext.window.Window', {
-        title: 'Filler Options',
+        title: 'Filler Manager',
         width: 900,
         height: 600,
         minWidth: 600,
@@ -1633,6 +1633,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

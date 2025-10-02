@@ -1010,7 +1010,16 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore, filterValueStore) => 
 						minChars: 0,
 						queryOnExpand: true,
 						triggerAction: 'all',
-						queryCaching: false
+						queryCaching: false,
+						caseSensitive: false,
+						listeners: {
+						    expand: function (combo) {
+						      // ensure previous filters/queries don't block the full list
+						      combo.getStore().clearFilter(true);
+						      combo.lastQuery = null;
+						      combo.doQuery('', true); // empty query -> show all
+						    }
+						  }
 					},
 					align: 'center'
 				},
@@ -1604,6 +1613,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

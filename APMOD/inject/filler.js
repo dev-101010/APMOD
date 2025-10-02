@@ -976,69 +976,90 @@ APModFiller.openAutoFillWindow = function() {
     if (APModPopup) APModPopup.openPopup("AutoFill saved.");
   }
 
-  // Build typed export object
-  function buildExportObject() {
-    const items = [];
-    store.each(function(r){
-      items.push({
-        type: r.get("type"),
-        status: r.get("status"),
-        field: r.get("field"),
-        value: r.get("value")
-      });
+  // Build typed export object (keeps your existing AUTO_KIND/AUTO_VERSION)
+function buildExportObject() {
+  const items = [];
+  store.each(function(r){
+    items.push({
+      type:  r.get("type"),
+      status:r.get("status"),
+      field: r.get("field"),
+      value: r.get("value")
     });
-    return { kind: AUTO_KIND, version: AUTO_VERSION, data: items };
-  }
+  });
+  return { kind: AUTO_KIND, version: AUTO_VERSION, data: items };
+}
 
-  function doExport() {
+// Export filename: APModAutofill_YYYY-MM-DD_HH-MM-SS.json
+function doExport() {
+  try {
     const payload = buildExportObject();
     const json = JSON.stringify(payload, null, 2);
+
+    const ts = (() => {
+      const d = new Date();
+      const pad = n => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_` +
+             `${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
+    })();
+
     const uri = "data:application/json;charset=utf-8," + encodeURIComponent(json);
     const a = document.createElement("a");
     a.setAttribute("href", uri);
-    a.setAttribute("download", "autofill.v" + AUTO_VERSION + ".json");
+    a.setAttribute("download", `APModAutofill_${ts}.json`);
     a.click();
-  }
-
-  function normalizeImportedData(parsed) {
-    // Accept typed object {kind, version, data:[...]} OR legacy array [...]
-    if (Array.isArray(parsed)) {
-      return parsed; // legacy
+    if (APModPopup) APModPopup.openPopup("Exported.");
+  } catch (err) {
+    if (Ext && Ext.Msg && Ext.Msg.alert) {
+      Ext.Msg.alert("Export failed", err && err.message ? String(err.message) : "Unexpected error during export.");
     }
-    if (parsed && parsed.kind === AUTO_KIND && Array.isArray(parsed.data)) {
-      // optionally check version compatibility
-      return parsed.data;
-    }
-    throw new Error("Unrecognized file format");
   }
+}
 
-  function doImport() {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".json,application/json";
-    input.onchange = e => {
-      const file = e.target.files && e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = evt => {
-        try {
-          const parsed = JSON.parse(String(evt.target.result || "null"));
-          const arr = normalizeImportedData(parsed);
-          store.loadData(arr.map(r => ({
-            type: (r && r.type) || "save",
-            status: (r && r.status) || "empty",
-            field: (r && r.field) || "",
-            value: (r && r.value) != null ? r.value : ""
-          })));
-          if (APModPopup) APModPopup.openPopup("Imported (not saved yet).");
-        } catch (e) {
-          Ext.Msg.alert("Import failed", "Invalid JSON or unsupported file.");
+// Strict typed import (no legacy arrays).
+function doImport() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".json,application/json";
+  input.onchange = e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = evt => {
+      try {
+        const parsed = JSON.parse(String(evt.target.result || "null"));
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+          throw new Error("Unsupported file: payload must be an object.");
         }
-      };
-      reader.readAsText(file, "UTF-8");
+        if (parsed.kind !== AUTO_KIND) {
+          throw new Error("Unsupported file: wrong 'kind'.");
+        }
+        if (typeof parsed.version !== "number" || parsed.version > AUTO_VERSION) {
+          throw new Error("Unsupported file: invalid or newer 'version'.");
+        }
+        if (!Array.isArray(parsed.data)) {
+          throw new Error("Invalid payload: 'data' must be an array.");
+        }
+
+        // Normalize and load into grid store
+        const arr = parsed.data.map(r => ({
+          type:   (r && r.type)   || "save",
+          status: (r && r.status) || "empty",
+          field:  (r && r.field)  || "",
+          value:  (r && r.value) != null ? r.value : ""
+        }));
+        store.loadData(arr);
+
+        if (APModPopup) APModPopup.openPopup("Imported (not saved yet).");
+      } catch (e) {
+        Ext.Msg.alert("Import failed", e && e.message ? String(e.message) : "Invalid JSON or unsupported file.");
+      }
     };
-    input.click();
-  }
+    reader.readAsText(file, "UTF-8");
+  };
+  input.click();
+}
 
   // Use CellEditing to avoid row update/cancel confirmation
   const cellEditor = Ext.create("Ext.grid.plugin.CellEditing", { clicksToEdit: 1 });
@@ -1324,59 +1345,134 @@ APModFiller.createPopupPanel = (store) => {
     });
 }
 
+// Strict typed export with timestamped filename: APModFiller_YYYY-MM-DD_HH-MM-SS.json
 APModFiller.exportToJsonFile = (data) => {
-    if (typeof data !== 'object') return;
-
-    let dataStr = JSON.stringify(data);
-    let dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-
-    let exportFileDefaultName = 'filler.json';
-
-    let linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-}
-
-APModFiller.importJsonToNew = (apModData) => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.onchange = e => {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.readAsText(file, 'UTF-8');
-        reader.onload = readerEvent => {
-            const content = readerEvent.target.result;
-            let data = null;
-            try {
-                const test = JSON.parse(content);
-                if (test != null && typeof test === 'object' && Array.isArray(test) && test[0] != null && test[0]["field"] != null && test[0]["data"] != null)
-                    data = test;
-                else
-                    throw new Error();
-            } catch (ignore) {
-                alert('Ungültige Datei.');
-            }
-
-            if (data != null && apModData != null && Array.isArray(data) && Array.isArray(apModData)) {
-                for (let entry of data) {
-                    if (apModData.find(e => e.field == entry.field && e.data == entry.data) != null) continue;
-                    apModData.push(entry);
-                }
-                const out = Ext.clone(APModFiller.store);
-                out.data = apModData;
-                APModFiller.popup.disable();
-                new Ext.util.DelayedTask(function () {
-                    APModFiller.popup.destroy();
-                    APModFiller.popup = null;
-                    APModFiller.popup = APModFiller.createPopupPanel(out);
-                    if (APModFiller.popup != null) APModFiller.popup.show();
-                }).delay(200);
-            }
-        }
+  try {
+    if (!Array.isArray(data)) {
+      throw new Error("Export data must be an array.");
     }
-    input.click();
-}
+
+    // normalize items (defensive)
+    const items = data.map((it) => {
+      const o = it && typeof it === "object" ? it : {};
+      return {
+        field: String(o.field || ""),
+        data:  typeof o.data === "string" ? o.data : String(o.data ?? ""),
+        depth: (typeof o.depth === "number" && o.depth >= 0 && o.depth <= 9) ? o.depth : 0,
+        title: typeof o.title === "string" ? o.title : (o.data ? String(o.data) : "")
+      };
+    });
+
+    const payload = {
+      kind: "APModFiller.Data",
+      version: 1,
+      data: items
+    };
+
+    // local timestamp helper (no globals)
+    const ts = (() => {
+      const d = new Date();
+      const pad = n => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_` +
+             `${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
+    })();
+
+    const json = JSON.stringify(payload, null, 2);
+    const uri = "data:application/json;charset=utf-8," + encodeURIComponent(json);
+    const a = document.createElement("a");
+    a.setAttribute("href", uri);
+    a.setAttribute("download", `APModFiller_${ts}.json`);
+    a.click();
+
+    if (APModPopup) APModPopup.openPopup("Exported.");
+  } catch (err) {
+    if (Ext && Ext.Msg && Ext.Msg.alert) {
+      Ext.Msg.alert("Export failed", err && err.message ? String(err.message) : "Unexpected error during export.");
+    }
+  }
+};
+
+// Strict typed import. Only accepts { kind:"APModFiller.Data", version<=1, data:[...] }.
+// Merges unique entries (same field+data) into the provided apModData. Rebuilds the popup as before.
+APModFiller.importJsonToNew = (apModData) => {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".json,application/json";
+  input.onchange = e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.readAsText(file, "UTF-8");
+    reader.onload = readerEvent => {
+      try {
+        const content = String(readerEvent.target.result || "");
+        const parsed = JSON.parse(content);
+
+        // strict typed header
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+          throw new Error("Unsupported file: payload must be an object.");
+        }
+        if (parsed.kind !== "APModFiller.Data") {
+          throw new Error("Unsupported file: wrong 'kind'.");
+        }
+        if (typeof parsed.version !== "number" || parsed.version > 1) {
+          throw new Error("Unsupported file: invalid or newer 'version'.");
+        }
+        if (!Array.isArray(parsed.data)) {
+          throw new Error("Invalid payload: 'data' must be an array.");
+        }
+
+        // normalize
+        const incoming = parsed.data.map((it) => {
+          const o = it && typeof it === "object" ? it : {};
+          return {
+            field: String(o.field || ""),
+            data:  typeof o.data === "string" ? o.data : String(o.data ?? ""),
+            depth: (typeof o.depth === "number" && o.depth >= 0 && o.depth <= 9) ? o.depth : 0,
+            title: typeof o.title === "string" ? o.title : (o.data ? String(o.data) : "")
+          };
+        });
+
+        if (!Array.isArray(apModData)) {
+          throw new Error("Target list is not an array.");
+        }
+
+        // merge by (field+data)
+        for (const entry of incoming) {
+          if (apModData.find(e => e.field == entry.field && e.data == entry.data)) continue;
+          apModData.push(entry);
+        }
+
+        // rebuild popup (same flow as your original)
+        const out = Ext.clone(APModFiller.store);
+        out.data = apModData;
+
+        if (APModFiller.popup && APModFiller.popup.disable) {
+          APModFiller.popup.disable();
+        }
+
+        new Ext.util.DelayedTask(function () {
+          if (APModFiller.popup) {
+            try { APModFiller.popup.destroy(); } catch (ignore) {}
+            APModFiller.popup = null;
+          }
+          APModFiller.popup = APModFiller.createPopupPanel(out);
+          if (APModFiller.popup) APModFiller.popup.show();
+          if (APModPopup) APModPopup.openPopup("Imported.");
+        }).delay(200);
+
+      } catch (err) {
+        if (Ext && Ext.Msg && Ext.Msg.alert) {
+          Ext.Msg.alert("Import failed", err && err.message ? String(err.message) : "Invalid JSON or unsupported file.");
+        } else {
+          alert("Import failed");
+        }
+      }
+    };
+  };
+  input.click();
+};
 
 APModFiller.fillerPanel = (fillerStore) => {
     return Ext.create('Ext.Panel', {
@@ -1586,6 +1682,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

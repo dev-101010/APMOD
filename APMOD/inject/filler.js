@@ -845,34 +845,43 @@ APModFiller.createAutoFillButton = () => {
 
 /** Opens a window to edit APModFiller.store.priority (object as key->config). */
 APModFiller.openPriorityWindow = function() {
+  // fixed, hardcoded code list
+  const fixedCodes = ["1", "2", "3", "4", "5"];
+
+  // source object (may or may not contain entries for all codes)
   const src = APModFiller.store.priority || {};
-  const rows = Object.keys(src).map(code => ({
+
+  // build rows for all fixed codes
+  const rows = fixedCodes.map(code => ({
     code,
     switchTo: (src[code] && src[code].switchTo) || "",
     label: (src[code] && src[code].label) || ""
   }));
 
+  // grid store
   const store = new Ext.data.Store({
     fields: ["code","switchTo","label"],
     data: rows
   });
 
-  // Combo options: show "—" for empty selection, but keep value = ""
+  // switchTo options: show "—" for empty but store "" as value
   const codeOptionsStore = new Ext.data.Store({
     fields: ["val","label"],
     data: [{ val: "", label: "—" }].concat(
-      Object.keys(src).map(v => ({ val: v, label: v }))
+      fixedCodes.map(v => ({ val: v, label: v }))
     )
   });
 
+  // use CellEditing (no row update/cancel popup)
   const cellEditor = Ext.create("Ext.grid.plugin.CellEditing", { clicksToEdit: 1 });
 
-  // helper to render displayed label from value (so empty -> "—")
+  // helper renderer: empty value -> "—"
   function renderSwitchTo(v){
     const rec = codeOptionsStore.findRecord("val", v, 0, false, true, true);
     return rec ? rec.get("label") : (v || "—");
   }
 
+  // the grid (no sorting, no header menus)
   const grid = Ext.create("Ext.grid.Panel", {
     border: true,
     flex: 1,
@@ -889,8 +898,8 @@ APModFiller.openPriorityWindow = function() {
           xtype: "combo",
           queryMode: "local",
           store: codeOptionsStore,
-          displayField: "label",   // show "—" for empty
-          valueField: "val",       // still stores ""
+          displayField: "label", // "—" for empty
+          valueField: "val",     // store ""
           forceSelection: true,
           editable: false,
           allowBlank: true,
@@ -915,30 +924,7 @@ APModFiller.openPriorityWindow = function() {
     plugins: [ cellEditor ]
   });
 
-  const leftControls = {
-    xtype: "container",
-    width: 64,
-    layout: { type: "vbox", align: "stretch", pack: "start" },
-    defaults: { xtype: "button", margin: "0 8 8 8", height: 36 },
-    items: [
-      {
-        text: "+",
-        handler: function(){
-          const rec = store.add({ code:"", switchTo:"", label:"" })[0];
-          cellEditor.startEdit(rec, 1);
-        }
-      },
-      {
-        text: "🗑",
-        ariaLabel: "Delete",
-        handler: function(){
-          const sel = grid.getSelectionModel().getSelection();
-          if (sel && sel.length) store.remove(sel);
-        }
-      }
-    ]
-  };
-
+  // bottom docked toolbar with centered Save/Close
   const bottomBar = {
     xtype: "toolbar",
     dock: "bottom",
@@ -947,12 +933,12 @@ APModFiller.openPriorityWindow = function() {
       {
         text: "Save",
         handler: function(){
+          // persist all fixed codes
           const out = {};
           store.each(function(r){
-            const code = String(r.get("code")||"").trim();
-            if (!code) return;
+            const code = String(r.get("code"));
             out[code] = {
-              switchTo: String(r.get("switchTo")||"").trim(), // stays "" when "—" is shown
+              switchTo: String(r.get("switchTo")||"").trim(), // "" when "—" shown
               label: String(r.get("label")||"").trim()
             };
           });
@@ -968,15 +954,15 @@ APModFiller.openPriorityWindow = function() {
 
   const mainPanel = Ext.create("Ext.panel.Panel", {
     layout: { type: "hbox", align: "stretch" },
-    items: [ leftControls, grid ],
+    items: [ grid ],
     dockedItems: [ bottomBar ]
   });
 
   const win = Ext.create("Ext.window.Window", {
     title: "Priority Settings",
     modal: true,
-    width: 700,
-    height: 420,
+    width: 640,
+    height: 380,
     layout: "fit",
     items: [ mainPanel ]
   });
@@ -1560,6 +1546,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

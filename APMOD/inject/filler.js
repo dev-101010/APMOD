@@ -973,6 +973,10 @@ APModFiller.openPriorityWindow = function() {
 /** Opens a window to edit APModFiller.store.autoFill (type/status/field/value). */
 // APModFiller.openAutoFillWindow: CellEditing (no row update/cancel popup), left text-icons, bottom dock with centered Save/Close and right-aligned Import/Export
 APModFiller.openAutoFillWindow = function() {
+  // --- typed payload metadata for import/export ---
+  const AUTO_KIND = "APModFiller.AutoFill";
+  const AUTO_VERSION = 1;
+
   // --- Friendly labels while keeping internal values ---
   const TYPE_OPTS   = [["save",  "On save"], ["load",  "On load"]];
   const STATUS_OPTS = [["always","Always"],  ["empty", "Field is empty"]];
@@ -1010,44 +1014,63 @@ APModFiller.openAutoFillWindow = function() {
     if (APModPopup) APModPopup.openPopup("AutoFill saved.");
   }
 
-  function doExport() {
-    const exportArr = [];
+  // Build typed export object
+  function buildExportObject() {
+    const items = [];
     store.each(function(r){
-      exportArr.push({
+      items.push({
         type: r.get("type"),
         status: r.get("status"),
         field: r.get("field"),
         value: r.get("value")
       });
     });
-    const json = JSON.stringify(exportArr, null, 2);
+    return { kind: AUTO_KIND, version: AUTO_VERSION, data: items };
+  }
+
+  function doExport() {
+    const payload = buildExportObject();
+    const json = JSON.stringify(payload, null, 2);
     const uri = "data:application/json;charset=utf-8," + encodeURIComponent(json);
     const a = document.createElement("a");
     a.setAttribute("href", uri);
-    a.setAttribute("download", "autofill.json");
+    a.setAttribute("download", "autofill.v" + AUTO_VERSION + ".json");
     a.click();
+  }
+
+  function normalizeImportedData(parsed) {
+    // Accept typed object {kind, version, data:[...]} OR legacy array [...]
+    if (Array.isArray(parsed)) {
+      return parsed; // legacy
+    }
+    if (parsed && parsed.kind === AUTO_KIND && Array.isArray(parsed.data)) {
+      // optionally check version compatibility
+      return parsed.data;
+    }
+    throw new Error("Unrecognized file format");
   }
 
   function doImport() {
     const input = document.createElement("input");
     input.type = "file";
+    input.accept = ".json,application/json";
     input.onchange = e => {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = evt => {
         try {
-          const arr = JSON.parse(String(evt.target.result || "[]"));
-          if (!Array.isArray(arr)) throw new Error("Invalid JSON");
+          const parsed = JSON.parse(String(evt.target.result || "null"));
+          const arr = normalizeImportedData(parsed);
           store.loadData(arr.map(r => ({
-            type: r.type || "save",
-            status: r.status || "empty",
-            field: r.field || "",
-            value: r.value != null ? r.value : ""
+            type: (r && r.type) || "save",
+            status: (r && r.status) || "empty",
+            field: (r && r.field) || "",
+            value: (r && r.value) != null ? r.value : ""
           })));
           if (APModPopup) APModPopup.openPopup("Imported (not saved yet).");
         } catch (e) {
-          Ext.Msg.alert("Import failed", "Invalid JSON.");
+          Ext.Msg.alert("Import failed", "Invalid JSON or unsupported file.");
         }
       };
       reader.readAsText(file, "UTF-8");
@@ -1066,7 +1089,7 @@ APModFiller.openAutoFillWindow = function() {
       {
         text: "When to autofill?",
         dataIndex: "type",
-        width: 150,
+        width: 170,
         tooltip: "Choose when the rule should apply",
         editor: {
           xtype: "combo",
@@ -1083,7 +1106,7 @@ APModFiller.openAutoFillWindow = function() {
       {
         text: "Only autofill if",
         dataIndex: "status",
-        width: 160,
+        width: 180,
         tooltip: "Condition for applying the value",
         editor: {
           xtype: "combo",
@@ -1102,15 +1125,21 @@ APModFiller.openAutoFillWindow = function() {
     ],
     selModel: "rowmodel",
     plugins: [ cellEditor ],
-    tbar: null
+    // Sorting is desired -> keep default sortable columns & header menus
   });
 
-  // Left vertical text-icon buttons ("+" and "🗑")
+  // Left vertical text-icon buttons: compact size
   const leftControls = {
     xtype: "container",
-    width: 64,
+    width: 48, // narrower rail
     layout: { type: "vbox", align: "stretch", pack: "start" },
-    defaults: { xtype: "button", margin: "0 8 8 8", height: 36 },
+    defaults: {
+      xtype: "button",
+      margin: "0 6 6 6",
+      height: 28,       // compact
+      minWidth: 28,     // compact
+      scale: "small"    // compact styling
+    },
     items: [
       {
         text: "+",
@@ -1130,38 +1159,41 @@ APModFiller.openAutoFillWindow = function() {
     ]
   };
 
-  // Bottom docked toolbar: Save/Close centered, Import/Export right-aligned
-  const centerGroup = {
-    xtype: "container",
-    layout: { type: "hbox", pack: "center" },
-    items: [
-      { xtype: "button", text: "Save", handler: doSave },
-      { xtype: "tbspacer", width: 24 },
-      { xtype: "button", text: "Close", handler: function(){ win.close(); } }
-    ]
-  };
-
-  const rightGroup = {
-    xtype: "container",
-    layout: { type: "hbox", pack: "end" },
-    items: [
-      { xtype: "button", text: "Import", handler: doImport },
-      { xtype: "tbspacer", width: 8 },
-      { xtype: "button", text: "Export", handler: doExport }
-    ]
-  };
-
+  // Bottom docked toolbar split into thirds:
+  // [ left (spacer) ] [ center (Save/Close centered) ] [ right (Import/Export right-aligned) ]
   const bottomBar = {
     xtype: "toolbar",
     dock: "bottom",
+    layout: { type: "hbox", align: "middle" },
     items: [
+      // Left third (spacer)
       { xtype: "container", flex: 1 },
-      Ext.apply({ xtype: "container", flex: 0 }, centerGroup),
-      { xtype: "container", flex: 1 },
-      Ext.apply({ xtype: "container", flex: 0 }, rightGroup)
+      // Middle third (center group)
+      {
+        xtype: "container",
+        flex: 1,
+        layout: { type: "hbox", pack: "center" },
+        items: [
+          { xtype: "button", text: "Save", handler: doSave },
+          { xtype: "tbspacer", width: 24 },
+          { xtype: "button", text: "Close", handler: function(){ win.close(); } }
+        ]
+      },
+      // Right third (Import/Export aligned to right)
+      {
+        xtype: "container",
+        flex: 1,
+        layout: { type: "hbox", pack: "end" },
+        items: [
+          { xtype: "button", text: "Import", handler: doImport },
+          { xtype: "tbspacer", width: 8 },
+          { xtype: "button", text: "Export", handler: doExport }
+        ]
+      }
     ]
   };
 
+  // Main panel: left controls + grid
   const mainPanel = Ext.create("Ext.panel.Panel", {
     layout: { type: "hbox", align: "stretch" },
     items: [ leftControls, grid ],
@@ -1171,8 +1203,8 @@ APModFiller.openAutoFillWindow = function() {
   const win = Ext.create("Ext.window.Window", {
     title: "AutoFill Manager",
     modal: true,
-    width: 800,
-    height: 480,
+    width: 820,
+    height: 500,
     layout: "fit",
     items: [ mainPanel ]
   });
@@ -1592,6 +1624,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

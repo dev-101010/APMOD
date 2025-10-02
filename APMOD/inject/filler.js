@@ -91,7 +91,7 @@ APModFiller.inputClick = (e) => {
                     APModFiller.store2.unshift({type: "text", content: textToCopy, timestamp: Date.now()});
                     if (APModFiller.store2.length > APModFiller.store.settings.copyEntries) APModFiller.store2.pop();
                     localStorage.setItem("APModCopy", JSON.stringify({"history": APModFiller.store2}));
-                    APModPopup.openPopup("Kopiert: " + textToCopy);
+                    if(APModPopup) APModPopup.openPopup("Kopiert: " + textToCopy);
                 }
             }
         }
@@ -1682,6 +1682,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

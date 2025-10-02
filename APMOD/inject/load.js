@@ -5,5 +5,6 @@ window.addEventListener("load", ()=> {
 	if(APModFiller!=null)APModFiller.load();
 	if(APModSelector!=null)APModSelector.load();
 	if(APModCopyWo!=null)APModCopyWo.load();
+	if(APModOptions!=null)APModOptions.load();
 });
 

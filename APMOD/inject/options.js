@@ -4,7 +4,6 @@ var APModOptions = (function () {
 
   function createMenu() {
     return Ext.create("Ext.menu.Menu", {
-      layout: { type: "table", columns: COLUMNS },
       showSeparator: false,
       defaults: { icon: null, iconCls: null, plain: true },
       items: [
@@ -16,12 +15,6 @@ var APModOptions = (function () {
           handler: function(){ APModFiller.openPriorityWindow(); } },
         { xtype: "menuitem", text: "AutoFill Manager", hideOnClick: true,
           handler: function(){ APModFiller.openAutoFillWindow(); } },
-
-        // Add more fixed items or sections here if needed
-        // { xtype: "menuseparator" },
-        // { xtype: "menuitem", text: "Mappings", disabled: true },
-        // { xtype: "menuitem", text: "Open Mappings", hideOnClick: true,
-        //   handler: function(){ APModMappings.openMappingsWindow(); } },
       ]
     });
   }

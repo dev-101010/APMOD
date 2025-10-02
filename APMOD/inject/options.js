@@ -38,7 +38,12 @@ var APModOptions = (function () {
       TBclass.prototype.APModOptionsOrigInitComponent = TBclass.prototype.initComponent;
       TBclass.prototype.initComponent = function () {
         this.APModOptionsOrigInitComponent.apply(this, arguments);
-        this.insert(this.items.length, createDropdown());
+        this.insert(this.items.length, { 
+                    text: 'Menu', menu: [
+                    	{ text: 'Option 1', handler: 'onOption1Click' },
+                		{ text: 'Option 2', handler: 'onOption2Click' }
+                	]
+                },);
       };
       _patched = true;
     }

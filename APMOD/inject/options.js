@@ -10,7 +10,7 @@ var APModOptions = (function () {
       this.APModOptionsOrigInitComponent.apply(this, arguments);
       this.insert(this.items.length, {
         text: null,
-        icon: null, iconCls: "x-pictos x-pictos-gear", // text-only
+        icon: null, iconCls: "x-tool.img x-tool-gear", // text-only
         menu: [
           // --- Header + separator ---
         { 

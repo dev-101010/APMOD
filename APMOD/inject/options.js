@@ -17,7 +17,7 @@ var APModOptions = (function () {
               APModFiller.showFillerSettings(); 
             } 
           },
-          { text: "CopyWo Settings", icon: null, iconCls: null, hideOnClick: true,
+          { text: "CopyWo Options", icon: null, iconCls: null, hideOnClick: true,
             handler: function(){ 
               APModDataSpy.showCopyWoOptions();
             } 

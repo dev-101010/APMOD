@@ -6,6 +6,37 @@ const APModDataSpy = {
 
 APModDataSpy.load = () => {
 	if (typeof Ext === 'undefined' || typeof EAM === 'undefined') return;
+	
+	EAM.APModDataSpy = APModDataSpy;
+	APModDataSpy.login = "UNKNOWN";
+	if(EAM?.AppData?._appData?.installParams?.user != null)
+	{
+		const mail = EAM.AppData._appData.installParams.user;
+		if(mail != null && mail.includes("@"))
+		{
+			APModDataSpy.login = mail.split("@")[0];
+		}
+	}
+
+	/*Ext.data.Store.prototype.dsGetData = function(){
+	  const arr = [];
+	  this.data.items.forEach(({data})=>{
+	    if (data.name === 'No Filter') return;
+	    const { name, sort, filter, field } = data; // pick only used props
+	    arr.push({ name, sort, filter, field });
+	  });
+	  return arr;
+	};*/
+
+	/*Ext.data.Store.prototype.dsGetData = function() {
+		const arr = [];
+		for (const item of this.data.items) {
+			if (item.data.name == "No Filter") continue;
+			delete item.data.id;
+			arr.push(item.data);
+		}
+		return arr;
+	}*/
 
 	Ext.data.Store.prototype.dsGetData = function () {
 	  const out = [];
@@ -38,37 +69,6 @@ APModDataSpy.load = () => {
 	
 	  return out;
 	};
-	
-	/*EAM.APModDataSpy = APModDataSpy;
-	APModDataSpy.login = "UNKNOWN";
-	if(EAM?.AppData?._appData?.installParams?.user != null)
-	{
-		const mail = EAM.AppData._appData.installParams.user;
-		if(mail != null && mail.includes("@"))
-		{
-			APModDataSpy.login = mail.split("@")[0];
-		}
-	}*/
-
-	/*Ext.data.Store.prototype.dsGetData = function(){
-	  const arr = [];
-	  this.data.items.forEach(({data})=>{
-	    if (data.name === 'No Filter') return;
-	    const { name, sort, filter, field } = data; // pick only used props
-	    arr.push({ name, sort, filter, field });
-	  });
-	  return arr;
-	};*/
-
-	Ext.data.Store.prototype.dsGetData = function() {
-		const arr = [];
-		for (const item of this.data.items) {
-			if (item.data.name == "No Filter") continue;
-			delete item.data.id;
-			arr.push(item.data);
-		}
-		return arr;
-	}
 
     APModDataSpy.injectMainToolbar();
 	APModDataSpy.injectDataspy();

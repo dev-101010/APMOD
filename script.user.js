@@ -30,11 +30,11 @@ GM_addStyle (GM_getResourceText("STYLE1"));
 GM_addStyle (GM_getResourceText("STYLE2"));
 
 window.addEventListener("load", ()=> {
-    if(APModOptions!=null)APModOptions.load();
     if(APModPopup!=null)APModPopup.load();
     if(APModShift!=null)APModShift.load();
     if(APModDataSpy!=null)APModDataSpy.load();
     if(APModFiller!=null)APModFiller.load();
     if(APModSelector!=null)APModSelector.load();
     if(APModCopyWo!=null)APModCopyWo.load();
+    if(APModOptions!=null)APModOptions.load();
 });

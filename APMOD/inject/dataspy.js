@@ -18,7 +18,7 @@ APModDataSpy.load = () => {
 		}
 	}
 
-	Ext.data.Store.prototype.dsGetData = function(){
+	/*Ext.data.Store.prototype.dsGetData = function(){
 	  const arr = [];
 	  this.data.items.forEach(({data})=>{
 	    if (data.name === 'No Filter') return;
@@ -26,7 +26,17 @@ APModDataSpy.load = () => {
 	    arr.push({ name, sort, filter, field });
 	  });
 	  return arr;
-	};
+	};*/
+
+	Ext.data.Store.prototype.dsGetData = function() {
+		const arr = [];
+		for (const item of this.data.items) {
+			if (item.data.name == "No Filter") continue;
+			delete item.data.id;
+			arr.push(item.data);
+		}
+		return arr;
+	}
 
     APModDataSpy.injectMainToolbar();
 	APModDataSpy.injectDataspy();
@@ -1586,6 +1596,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

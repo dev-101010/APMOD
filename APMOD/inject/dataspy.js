@@ -1018,6 +1018,12 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore, filterValueStore) => 
 						      combo.getStore().clearFilter(true);
 						      combo.lastQuery = null;
 						      combo.doQuery('', true); // empty query -> show all
+						    },
+						    beforequery: function (qe) {
+						      // safety net for some Ext versions/builds
+						      qe.query = '';
+						      qe.forceAll = true;
+						      if (qe.combo) qe.combo.lastQuery = null;
 						    }
 						  }
 					},
@@ -1613,6 +1619,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

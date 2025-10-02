@@ -12,7 +12,7 @@
 	}],
 
 	"web_accessible_resources": [{
-		"resources": ["inject/selector.js","inject/dataspy.js","inject/dataspyfilter.js","inject/filler.js","inject/shift.js","inject/popup.js","inject/radialmenu.js","inject/style.css","inject/radialmenu.css","inject/load.js"],
+		"resources": ["inject/selector.js","inject/dataspy.js","inject/dataspyfilter.js","inject/filler.js","inject/shift.js","inject/popup.js","inject/radialmenu.js","inject/load.js","inject/options.js","inject/style.css","inject/radialmenu.css"],
 		"matches": ["https://eu1.eam.hxgnsmartcloud.com/*","https://t.corp.amazon.com/*"]
 	  }],
 
@@ -21,6 +21,7 @@
 		"default_icon": "icon.png"
 	}
 }
+
 
 
 

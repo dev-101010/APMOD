@@ -263,32 +263,65 @@ var APModShift = (function () {
    * Import from a parsed JSON value (already JSON.parse'd).
    * Merges or replaces cache (default: replace = true). Saves and optionally refreshes a store.
    */
-  api.importFromParsed = function (parsed, opts) {
-    const o = opts || {};
-    const normalized = _normalizeImportedData(parsed);
-    const targetKey = o.storageKey || normalized.storageKey || api._loadedKey || api.defaults.storageKey;
+  // Stricter import using the typed header and giving clear feedback.
+api.importFromParsed = function(parsed, opts) {
+  const o = opts || {};
 
-    // Ensure cache belongs to the active key
-    if (!api._loadedKey || api._loadedKey !== targetKey) {
-      api.load(targetKey);
-    }
+  // 1) Enforce typed payload
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed) || parsed.kind !== EXPORT_KIND) {
+    throw new Error("Unsupported file: missing or invalid 'kind'.");
+  }
+  if (typeof parsed.version !== "number" || parsed.version > EXPORT_VERSION) {
+    throw new Error("Unsupported file version.");
+  }
+  if (!parsed.data || typeof parsed.data !== "object" || Array.isArray(parsed.data)) {
+    throw new Error("Invalid payload: 'data' must be an object.");
+  }
 
-    const incoming = normalized.map || {};
-    if (o.merge === true) {
-      // merge: override incoming keys, keep others
-      api.cache = Object.assign({}, api.cache || {}, incoming);
-    } else {
-      // replace
-      api.cache = incoming;
-    }
-    api.save(targetKey);
+  const fileKey = parsed.storageKey || null;
+  const targetKey = o.storageKey || fileKey || api._loadedKey || api.defaults.storageKey;
 
-    // Optionally refresh a store to push values into records
-    const store = o.store;
-    if (store) {
-      api.refresh(store, Ext.apply({}, { storageKey: targetKey }, api.defaults));
-    }
-  };
+  // 2) Ensure we operate on the correct storage slot
+  if (!api._loadedKey || api._loadedKey !== targetKey) {
+    api.load(targetKey);
+  }
+
+  // 3) Replace or merge cache
+  const incoming = parsed.data || {};
+  if (o.merge === true) {
+    api.cache = Object.assign({}, api.cache || {}, incoming);
+  } else {
+    api.cache = incoming;
+  }
+  api.save(targetKey);
+
+  // 4) Optional: apply to store and compute match stats
+  let stats = { total: Object.keys(incoming).length, matched: null, storageKey: targetKey };
+  const store = o.store;
+  if (store) {
+    const present = {};
+    store.each(function(rec){ present[api.defaults.keyFn(rec)] = true; });
+    stats.matched = Object.keys(incoming).reduce((n,k)=> n + (present[k] ? 1 : 0), 0);
+    api.refresh(store, Ext.apply({}, { storageKey: targetKey }, api.defaults));
+  }
+
+  // 5) User feedback (prefer APModPopup if present)
+  const warnings = [];
+  if (fileKey && fileKey !== targetKey && !o.storageKey) {
+    warnings.push(`File storageKey "${fileKey}" differs from target "${targetKey}".`);
+  }
+  if (stats.matched !== null && stats.total > 0 && stats.matched === 0) {
+    warnings.push("No keys matched current grid records.");
+  }
+  const msg =
+    `Imported ${stats.total} note(s) into "${targetKey}".` +
+    (stats.matched !== null ? `\nApplied to ${stats.matched} record(s).` : "") +
+    (warnings.length ? `\n\nWarnings:\n- ${warnings.join("\n- ")}` : "");
+
+  if (window.APModPopup) APModPopup.openPopup(msg);
+  else if (Ext && Ext.Msg && Ext.Msg.alert) Ext.Msg.alert("Import result", msg.replace(/\n/g,"<br/>"));
+  else alert(msg);
+};
 
   /**
    * Open a file picker, parse, validate, import, save, and refresh.

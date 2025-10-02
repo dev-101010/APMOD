@@ -29,7 +29,6 @@ APModDataSpy.load = () => {
 		return arr;
 	}
 
-    APModDataSpy.injectMainToolbar();
 	APModDataSpy.injectDataspy();
 	APModDataSpy.injectReadOnlyGrid();
 }
@@ -248,7 +247,7 @@ APModDataSpy.onFunction = (value) => {
 	return value;
 }
 
-APModDataSpy.injectMainToolbar = () => {
+/*APModDataSpy.injectMainToolbar = () => {
 	if (typeof EAM?.view?.common?.MainToolbar === 'undefined') return;
 	const TBclass = EAM.view.common.MainToolbar;
 	if (TBclass.prototype.APModDataSpyOrigInitComponent == null) {
@@ -260,9 +259,9 @@ APModDataSpy.injectMainToolbar = () => {
             }
 		}
 	}
-}
+}*/
 
-APModDataSpy.createCopyWoButton = () => {
+/*APModDataSpy.createCopyWoButton = () => {
 	return Ext.create('Ext.Button', {
 		text: '📋',
 		tooltip: "CopyWo Menu",
@@ -273,6 +272,15 @@ APModDataSpy.createCopyWoButton = () => {
 			}
 		}
 	});
+}*/
+
+APModDataSpy.showCopyWoOptions = () => {
+	if (APModDataSpy.popupWo == null) {
+        APModDataSpy.popupWo = APModDataSpy.createCopyWoPopupPanel()
+		if (APModDataSpy.popupWo != null) APModDataSpy.popupWo.show();
+	} else {
+		APModDataSpy.popupWo.show();
+	}
 }
 
 APModDataSpy.createCopyWoPopupPanel = () => {
@@ -1574,6 +1582,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

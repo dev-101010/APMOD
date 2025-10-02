@@ -9,7 +9,7 @@ var APModOptions = (function () {
     TBclass.prototype.initComponent = function () {
       this.APModOptionsOrigInitComponent.apply(this, arguments);
       this.insert(this.items.length, {
-      iconCls: "x-tool-img x-tool-gear", // icon
+      iconCls: "x-btn-icon-el x-btn-icon-el-default-toolbar-small toolbarGear", // icon
         menu: [
           // --- Header + separator ---
         { 

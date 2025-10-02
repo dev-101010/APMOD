@@ -517,7 +517,7 @@ APModDataSpy.getGridToCsvButton = (grid) => {
 	
 APModDataSpy.getGridNodesExportButton = (grid) => {
 	return Ext.create('Ext.Button', {
-		text: "🔽",
+		text: "⇓",
 		tooltip: "Export Nodes",
 		handler: function() {
 			APModShift.exportToFile({ storageKey: "APModShift" });
@@ -527,7 +527,7 @@ APModDataSpy.getGridNodesExportButton = (grid) => {
 
 APModDataSpy.getGridNodesImportButton = (grid) => {
 	return Ext.create('Ext.Button', {
-		text: "🔼",
+		text: "⇑",
 		tooltip: "Import Nodes",
 		handler: function() {
 			APModShift.importFromFile({ store: grid.getStore() });
@@ -1610,6 +1610,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

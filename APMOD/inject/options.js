@@ -12,6 +12,11 @@ var APModOptions = (function () {
         xtype: "button",
       // icon-only button (no text); uses Ext's built-in tool icon classes
       iconCls: "x-tool x-tool-gear",
+      ui: "default-toolbar",
+      tooltip: "APMod",
+      focusable: false,
+      width: 28,   // tweak if your theme needs other sizing
+      height: 28,  // tweak if your theme needs other sizing
         menu: [
           // --- Header + separator ---
         { 

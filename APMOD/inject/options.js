@@ -9,8 +9,8 @@ var APModOptions = (function () {
     TBclass.prototype.initComponent = function () {
       this.APModOptionsOrigInitComponent.apply(this, arguments);
       this.insert(this.items.length, {
-        text: "⚙️",
-        icon: null, iconCls: null, // text-only
+        text: null,
+        icon: null, iconCls: "x-fa fa-cog", // text-only
         menu: [
           // --- Header + separator ---
         { 

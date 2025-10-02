@@ -438,20 +438,6 @@ APModFiller.delRad = (target, x, y, apModFields) => {
     } else APModPopup.openPopup("No entry found.");
 }
 
-/*APModFiller.injectMainToolbar = () => {
-    if (typeof EAM?.view?.common?.MainToolbar === 'undefined') return;
-    const TBclass = EAM.view.common.MainToolbar;
-    if (TBclass.prototype.APModFillerOrigInitComponent == null) {
-        TBclass.prototype.APModFillerOrigInitComponent = TBclass.prototype.initComponent;
-        TBclass.prototype.initComponent = function () {
-            this.APModFillerOrigInitComponent.apply(this, []);
-            this.insert(this.items.length, APModFiller.createFillerButton());
-            this.insert(this.items.length, APModFiller.createPriorityButton());
-            this.insert(this.items.length, APModFiller.createAutoFillButton());
-        }
-    }
-}*/
-
 APModFiller.injectRecordView = () => {
   if (typeof EAM.view?.common?.RecordView === 'undefined') return;
   const RVclass = EAM.view.common.RecordView;
@@ -818,39 +804,6 @@ APModFiller.showFillerSettings = () => {
         if (APModFiller.popup != null) APModFiller.popup.show();
     }
 }
-
-/*APModFiller.createFillerButton = () => {
-    return Ext.create('Ext.Button', {
-        text: '✎',
-        tooltip: "Filler Menu",
-        handler: function () {
-            if (APModFiller.popup == null) {
-                APModFiller.popup = APModFiller.createPopupPanel(APModFiller.store)
-                if (APModFiller.popup != null) APModFiller.popup.show();
-            }
-        }
-    });
-}*/
-
-/*APModFiller.createPriorityButton = () => {
-    return Ext.create('Ext.Button', {
-        text: '№',
-        tooltip: "Priority Menu",
-        handler: function () {
-            APModFiller.openPriorityWindow();
-        }
-    });
-}
-
-APModFiller.createAutoFillButton = () => {
-    return Ext.create('Ext.Button', {
-        text: '📝',
-        tooltip: "Autofill Menu",
-        handler: function () {
-            APModFiller.openAutoFillWindow();
-        }
-    });
-}*/
 
 /** Opens a window to edit APModFiller.store.priority (object as key->config). */
 APModFiller.openPriorityWindow = function() {
@@ -1633,6 +1586,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

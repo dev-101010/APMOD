@@ -308,7 +308,7 @@ var APModShift = (function () {
         try {
           const parsed = JSON.parse(String(evt.target.result || "null"));
           api.importFromParsed(parsed, opts || {});
-          if (window.APModPopup) {
+          if (APModPopup) {
             APModPopup.openPopup("Notes imported.");
           } else {
             // Silent fallback (no blocking alerts); useful for unit tests/dev

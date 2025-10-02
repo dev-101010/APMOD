@@ -985,10 +985,6 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore, filterValueStore) => 
 						forceSelection: true,
 						anyMatch: true,
 						queryMode: 'local',
-						minChars: 0,
-						queryOnExpand: true,
-						triggerAction: 'all',
-						queryCaching: false
 					},
 					align: 'center'
 				},
@@ -1007,25 +1003,6 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore, filterValueStore) => 
 						forceSelection: true,
 						anyMatch: true,
 						queryMode: 'local',
-						minChars: 0,
-						queryOnExpand: true,
-						triggerAction: 'all',
-						queryCaching: false,
-						caseSensitive: false,
-						listeners: {
-						    expand: function (combo) {
-						      // ensure previous filters/queries don't block the full list
-						      combo.getStore().clearFilter(true);
-						      combo.lastQuery = null;
-						      combo.doQuery('', true); // empty query -> show all
-						    },
-						    beforequery: function (qe) {
-						      // safety net for some Ext versions/builds
-						      qe.query = '';
-						      qe.forceAll = true;
-						      if (qe.combo) qe.combo.lastQuery = null;
-						    }
-						  }
 					},
 					align: 'center'
 				},
@@ -1042,44 +1019,27 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore, filterValueStore) => 
 					},
 					align: 'center',
 					editor: {
-  xtype: 'combobox',
-  store: [
-    'CONTAINS','NOTCONTAINS','IS EMPTY','NOT EMPTY',
-    'BEGINS','ENDS','<','>','<=','>=','=','!='
-  ],
-  queryMode: 'local',
-  editable: true,
-  forceSelection: true,     // optional
-  anyMatch: true,           // we'll also handle matching ourselves
-  minChars: 0,
-  filterPickList: false,    // << disable built-in filtering to avoid the "empty query = empty list" issue
-  triggerAction: 'all',
-  listeners: {
-    expand: function (combo) {
-      // Always show all on open
-      const store = combo.getStore();
-      store.clearFilter(true);
-    },
-    beforequery: function (qe) {
-      // Manual local filtering (including empty query)
-      const combo = qe.combo, store = combo.getStore();
-      const q = (qe.query || '').toLowerCase();
-
-      store.clearFilter(true);
-
-      if (q.length) {
-        store.filterBy(function (rec) {
-          // For simple array store, rec.get(combo.displayField) may be undefined.
-          // rec.data is the string itself in position 0.
-          const val = (rec.get && combo.displayField) ? rec.get(combo.displayField) : rec.data;
-          return String(val).toLowerCase().indexOf(q) !== -1;
-        });
-      }
-      // prevent default query logic (which caused the empty-list behavior)
-      qe.cancel = true;
-    }
-  }
-}
+						xtype: 'combobox',
+						editable: true,
+						forceSelection: false,
+						store: filterValueStore,
+						displayField: 'value',
+						valueField: 'value',
+						listeners:{
+							select: function(comp,record,index) {
+								if(comp.getValue() == "&nbsp;") comp.setValue("");
+							},
+							expand:function(combo){
+								if(combo.up().context?.record?.data?.NAME != null) {
+									const name = combo.up().context.record.data.NAME;
+									combo.store.clearFilter();
+									combo.store.filterBy(function(rec){
+										return rec.data.typ == name || rec.data.typ == "*";
+									});
+								}
+							}
+						}
+					}
 				},
 				{
 					xtype: 'checkcolumn',
@@ -1107,10 +1067,6 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore, filterValueStore) => 
 						forceSelection: true,
 						anyMatch: true,
 						queryMode: 'local',
-						minChars: 0,
-						queryOnExpand: true,
-						triggerAction: 'all',
-						queryCaching: false
 					},
 					align: 'center'
 				}
@@ -1631,11 +1587,6 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
-
-
-
-
-
 
 
 

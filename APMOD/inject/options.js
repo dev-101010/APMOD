@@ -13,8 +13,10 @@ var APModOptions = (function () {
         icon: null, iconCls: null, // text-only
         menu: [
           // --- Header + separator ---
-        { xtype: "menuitem", text: "APMod", disabled: true, // acts as header
-          style: "font-weight:bold;cursor:default;" },
+        { 
+          xtype: "component",
+          html: "<div style='font-weight:bold;padding:6px 10px;'>APMod</div'"
+        },
         "-",
           { text: "Filler Manager", icon: null, iconCls: null, hideOnClick: true,
             handler: function(){ 

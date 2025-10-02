@@ -26,6 +26,8 @@ APModDataSpy.load = () => {
 	    const copy = (typeof Ext !== 'undefined' && Ext.clone)
 	      ? Ext.clone(raw)
 	      : JSON.parse(JSON.stringify(raw)); // fallback for plain data
+
+		  console.log(copy);
 	
 	    // Remove id fields only on the copy
 	    if (copy && Object.prototype.hasOwnProperty.call(copy, idProp)) delete copy[idProp];
@@ -1626,6 +1628,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

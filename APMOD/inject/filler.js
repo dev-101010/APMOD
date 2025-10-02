@@ -1180,18 +1180,6 @@ APModFiller.openAutoFillWindow = function() {
   win.show();
 };
 
-
-  const win = Ext.create("Ext.window.Window", {
-    title: "AutoFill Manager",
-    modal: true,
-    width: 800,
-    height: 480,
-    layout: "fit",
-    items: [grid]
-  });
-  win.show();
-};
-
 APModFiller.createPopupPanel = (store) => {
     const fillerStore = Ext.create('Ext.data.Store', {
         fields: ['field', 'depth', 'data', 'title'],
@@ -1604,6 +1592,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

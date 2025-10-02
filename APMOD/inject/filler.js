@@ -971,22 +971,17 @@ APModFiller.openPriorityWindow = function() {
 };
 
 /** Opens a window to edit APModFiller.store.autoFill (type/status/field/value). */
+// APModFiller.openAutoFillWindow: CellEditing (no row update/cancel popup), left text-icons, bottom dock with centered Save/Close and right-aligned Import/Export
 APModFiller.openAutoFillWindow = function() {
-    // --- Friendly labels while keeping internal values ---
-    const TYPE_OPTS   = [["save",  "On save"],       ["load",  "On load"]];
-    const STATUS_OPTS = [["always","Always"],         ["empty", "Field is empty"]];
-    
-    const TYPE_LABEL   = { save: "On save",  load: "On load" };
-    const STATUS_LABEL = { always: "Always", empty: "Field is empty" };
-    
-    const typeStore = new Ext.data.ArrayStore({
-      fields: ["value","label"],
-      data: TYPE_OPTS
-    });
-    const statusStore = new Ext.data.ArrayStore({
-      fields: ["value","label"],
-      data: STATUS_OPTS
-    });
+  // --- Friendly labels while keeping internal values ---
+  const TYPE_OPTS   = [["save",  "On save"], ["load",  "On load"]];
+  const STATUS_OPTS = [["always","Always"],  ["empty", "Field is empty"]];
+
+  const TYPE_LABEL   = { save: "On save",  load: "On load" };
+  const STATUS_LABEL = { always: "Always", empty: "Field is empty" };
+
+  const typeStore = new Ext.data.ArrayStore({ fields: ["value","label"], data: TYPE_OPTS });
+  const statusStore = new Ext.data.ArrayStore({ fields: ["value","label"], data: STATUS_OPTS });
 
   const data = (APModFiller.store.autoFill || []).map(r => ({
     type: r.type || "save",
@@ -1011,7 +1006,7 @@ APModFiller.openAutoFillWindow = function() {
       arr.push({ type, status, field, value });
     });
     APModFiller.store.autoFill = arr;
-    APModFiller.save(); // trigger your existing save
+    APModFiller.save();
     if (APModPopup) APModPopup.openPopup("AutoFill saved.");
   }
 
@@ -1026,7 +1021,6 @@ APModFiller.openAutoFillWindow = function() {
       });
     });
     const json = JSON.stringify(exportArr, null, 2);
-    // Use a download (like your exportToJsonFile)
     const uri = "data:application/json;charset=utf-8," + encodeURIComponent(json);
     const a = document.createElement("a");
     a.setAttribute("href", uri);
@@ -1061,67 +1055,131 @@ APModFiller.openAutoFillWindow = function() {
     input.click();
   }
 
+  // Use CellEditing to avoid row update/cancel confirmation
+  const cellEditor = Ext.create("Ext.grid.plugin.CellEditing", { clicksToEdit: 1 });
+
   const grid = Ext.create("Ext.grid.Panel", {
     border: true,
+    flex: 1,
     store,
     columns: [
       {
-  text: "When to autofill?",
-  dataIndex: "type",
-  width: 150,
-  tooltip: "Choose when the rule should apply",
-  editor: {
-    xtype: "combo",
-    queryMode: "local",
-    editable: false,
-    forceSelection: true,
-    triggerAction: "all",
-    store: typeStore,
-    valueField: "value",   // keeps "save"/"load"
-    displayField: "label"  // shows "On save"/"On load"
-  },
-  renderer: function(v){ return TYPE_LABEL[v] || v; }
-},
-{
-  text: "Only autofill if",
-  dataIndex: "status",
-  width: 160,
-  tooltip: "Condition for applying the value",
-  editor: {
-    xtype: "combo",
-    queryMode: "local",
-    editable: false,
-    forceSelection: true,
-    triggerAction: "all",
-    store: statusStore,
-    valueField: "value",   // keeps "always"/"empty"
-    displayField: "label"  // shows "Always"/"Field is empty"
-  },
-  renderer: function(v){ return STATUS_LABEL[v] || v; }
-},
+        text: "When to autofill?",
+        dataIndex: "type",
+        width: 150,
+        tooltip: "Choose when the rule should apply",
+        editor: {
+          xtype: "combo",
+          queryMode: "local",
+          editable: false,
+          forceSelection: true,
+          triggerAction: "all",
+          store: typeStore,
+          valueField: "value",
+          displayField: "label"
+        },
+        renderer: function(v){ return TYPE_LABEL[v] || v; }
+      },
+      {
+        text: "Only autofill if",
+        dataIndex: "status",
+        width: 160,
+        tooltip: "Condition for applying the value",
+        editor: {
+          xtype: "combo",
+          queryMode: "local",
+          editable: false,
+          forceSelection: true,
+          triggerAction: "all",
+          store: statusStore,
+          valueField: "value",
+          displayField: "label"
+        },
+        renderer: function(v){ return STATUS_LABEL[v] || v; }
+      },
       { text: "Field", dataIndex: "field", flex: 1, editor: { xtype: "textfield" } },
       { text: "Value", dataIndex: "value", flex: 1, editor: { xtype: "textfield" } }
     ],
     selModel: "rowmodel",
-    plugins: [ Ext.create("Ext.grid.plugin.RowEditing", { clicksToEdit: 1 }) ],
-    tbar: [
-      { text: "Add", handler: function(){
+    plugins: [ cellEditor ],
+    tbar: null
+  });
+
+  // Left vertical text-icon buttons ("+" and "🗑")
+  const leftControls = {
+    xtype: "container",
+    width: 64,
+    layout: { type: "vbox", align: "stretch", pack: "start" },
+    defaults: { xtype: "button", margin: "0 8 8 8", height: 36 },
+    items: [
+      {
+        text: "+",
+        handler: function(){
           const rec = store.add({ type:"save", status:"empty", field:"", value:"" })[0];
-          grid.findPlugin("rowediting").startEdit(rec, 0);
+          cellEditor.startEdit(rec, 0);
         }
       },
-      { text: "Delete", handler: function(){
+      {
+        text: "🗑",
+        ariaLabel: "Delete",
+        handler: function(){
           const sel = grid.getSelectionModel().getSelection();
           if (sel && sel.length) store.remove(sel);
         }
-      },
-      "->",
-      { text: "Import", handler: doImport },
-      { text: "Export", handler: doExport },
-      { text: "Save", handler: doSave },
-      { text: "Close", handler: function(){ win.close(); } }
+      }
     ]
+  };
+
+  // Bottom docked toolbar: Save/Close centered, Import/Export right-aligned
+  const centerGroup = {
+    xtype: "container",
+    layout: { type: "hbox", pack: "center" },
+    items: [
+      { xtype: "button", text: "Save", handler: doSave },
+      { xtype: "tbspacer", width: 24 },
+      { xtype: "button", text: "Close", handler: function(){ win.close(); } }
+    ]
+  };
+
+  const rightGroup = {
+    xtype: "container",
+    layout: { type: "hbox", pack: "end" },
+    items: [
+      { xtype: "button", text: "Import", handler: doImport },
+      { xtype: "tbspacer", width: 8 },
+      { xtype: "button", text: "Export", handler: doExport }
+    ]
+  };
+
+  const bottomBar = {
+    xtype: "toolbar",
+    dock: "bottom",
+    items: [
+      { xtype: "container", flex: 1 },
+      Ext.apply({ xtype: "container", flex: 0 }, centerGroup),
+      { xtype: "container", flex: 1 },
+      Ext.apply({ xtype: "container", flex: 0 }, rightGroup)
+    ]
+  };
+
+  const mainPanel = Ext.create("Ext.panel.Panel", {
+    layout: { type: "hbox", align: "stretch" },
+    items: [ leftControls, grid ],
+    dockedItems: [ bottomBar ]
   });
+
+  const win = Ext.create("Ext.window.Window", {
+    title: "AutoFill Manager",
+    modal: true,
+    width: 800,
+    height: 480,
+    layout: "fit",
+    items: [ mainPanel ]
+  });
+
+  win.show();
+};
+
 
   const win = Ext.create("Ext.window.Window", {
     title: "AutoFill Manager",
@@ -1546,6 +1604,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

@@ -31,23 +31,35 @@ var APModOptions = (function () {
   }
 
   function injectMainToolbar() {
-    if (typeof EAM?.view?.common?.MainToolbar === "undefined") return;
-    var TBclass = EAM.view.common.MainToolbar;
-    if (_patched) return; // already patched
-    if (!TBclass.prototype.APModOptionsOrigInitComponent) {
-      TBclass.prototype.APModOptionsOrigInitComponent = TBclass.prototype.initComponent;
-      TBclass.prototype.initComponent = function () {
-        this.APModOptionsOrigInitComponent.apply(this, arguments);
-        this.insert(this.items.length, { 
-                    text: 'Menu', menu: [
-                    	{ text: 'Option 1', handler: 'onOption1Click' },
-                		{ text: 'Option 2', handler: 'onOption2Click' }
-                	]
-                },);
-      };
-      _patched = true;
-    }
+  if (typeof EAM?.view?.common?.MainToolbar === "undefined") return;
+  var TBclass = EAM.view.common.MainToolbar;
+  if (_patched) return; // already patched
+
+  if (!TBclass.prototype.APModOptionsOrigInitComponent) {
+    TBclass.prototype.APModOptionsOrigInitComponent = TBclass.prototype.initComponent;
+    TBclass.prototype.initComponent = function () {
+      this.APModOptionsOrigInitComponent.apply(this, arguments);
+      this.insert(this.items.length, {
+        text: "Menu",
+        icon: null, iconCls: null, // text-only
+        menu: [
+          { text: "Option 1", icon: null, iconCls: null, hideOnClick: true,
+            handler: function(){ 
+              // call your function here:
+              APModFiller.openPriorityWindow(); 
+            } 
+          },
+          { text: "Option 2", icon: null, iconCls: null, hideOnClick: true,
+            handler: function(){ 
+              APModFiller.openAutoFillWindow(); 
+            } 
+          }
+        ]
+      });
+    };
+    _patched = true;
   }
+}
 
   // Public API
   function load() {

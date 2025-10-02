@@ -7,7 +7,37 @@ const APModDataSpy = {
 APModDataSpy.load = () => {
 	if (typeof Ext === 'undefined' || typeof EAM === 'undefined') return;
 
-	EAM.APModDataSpy = APModDataSpy;
+	Ext.data.Store.prototype.dsGetData = function () {
+	  const out = [];
+	
+	  const Model  = this.getModel && this.getModel();
+	  const idProp = (Model && Model.prototype && Model.prototype.idProperty) || 'id';
+	
+	  // Use getRange() if available
+	  const records = this.getRange ? this.getRange() : (this.data && this.data.items) || [];
+	
+	  records.forEach((rec) => {
+	    const raw = rec.getData ? rec.getData() : rec.data;
+	    if (!raw) return;
+	
+	    if (raw.name === 'No Filter') return; // keep your original rule
+	
+	    // Prefer Ext.clone (handles Ext objects better than JSON stringify)
+	    const copy = (typeof Ext !== 'undefined' && Ext.clone)
+	      ? Ext.clone(raw)
+	      : JSON.parse(JSON.stringify(raw)); // fallback for plain data
+	
+	    // Remove id fields only on the copy
+	    if (copy && Object.prototype.hasOwnProperty.call(copy, idProp)) delete copy[idProp];
+	    if (copy && Object.prototype.hasOwnProperty.call(copy, 'internalId')) delete copy.internalId;
+	
+	    out.push(copy);
+	  });
+	
+	  return out;
+	};
+	
+	/*EAM.APModDataSpy = APModDataSpy;
 	APModDataSpy.login = "UNKNOWN";
 	if(EAM?.AppData?._appData?.installParams?.user != null)
 	{
@@ -16,7 +46,7 @@ APModDataSpy.load = () => {
 		{
 			APModDataSpy.login = mail.split("@")[0];
 		}
-	}
+	}*/
 
 	/*Ext.data.Store.prototype.dsGetData = function(){
 	  const arr = [];
@@ -1596,6 +1626,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

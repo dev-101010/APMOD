@@ -9,9 +9,13 @@ var APModOptions = (function () {
     TBclass.prototype.initComponent = function () {
       this.APModOptionsOrigInitComponent.apply(this, arguments);
       this.insert(this.items.length, {
-        text: "APMod",
+        text: "⚙️",
         icon: null, iconCls: null, // text-only
         menu: [
+          // --- Header + separator ---
+        { xtype: "menuitem", text: "APMod", disabled: true, // acts as header
+          style: "font-weight:bold;cursor:default;" },
+        "-",
           { text: "Filler Manager", icon: null, iconCls: null, hideOnClick: true,
             handler: function(){ 
               APModFiller.showFillerSettings(); 

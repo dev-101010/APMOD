@@ -9,7 +9,7 @@ var APModOptions = (function () {
     TBclass.prototype.initComponent = function () {
       this.APModOptionsOrigInitComponent.apply(this, arguments);
       this.insert(this.items.length, {
-      xtype: "gear",
+      iconCls: "x-tool-img x-tool-gear",
         menu: [
           // --- Header + separator ---
         { 

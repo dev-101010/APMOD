@@ -1042,32 +1042,44 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore, filterValueStore) => 
 					},
 					align: 'center',
 					editor: {
-						xtype: 'combobox',
-						editable: true,
-						forceSelection: false,
-						store: filterValueStore,
-						displayField: 'value',
-						valueField: 'value',
-						queryMode: 'local',        // << important
-						minChars: 0,               // << show even with empty input
-						queryOnExpand: true,
-						triggerAction: 'all',
-						queryCaching: false,
-						listeners:{
-							select: function(comp,record,index) {
-								if(comp.getValue() == "&nbsp;") comp.setValue("");
-							},
-							expand:function(combo){
-								if(combo.up().context?.record?.data?.NAME != null) {
-									const name = combo.up().context.record.data.NAME;
-									combo.store.clearFilter();
-									combo.store.filterBy(function(rec){
-										return rec.data.typ == name || rec.data.typ == "*";
-									});
-								}
-							}
-						}
-					}
+  xtype: 'combobox',
+  store: [
+    'CONTAINS','NOTCONTAINS','IS EMPTY','NOT EMPTY',
+    'BEGINS','ENDS','<','>','<=','>=','=','!='
+  ],
+  queryMode: 'local',
+  editable: true,
+  forceSelection: true,     // optional
+  anyMatch: true,           // we'll also handle matching ourselves
+  minChars: 0,
+  filterPickList: false,    // << disable built-in filtering to avoid the "empty query = empty list" issue
+  triggerAction: 'all',
+  listeners: {
+    expand: function (combo) {
+      // Always show all on open
+      const store = combo.getStore();
+      store.clearFilter(true);
+    },
+    beforequery: function (qe) {
+      // Manual local filtering (including empty query)
+      const combo = qe.combo, store = combo.getStore();
+      const q = (qe.query || '').toLowerCase();
+
+      store.clearFilter(true);
+
+      if (q.length) {
+        store.filterBy(function (rec) {
+          // For simple array store, rec.get(combo.displayField) may be undefined.
+          // rec.data is the string itself in position 0.
+          const val = (rec.get && combo.displayField) ? rec.get(combo.displayField) : rec.data;
+          return String(val).toLowerCase().indexOf(q) !== -1;
+        });
+      }
+      // prevent default query logic (which caused the empty-list behavior)
+      qe.cancel = true;
+    }
+  }
+}
 				},
 				{
 					xtype: 'checkcolumn',
@@ -1619,6 +1631,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

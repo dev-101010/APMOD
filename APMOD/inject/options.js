@@ -12,12 +12,12 @@ var APModOptions = (function () {
         text: "APMod",
         icon: null, iconCls: null, // text-only
         menu: [
-          { text: "Priority Settings", icon: null, iconCls: null, hideOnClick: true,
+          { text: "Filler Manager", icon: null, iconCls: null, hideOnClick: true,
             handler: function(){ 
               APModFiller.showFillerSettings(); 
             } 
           },
-          { text: "Priority Settings", icon: null, iconCls: null, hideOnClick: true,
+          { text: "CopyWo Settings", icon: null, iconCls: null, hideOnClick: true,
             handler: function(){ 
               APModDataSpy.showCopyWoOptions();
             } 

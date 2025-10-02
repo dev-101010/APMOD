@@ -9,8 +9,9 @@ var APModOptions = (function () {
     TBclass.prototype.initComponent = function () {
       this.APModOptionsOrigInitComponent.apply(this, arguments);
       this.insert(this.items.length, {
-        text: null,
-        icon: null, iconCls: "x-tool x-tool-gear", // text-only
+        xtype: "button",
+      // icon-only button (no text); uses Ext's built-in tool icon classes
+      iconCls: "x-tool x-tool-gear",
         menu: [
           // --- Header + separator ---
         { 

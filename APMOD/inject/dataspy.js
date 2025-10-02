@@ -28,47 +28,16 @@ APModDataSpy.load = () => {
 	  return arr;
 	};*/
 
-	/*Ext.data.Store.prototype.dsGetData = function() {
+	Ext.data.Store.prototype.dsGetData = function() {
 		const arr = [];
 		for (const item of this.data.items) {
 			if (item.data.name == "No Filter") continue;
-			delete item.data.id;
+			const data = JSON.parse(JSON.stringify(item.data))
+			delete data;
 			arr.push(item.data);
 		}
 		return arr;
-	}*/
-
-	Ext.data.Store.prototype.dsGetData = function () {
-	  const out = [];
-	
-	  const Model  = this.getModel && this.getModel();
-	  const idProp = (Model && Model.prototype && Model.prototype.idProperty) || 'id';
-	
-	  // Use getRange() if available
-	  const records = this.getRange ? this.getRange() : (this.data && this.data.items) || [];
-	
-	  records.forEach((rec) => {
-	    const raw = rec.getData ? rec.getData() : rec.data;
-	    if (!raw) return;
-	
-	    if (raw.name === 'No Filter') return; // keep your original rule
-	
-	    // Prefer Ext.clone (handles Ext objects better than JSON stringify)
-	    const copy = (typeof Ext !== 'undefined' && Ext.clone)
-	      ? Ext.clone(raw)
-	      : JSON.parse(JSON.stringify(raw)); // fallback for plain data
-
-		  console.log(copy);
-	
-	    // Remove id fields only on the copy
-	    if (copy && Object.prototype.hasOwnProperty.call(copy, idProp)) delete copy[idProp];
-	    if (copy && Object.prototype.hasOwnProperty.call(copy, 'internalId')) delete copy.internalId;
-	
-	    out.push(copy);
-	  });
-	
-	  return out;
-	};
+	}
 
     APModDataSpy.injectMainToolbar();
 	APModDataSpy.injectDataspy();
@@ -1628,6 +1597,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

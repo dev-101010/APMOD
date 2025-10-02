@@ -33,7 +33,7 @@ APModDataSpy.load = () => {
 		for (const item of this.data.items) {
 			if (item.data.name == "No Filter") continue;
 			const data = JSON.parse(JSON.stringify(item.data))
-			delete data;
+			delete data.id;
 			arr.push(item.data);
 		}
 		return arr;
@@ -1597,6 +1597,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

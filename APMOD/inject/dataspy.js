@@ -133,6 +133,14 @@ APModDataSpy.injectReadOnlyGrid = () => {
 			}
 
 			if (this.gridURL.includes("EWSUSR.TAB")) {
+				const list = this.getDockedItems('toolbar[dock="bottom"]');
+				if(list.length > 0) {
+					const botToolbar = this.getDockedItems('toolbar[dock="bottom"]')[0];
+					if(botToolbar != null && botToolbar.items != null) {
+						botToolbar.insert(botToolbar.items.length,APModDataSpy.getGridNodesExportButton(this));
+						botToolbar.insert(botToolbar.items.length,APModDataSpy.getGridNodesImportButton(this));
+					}
+				}
 				this.on("afterrender", function(){
 				  APModShift.attach(this);
 				});
@@ -503,6 +511,26 @@ APModDataSpy.getGridToCsvButton = (grid) => {
 		tooltip: "Download CSV",
 		handler: function() {
 			grid.exportToCSV();
+		}
+	});
+} 
+	
+APModDataSpy.getGridNodesExportButton = (grid) => {
+	return Ext.create('Ext.Button', {
+		text: "🔽",
+		tooltip: "Export Nodes",
+		handler: function() {
+			APModShift.exportToFile({ storageKey: "APModShift" });
+		}
+	});
+}
+
+APModDataSpy.getGridNodesImportButton = (grid) => {
+	return Ext.create('Ext.Button', {
+		text: "🔼",
+		tooltip: "Import Nodes",
+		handler: function() {
+			APModShift.importFromFile({ store: grid.getStore() });
 		}
 	});
 }
@@ -1582,6 +1610,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

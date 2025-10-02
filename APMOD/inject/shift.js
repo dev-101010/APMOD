@@ -312,7 +312,7 @@ var APModShift = (function () {
             APModPopup.openPopup("Notes imported.");
           } else {
             // Silent fallback (no blocking alerts); useful for unit tests/dev
-            if (window.console && console.info) console.info("APModShift: Notes imported.");
+            console.info("APModShift: Notes imported.");
           }
         } catch (err) {
           if (Ext && Ext.Msg && Ext.Msg.alert) {

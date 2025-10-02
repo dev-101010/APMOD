@@ -1,5 +1,5 @@
 var APModOptions = (function () {
-  var COLUMNS = 3;
+  var COLUMNS = 4;
   var _patched = false; // ensure idempotent injection
 
   function createMenu() {
@@ -9,6 +9,8 @@ var APModOptions = (function () {
       defaults: { icon: null, iconCls: null, plain: true },
       items: [
         { xtype: "menuitem", text: "Priority Settings", hideOnClick: true,
+          handler: function(){ APModDataSpy.showFillerSettings(); } },
+        { xtype: "menuitem", text: "Filler Manager", hideOnClick: true,
           handler: function(){ APModDataSpy.showCopyWoOptions(); } },
         { xtype: "menuitem", text: "Priority Settings", hideOnClick: true,
           handler: function(){ APModFiller.openPriorityWindow(); } },

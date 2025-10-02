@@ -200,7 +200,7 @@ var APModShift = (function () {
     const HH   = pad(d.getHours());
     const MM   = pad(d.getMinutes());
     const SS   = pad(d.getSeconds());
-    return `${yyyy}-${mm}-${dd}_${HH-${MM}-${SS}`;
+    return `${yyyy}-${mm}-${dd}_${HH}-${MM}-${SS}`;
   }
 
   function _safeFileNamePart(s) {

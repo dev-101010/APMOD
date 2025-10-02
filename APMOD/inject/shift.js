@@ -55,33 +55,33 @@ var APModShift = (function () {
 
   // --- Internal helpers -------------------------------------------------------
   api._ensureModelField = function (store, dataIndex) {
-  const model = store && store.getModel && store.getModel();
-  if (!model || !model.fields) return;
-  const fields = model.fields;
-  // Modern ExtJS: fields is a MixedCollection with .get()
-  if (typeof fields.get === 'function') {
-    if (!fields.get(dataIndex)) {
-      fields.add(new Ext.data.Field({
-        name: dataIndex,
-        type: "string",
-        defaultValue: "",
-        persist: false
-      }));
+    const model = store && store.getModel && store.getModel();
+    if (!model || !model.fields) return;
+    const fields = model.fields;
+    // Modern ExtJS: fields is a MixedCollection with .get()
+    if (typeof fields.get === 'function') {
+      if (!fields.get(dataIndex)) {
+        fields.add(new Ext.data.Field({
+          name: dataIndex,
+          type: "string",
+          defaultValue: "",
+          persist: false
+        }));
+      }
     }
-  }
-  // Fallback: if fields is an array (older/extremely custom)
-  else if (Array.isArray(fields)) {
-    const exists = fields.some(f => f.name === dataIndex);
-    if (!exists) {
-      fields.push(new Ext.data.Field({
-        name: dataIndex,
-        type: "string",
-        defaultValue: "",
-        persist: false
-      }));
+    // Fallback: if fields is an array (older/extremely custom)
+    else if (Array.isArray(fields)) {
+      const exists = fields.some(f => f.name === dataIndex);
+      if (!exists) {
+        fields.push(new Ext.data.Field({
+          name: dataIndex,
+          type: "string",
+          defaultValue: "",
+          persist: false
+        }));
+      }
     }
-  }
-};
+  };
 
   api._attachStoreSync = function (store, cfg) {
     if (!store || store.__apmodShiftNoteSynced) return;
@@ -107,43 +107,43 @@ var APModShift = (function () {
   };
 
   api._ensureCellEditing = function (grid, cfg) {
-        let plugin = grid.findPlugin && grid.findPlugin("cellediting");
-        if (!plugin) {
-            plugin = Ext.create("Ext.grid.plugin.CellEditing", { clicksToEdit: 1, pluginId: "cellediting" });
-            grid.plugins = grid.plugins || [];
-            grid.plugins.push(plugin);
-            grid.initPlugin && grid.initPlugin(plugin);
+    let plugin = grid.findPlugin && grid.findPlugin("cellediting");
+    if (!plugin) {
+      plugin = Ext.create("Ext.grid.plugin.CellEditing", { clicksToEdit: 1, pluginId: "cellediting" });
+      grid.plugins = grid.plugins || [];
+      grid.plugins.push(plugin);
+      grid.initPlugin && grid.initPlugin(plugin);
+    }
+    if (!plugin.__apmodShiftBeforeEditBound) {
+      plugin.__apmodShiftBeforeEditBound = true;
+      plugin.on("beforeedit", function (editor, e) {
+        return e && e.column && e.column.dataIndex === cfg.dataIndex;
+      });
+    }
+    if (!plugin.__apmodShiftEditBound) {
+      plugin.__apmodShiftEditBound = true;
+      plugin.on("edit", function (ed, ctx) {
+        if (!ctx || !ctx.record) return;
+        if (!ctx.column || ctx.column.dataIndex !== cfg.dataIndex) return;
+        // Update cache and persist once
+        const rec = ctx.record;
+        const newVal = String(ctx.value || "");
+        rec.set(cfg.dataIndex, newVal);
+        rec.commit();
+        const k = cfg.keyFn(rec);
+        if (newVal) {
+          api.cache[k] = newVal;
+        } else {
+          delete api.cache[k];
         }
-        if (!plugin.__apmodShiftBeforeEditBound) {
-            plugin.__apmodShiftBeforeEditBound = true;
-            plugin.on("beforeedit", function (editor, e) {
-                return e && e.column && e.column.dataIndex === cfg.dataIndex;
-            });
+        api.save(cfg.storageKey);
+        const store = rec.store;
+        if (store) {
+          store.fireEvent('datachanged', store);
         }
-        if (!plugin.__apmodShiftEditBound) {
-            plugin.__apmodShiftEditBound = true;
-            plugin.on("edit", function (ed, ctx) {
-                if (!ctx || !ctx.record) return;
-                if (!ctx.column || ctx.column.dataIndex !== cfg.dataIndex) return;
-                // Update cache and persist once
-                const rec = ctx.record;
-                const newVal = String(ctx.value || "");
-                rec.set(cfg.dataIndex, newVal);
-                rec.commit();
-                const k = cfg.keyFn(rec);
-                if (newVal) {
-                    api.cache[k] = newVal;
-                } else {
-                    delete api.cache[k];
-                }
-                api.save(cfg.storageKey);
-                const store = rec.store;
-                if (store) {
-                    store.fireEvent('datachanged', store);
-                }
-            });
-        }
-    };
+      });
+    }
+  };
 
   api._insertColumnLeft = function (grid, col) {
     if (grid.headerCt && typeof grid.headerCt.insert === "function") {
@@ -200,7 +200,7 @@ var APModShift = (function () {
     const HH   = pad(d.getHours());
     const MM   = pad(d.getMinutes());
     const SS   = pad(d.getSeconds());
-    return `${yyyy}-${mm}-${dd}_${HH}-${MM}-${SS}`;
+    return `${yyyy}-${mm}-${dd}_${HH-${MM}-${SS}`;
   }
 
   function _safeFileNamePart(s) {
@@ -233,99 +233,68 @@ var APModShift = (function () {
     a.click();
   };
 
-  /** Normalize various accepted import formats to a plain { key: note } map. */
-  function _normalizeImportedData(parsed) {
-    // Preferred typed object
-    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-      if (parsed.kind === EXPORT_KIND && Array.isArray(parsed.data) === false && typeof parsed.data === "object") {
-        return { map: parsed.data, storageKey: parsed.storageKey || null };
-      }
-      // Legacy plain object { key: "note", ... }
-      const isPlain = Object.keys(parsed).every(k => typeof parsed[k] === "string");
-      if (isPlain) return { map: parsed, storageKey: null };
+  // --- Strict import normalization --------------------------------------------
+  function _normalizeImportedDataStrict(parsed) {
+    // Enforce typed payload: object with exact kind, valid version, and object data
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new Error("Unsupported file: payload must be an object.");
     }
-    // Legacy array of pairs or array of objects
-    if (Array.isArray(parsed)) {
-      const out = {};
-      parsed.forEach(it => {
-        if (Array.isArray(it) && it.length >= 2) {
-          out[String(it[0])] = String(it[1] == null ? "" : it[1]);
-        } else if (it && typeof it === "object" && "key" in it) {
-          out[String(it.key)] = String(it.value == null ? "" : it.value);
-        }
-      });
-      return { map: out, storageKey: null };
+    if (parsed.kind !== EXPORT_KIND) {
+      throw new Error("Unsupported file: wrong 'kind'.");
     }
-    throw new Error("Unrecognized file format");
+    if (typeof parsed.version !== "number" || parsed.version > EXPORT_VERSION) {
+      throw new Error("Unsupported file: invalid or newer 'version'.");
+    }
+    if (!parsed.data || typeof parsed.data !== "object" || Array.isArray(parsed.data)) {
+      throw new Error("Invalid payload: 'data' must be an object.");
+    }
+    // Ensure all values are strings (normalize to strings)
+    const map = {};
+    Object.keys(parsed.data).forEach(k => {
+      map[String(k)] = String(parsed.data[k] == null ? "" : parsed.data[k]);
+    });
+    const storageKey = parsed.storageKey || null;
+    return { map, storageKey };
   }
 
   /**
    * Import from a parsed JSON value (already JSON.parse'd).
    * Merges or replaces cache (default: replace = true). Saves and optionally refreshes a store.
+   * Strictly validates typed header (kind/version/storageKey).
    */
-  // Stricter import using the typed header and giving clear feedback.
-api.importFromParsed = function(parsed, opts) {
-  const o = opts || {};
+  api.importFromParsed = function (parsed, opts) {
+    const o = opts || {};
+    const normalized = _normalizeImportedDataStrict(parsed);
+    const targetKey = o.storageKey || normalized.storageKey || api._loadedKey || api.defaults.storageKey;
 
-  // 1) Enforce typed payload
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed) || parsed.kind !== EXPORT_KIND) {
-    throw new Error("Unsupported file: missing or invalid 'kind'.");
-  }
-  if (typeof parsed.version !== "number" || parsed.version > EXPORT_VERSION) {
-    throw new Error("Unsupported file version.");
-  }
-  if (!parsed.data || typeof parsed.data !== "object" || Array.isArray(parsed.data)) {
-    throw new Error("Invalid payload: 'data' must be an object.");
-  }
+    // Ensure cache belongs to the active key
+    if (!api._loadedKey || api._loadedKey !== targetKey) {
+      api.load(targetKey);
+    }
 
-  const fileKey = parsed.storageKey || null;
-  const targetKey = o.storageKey || fileKey || api._loadedKey || api.defaults.storageKey;
+    const incoming = normalized.map || {};
+    if (o.merge === true) {
+      // merge: override incoming keys, keep others
+      api.cache = Object.assign({}, api.cache || {}, incoming);
+    } else {
+      // replace
+      api.cache = incoming;
+    }
+    api.save(targetKey);
 
-  // 2) Ensure we operate on the correct storage slot
-  if (!api._loadedKey || api._loadedKey !== targetKey) {
-    api.load(targetKey);
-  }
-
-  // 3) Replace or merge cache
-  const incoming = parsed.data || {};
-  if (o.merge === true) {
-    api.cache = Object.assign({}, api.cache || {}, incoming);
-  } else {
-    api.cache = incoming;
-  }
-  api.save(targetKey);
-
-  // 4) Optional: apply to store and compute match stats
-  let stats = { total: Object.keys(incoming).length, matched: null, storageKey: targetKey };
-  const store = o.store;
-  if (store) {
-    const present = {};
-    store.each(function(rec){ present[api.defaults.keyFn(rec)] = true; });
-    stats.matched = Object.keys(incoming).reduce((n,k)=> n + (present[k] ? 1 : 0), 0);
-    api.refresh(store, Ext.apply({}, { storageKey: targetKey }, api.defaults));
-  }
-
-  // 5) User feedback (prefer APModPopup if present)
-  const warnings = [];
-  if (fileKey && fileKey !== targetKey && !o.storageKey) {
-    warnings.push(`File storageKey "${fileKey}" differs from target "${targetKey}".`);
-  }
-  if (stats.matched !== null && stats.total > 0 && stats.matched === 0) {
-    warnings.push("No keys matched current grid records.");
-  }
-  const msg =
-    `Imported ${stats.total} note(s) into "${targetKey}".` +
-    (stats.matched !== null ? `\nApplied to ${stats.matched} record(s).` : "") +
-    (warnings.length ? `\n\nWarnings:\n- ${warnings.join("\n- ")}` : "");
-
-  if (window.APModPopup) APModPopup.openPopup(msg);
-  else if (Ext && Ext.Msg && Ext.Msg.alert) Ext.Msg.alert("Import result", msg.replace(/\n/g,"<br/>"));
-  else alert(msg);
-};
+    // Optionally refresh a store to push values into records
+    const store = o.store;
+    if (store) {
+      api.refresh(store, Ext.apply({}, { storageKey: targetKey }, api.defaults));
+    }
+  };
 
   /**
    * Open a file picker, parse, validate, import, save, and refresh.
    * Options: { storageKey?, store?, merge? }
+   * UI behavior:
+   *  - On success: only a short APModPopup message (if available); otherwise silent (console).
+   *  - On failure: Ext.Msg.alert with a concise error message.
    */
   api.importFromFile = function (opts) {
     const input = document.createElement("input");
@@ -339,15 +308,25 @@ api.importFromParsed = function(parsed, opts) {
         try {
           const parsed = JSON.parse(String(evt.target.result || "null"));
           api.importFromParsed(parsed, opts || {});
-          if (window.APModPopup) APModPopup.openPopup("Notes imported (saved).");
+          if (window.APModPopup) {
+            APModPopup.openPopup("Notes imported.");
+          } else {
+            // Silent fallback (no blocking alerts); useful for unit tests/dev
+            if (window.console && console.info) console.info("APModShift: Notes imported.");
+          }
         } catch (err) {
-          Ext && Ext.Msg && Ext.Msg.alert ? Ext.Msg.alert("Import failed", "Invalid JSON or unsupported file.") : alert("Import failed.");
+          if (Ext && Ext.Msg && Ext.Msg.alert) {
+            Ext.Msg.alert("Import failed", err && err.message ? String(err.message) : "Invalid JSON or unsupported file.");
+          } else {
+            // Last-resort fallback if Ext.Msg is not present
+            alert("Import failed");
+          }
         }
       };
       reader.readAsText(file, "UTF-8");
     };
     input.click();
   };
-  
+
   return api;
 })();

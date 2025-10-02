@@ -15,7 +15,7 @@ var APModOptions = (function () {
           // --- Header + separator ---
         { 
           xtype: "component",
-          html: "<div style='font-weight:bold;padding:6px 10px;'>APMod</div'"
+          html: "<div style='font-weight:bold;'>APMod</div'"
         },
         "-",
           { text: "Filler Manager", icon: null, iconCls: null, hideOnClick: true,

@@ -18,16 +18,6 @@ APModDataSpy.load = () => {
 		}
 	}
 
-	/*Ext.data.Store.prototype.dsGetData = function(){
-	  const arr = [];
-	  this.data.items.forEach(({data})=>{
-	    if (data.name === 'No Filter') return;
-	    const { name, sort, filter, field } = data; // pick only used props
-	    arr.push({ name, sort, filter, field });
-	  });
-	  return arr;
-	};*/
-
 	Ext.data.Store.prototype.dsGetData = function() {
 		const arr = [];
 		for (const item of this.data.items) {
@@ -1052,6 +1042,17 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore, filterValueStore) => 
 					}
 				},
 				{
+					xtype: 'checkcolumn',
+					header: 'Right Brace',
+					dataIndex: 'RPAREN',
+					sortable: false,
+					menuDisabled: true,
+					flex: 1,
+					maxWidth: 90,
+					minWidth: 90,
+					align: 'center'
+				},
+				{
 					header: 'Joiner',
 					dataIndex: 'JOINER',
 					sortable: false,
@@ -1067,17 +1068,6 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore, filterValueStore) => 
 						anyMatch: true,
 						queryMode: 'local',
 					},
-					align: 'center'
-				},
-				{
-					xtype: 'checkcolumn',
-					header: 'Right Brace',
-					dataIndex: 'RPAREN',
-					sortable: false,
-					menuDisabled: true,
-					flex: 1,
-					maxWidth: 90,
-					minWidth: 90,
 					align: 'center'
 				}
 			],
@@ -1597,6 +1587,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

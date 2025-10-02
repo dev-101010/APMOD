@@ -845,7 +845,7 @@ APModFiller.createAutoFillButton = () => {
 
 /** Opens a window to edit APModFiller.store.priority (object as key->config). */
 APModFiller.openPriorityWindow = function() {
-  // object -> array for grid editing
+  // object -> array for grid display
   const src = APModFiller.store.priority || {};
   const rows = Object.keys(src).map(code => ({
     code,
@@ -853,51 +853,133 @@ APModFiller.openPriorityWindow = function() {
     label: (src[code] && src[code].label) || ""
   }));
 
+  // store for grid rows
   const store = new Ext.data.Store({
     fields: ["code","switchTo","label"],
     data: rows
   });
 
-  const grid = Ext.create("Ext.grid.Panel", {
-    border: true,
-    store,
-    columns: [
-      { text: "Code", dataIndex: "code", flex: 1, editor: { xtype: "textfield" } },
-      { text: "Switch To", dataIndex: "switchTo", flex: 1, editor: { xtype: "textfield" } },
-      { text: "Label", dataIndex: "label", flex: 2, editor: { xtype: "textfield" } }
-    ],
-    selModel: "rowmodel",
-    plugins: [ Ext.create("Ext.grid.plugin.RowEditing", { clicksToEdit: 1 }) ],
-    tbar: [
-      { text: "Add", handler: function(){
+  // options for "switchTo": empty + all existing codes (read-only codes)
+  const codeOptions = [""].concat(Object.keys(src));
+  const codeOptionsStore = new Ext.data.Store({
+    fields: ["val"],
+    data: codeOptions.map(v => ({ val: v }))
+  });
+
+  // left vertical control panel with "+" and "Papierkorb" stacked
+  const leftControls = {
+    xtype: "container",
+    width: 64,
+    layout: {
+      type: "vbox",
+      align: "stretch",
+      pack: "start"
+    },
+    defaults: {
+      xtype: "button",
+      margin: "0 8 8 8",
+      height: 36
+    },
+    items: [
+      {
+        text: "+",
+        handler: function(){
           const rec = store.add({ code:"", switchTo:"", label:"" })[0];
-          grid.findPlugin("rowediting").startEdit(rec, 0);
+          // start editing "switchTo" immediately (col index 1) since code is not editable
+          grid.findPlugin("rowediting").startEdit(rec, 1);
         }
       },
-      { text: "Delete", handler: function(){
+      {
+        text: "Papierkorb",
+        handler: function(){
           const sel = grid.getSelectionModel().getSelection();
           if (sel && sel.length) store.remove(sel);
         }
+      }
+    ]
+  };
+
+  // row editing plugin (single-click)
+  const rowEditor = Ext.create("Ext.grid.plugin.RowEditing", {
+    clicksToEdit: 1
+  });
+
+  // the grid
+  const grid = Ext.create("Ext.grid.Panel", {
+    border: true,
+    flex: 1,
+    store,
+    columns: [
+      // code: read-only (no editor)
+      { text: "Code", dataIndex: "code", flex: 1, sortable: true, menuDisabled: true },
+      // switchTo: forced selection from codeOptions (including empty)
+      { 
+        text: "Switch To",
+        dataIndex: "switchTo",
+        flex: 1,
+        editor: {
+          xtype: "combo",
+          queryMode: "local",
+          store: codeOptionsStore,
+          displayField: "val",
+          valueField: "val",
+          forceSelection: true,
+          editable: false,
+          allowBlank: true
+        },
+        renderer: function(v){
+          return v || "";
+        }
       },
-      "->",
-      { text: "Save", handler: function(){
+      // label: freely editable
+      { 
+        text: "Label",
+        dataIndex: "label",
+        flex: 2,
+        editor: { xtype: "textfield", allowBlank: true }
+      }
+    ],
+    selModel: "rowmodel",
+    plugins: [ rowEditor ]
+  });
+
+  // bottom docked toolbar with centered Save/Close
+  const bottomBar = {
+    xtype: "toolbar",
+    dock: "bottom",
+    layout: { pack: "center" },
+    items: [
+      {
+        text: "Save",
+        handler: function(){
           // array -> object
           const out = {};
           store.each(function(r){
             const code = String(r.get("code")||"").trim();
-            if (!code) return;
+            if (!code) return; // skip rows without code
             out[code] = {
               switchTo: String(r.get("switchTo")||"").trim(),
               label: String(r.get("label")||"").trim()
             };
           });
           APModFiller.store.priority = out;
-          APModFiller.save(); // trigger your existing save
+          APModFiller.save();
           if (APModPopup) APModPopup.openPopup("Priority saved.");
         }
       },
+      { xtype: "tbspacer", width: 24 },
       { text: "Close", handler: function(){ win.close(); } }
     ]
+  };
+
+  // main panel: left controls + grid in an hbox
+  const mainPanel = Ext.create("Ext.panel.Panel", {
+    layout: {
+      type: "hbox",
+      align: "stretch"
+    },
+    items: [ leftControls, grid ],
+    dockedItems: [ bottomBar ]
   });
 
   const win = Ext.create("Ext.window.Window", {
@@ -906,8 +988,9 @@ APModFiller.openPriorityWindow = function() {
     width: 700,
     height: 420,
     layout: "fit",
-    items: [grid]
+    items: [ mainPanel ]
   });
+
   win.show();
 };
 
@@ -1487,6 +1570,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

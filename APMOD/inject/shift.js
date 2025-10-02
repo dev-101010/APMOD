@@ -225,7 +225,7 @@ var APModShift = (function () {
     const json = JSON.stringify(payload, null, 2);
     const keyPart = _safeFileNamePart(payload.storageKey || "APModShift");
     const ts = _nowTimestamp();
-    const filename = `${keyPart}_Nodes_${ts}.json`;
+    const filename = `${keyPart}_Notes_${ts}.json`;
     const uri = "data:application/json;charset=utf-8," + encodeURIComponent(json);
     const a = document.createElement("a");
     a.setAttribute("href", uri);

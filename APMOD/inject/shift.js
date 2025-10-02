@@ -186,5 +186,135 @@ var APModShift = (function () {
     api.refresh(store, cfg);
   };
 
+  // ---- Export / Import helpers ------------------------------------------------
+  const EXPORT_KIND = "APModShift.Notes";
+  const EXPORT_VERSION = 1;
+
+  function _nowTimestamp() {
+    // yyyy-mm-dd_HH-MM-SS
+    const d = new Date();
+    const pad = n => String(n).padStart(2, "0");
+    const yyyy = d.getFullYear();
+    const mm   = pad(d.getMonth() + 1);
+    const dd   = pad(d.getDate());
+    const HH   = pad(d.getHours());
+    const MM   = pad(d.getMinutes());
+    const SS   = pad(d.getSeconds());
+    return `${yyyy}-${mm}-${dd}_${HH}-${MM}-${SS}`;
+  }
+
+  function _safeFileNamePart(s) {
+    return String(s || "")
+      .replace(/[^a-z0-9_\-\.]+/gi, "_")
+      .replace(/^_+|_+$/g, "");
+  }
+
+  /** Build typed export payload from current in-memory cache. */
+  api.buildExportPayload = function (opts) {
+    const key = (opts && opts.storageKey) || api._loadedKey || api.defaults.storageKey;
+    const data = {};
+    // Copy only string values
+    const src = api.cache || {};
+    Object.keys(src).forEach(k => { data[k] = String(src[k] == null ? "" : src[k]); });
+    return { kind: EXPORT_KIND, version: EXPORT_VERSION, storageKey: key, data };
+  };
+
+  /** Trigger a file download with a timestamped filename. */
+  api.exportToFile = function (opts) {
+    const payload = api.buildExportPayload(opts);
+    const json = JSON.stringify(payload, null, 2);
+    const keyPart = _safeFileNamePart(payload.storageKey || "APModShift");
+    const ts = _nowTimestamp();
+    const filename = `apmod-shift-notes_${keyPart}_${ts}.json`;
+    const uri = "data:application/json;charset=utf-8," + encodeURIComponent(json);
+    const a = document.createElement("a");
+    a.setAttribute("href", uri);
+    a.setAttribute("download", filename);
+    a.click();
+  };
+
+  /** Normalize various accepted import formats to a plain { key: note } map. */
+  function _normalizeImportedData(parsed) {
+    // Preferred typed object
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      if (parsed.kind === EXPORT_KIND && Array.isArray(parsed.data) === false && typeof parsed.data === "object") {
+        return { map: parsed.data, storageKey: parsed.storageKey || null };
+      }
+      // Legacy plain object { key: "note", ... }
+      const isPlain = Object.keys(parsed).every(k => typeof parsed[k] === "string");
+      if (isPlain) return { map: parsed, storageKey: null };
+    }
+    // Legacy array of pairs or array of objects
+    if (Array.isArray(parsed)) {
+      const out = {};
+      parsed.forEach(it => {
+        if (Array.isArray(it) && it.length >= 2) {
+          out[String(it[0])] = String(it[1] == null ? "" : it[1]);
+        } else if (it && typeof it === "object" && "key" in it) {
+          out[String(it.key)] = String(it.value == null ? "" : it.value);
+        }
+      });
+      return { map: out, storageKey: null };
+    }
+    throw new Error("Unrecognized file format");
+  }
+
+  /**
+   * Import from a parsed JSON value (already JSON.parse'd).
+   * Merges or replaces cache (default: replace = true). Saves and optionally refreshes a store.
+   */
+  api.importFromParsed = function (parsed, opts) {
+    const o = opts || {};
+    const normalized = _normalizeImportedData(parsed);
+    const targetKey = o.storageKey || normalized.storageKey || api._loadedKey || api.defaults.storageKey;
+
+    // Ensure cache belongs to the active key
+    if (!api._loadedKey || api._loadedKey !== targetKey) {
+      api.load(targetKey);
+    }
+
+    const incoming = normalized.map || {};
+    if (o.merge === true) {
+      // merge: override incoming keys, keep others
+      api.cache = Object.assign({}, api.cache || {}, incoming);
+    } else {
+      // replace
+      api.cache = incoming;
+    }
+    api.save(targetKey);
+
+    // Optionally refresh a store to push values into records
+    const store = o.store;
+    if (store) {
+      api.refresh(store, Ext.apply({}, { storageKey: targetKey }, api.defaults));
+    }
+  };
+
+  /**
+   * Open a file picker, parse, validate, import, save, and refresh.
+   * Options: { storageKey?, store?, merge? }
+   */
+  api.importFromFile = function (opts) {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json,application/json";
+    input.onchange = e => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = evt => {
+        try {
+          const parsed = JSON.parse(String(evt.target.result || "null"));
+          api.importFromParsed(parsed, opts || {});
+          if (window.APModPopup) APModPopup.openPopup("Notes imported (saved).");
+        } catch (err) {
+          Ext && Ext.Msg && Ext.Msg.alert ? Ext.Msg.alert("Import failed", "Invalid JSON or unsupported file.") : alert("Import failed.");
+        }
+      };
+      reader.readAsText(file, "UTF-8");
+    };
+    input.click();
+  };
+  
   return api;
 })();

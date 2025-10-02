@@ -659,20 +659,7 @@ APModDataSpy.createPopupPanel = (grid,data) => {
 					editable: false,
 					store: posStore,
 					value: pos
-				}, {
-					text: 'Options',                      
-					menu: {
-						xtype: 'menu',                          
-						items: [
-							{
-								text: 'Save Backup'
-							}, {
-								text: 'Load Backup'
-							}
-						]                          
-					}
-				}
-				]
+				}]
 			},
 			{
 				xtype: 'toolbar',
@@ -1587,6 +1574,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

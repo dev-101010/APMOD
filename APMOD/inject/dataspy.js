@@ -985,6 +985,10 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore, filterValueStore) => 
 						forceSelection: true,
 						anyMatch: true,
 						queryMode: 'local',
+						minChars: 0,
+						queryOnExpand: true,
+						triggerAction: 'all',
+						queryCaching: false
 					},
 					align: 'center'
 				},
@@ -1003,6 +1007,10 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore, filterValueStore) => 
 						forceSelection: true,
 						anyMatch: true,
 						queryMode: 'local',
+						minChars: 0,
+						queryOnExpand: true,
+						triggerAction: 'all',
+						queryCaching: false
 					},
 					align: 'center'
 				},
@@ -1025,6 +1033,11 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore, filterValueStore) => 
 						store: filterValueStore,
 						displayField: 'value',
 						valueField: 'value',
+						queryMode: 'local',        // << important
+						minChars: 0,               // << show even with empty input
+						queryOnExpand: true,
+						triggerAction: 'all',
+						queryCaching: false,
 						listeners:{
 							select: function(comp,record,index) {
 								if(comp.getValue() == "&nbsp;") comp.setValue("");
@@ -1067,6 +1080,10 @@ APModDataSpy.filterPanel = (filterStore, filterAliasStore, filterValueStore) => 
 						forceSelection: true,
 						anyMatch: true,
 						queryMode: 'local',
+						minChars: 0,
+						queryOnExpand: true,
+						triggerAction: 'all',
+						queryCaching: false
 					},
 					align: 'center'
 				}
@@ -1587,6 +1604,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

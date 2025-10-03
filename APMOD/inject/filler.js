@@ -1114,17 +1114,16 @@ function doImport() {
   // Left vertical text-icon buttons: compact size
   const leftControls = {
     xtype: "container",
-    width: 48, // narrower rail
-    layout: { type: "vbox", align: "stretch", pack: "start" },
+    width: 40, // narrower rail
+    layout: { type: "vbox" },
     defaults: {
-      xtype: "button",
       margin: "2 0 2 0",
-      height: 28,       // compact
-      minWidth: 28,     // compact
-      scale: "small"    // compact styling
     },
     items: [
       {
+        xtype: 'button',
+        width: 28,
+		height: 28,
         text: "+",
         handler: function(){
           const rec = store.add({ type:"save", status:"empty", field:"", value:"" })[0];
@@ -1132,6 +1131,9 @@ function doImport() {
         }
       },
       {
+        xtype: 'button',
+        width: 28,
+		height: 28,
         text: "🗑",
         ariaLabel: "Delete",
         handler: function(){
@@ -1682,6 +1684,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

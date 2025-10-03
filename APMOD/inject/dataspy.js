@@ -518,10 +518,13 @@ APModDataSpy.getDataSpyEditButton = (grid) => {
 APModDataSpy.viewShiftNotes = (grid,shift) => {
 	return Ext.create('Ext.Button', {
 		text: shift,
+		enableToggle: true,
+    	toggleGroup: "shiftGroup",
+    	allowDepress: false,
 		tooltip: `View Shift ${shift} Notes`,
-		handler: function() {
-			APModShift.setDataset(shift);
-		}
+		toggleHandler: function (btn, pressed) {
+	      if (pressed) APModShift.setDataset("A"); else APModShift.setDataset(null);
+	    }
 	});
 }
 
@@ -1630,6 +1633,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

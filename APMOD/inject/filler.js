@@ -1180,7 +1180,7 @@ function doImport() {
 
   // Main panel: left controls + grid
   const mainPanel = Ext.create("Ext.panel.Panel", {
-    layout: { type: "hbox", align: "stretch" },
+    layout: { type: "hbox", align: "fit" },
     items: [ leftControls, grid ],
     dockedItems: [ bottomBar ]
   });
@@ -1684,6 +1684,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

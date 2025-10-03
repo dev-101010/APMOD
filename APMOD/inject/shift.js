@@ -77,6 +77,24 @@ var APModShift = (function () {
 
   function _isActive() { return !!api.activeDataset; }
 
+  // --- Init-style public load/save (no params) ---------------------------------
+  api.load = function () {
+    // load single master blob; do NOT auto-activate a dataset
+    _loadMaster(api.defaults.storageKey);
+    if (api.activeDataset) {
+      // keep pointing cache to the already active dataset, if any
+      api.cache = _getDatasetMap(api.activeDataset);
+    } else {
+      api.cache = {}; // no active selection yet → no UI writes
+    }
+    return api._master;
+  };
+  
+  api.save = function () {
+    // optional utility; not required for normal use
+    _saveMaster(api.defaults.storageKey);
+  };
+
   // --- UI sync ----------------------------------------------------------------
   /** Apply current cache (active dataset) to a store's records (NO-OP if no dataset active). */
   api.refresh = function (store, cfg) {

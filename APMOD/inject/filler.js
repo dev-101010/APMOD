@@ -1118,7 +1118,7 @@ function doImport() {
     layout: { type: "vbox", align: "stretch", pack: "start" },
     defaults: {
       xtype: "button",
-      margin: "0 6 6 6",
+      margin: "2 0 2 0",
       height: 28,       // compact
       minWidth: 28,     // compact
       scale: "small"    // compact styling
@@ -1682,6 +1682,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

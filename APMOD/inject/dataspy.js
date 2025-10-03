@@ -102,8 +102,10 @@ APModDataSpy.injectDataspy = (dsStore) => {
 			}
 			if (this.gridURL.includes("EWSUSR.TAB")) {
 				const grid = this.getGrid();
-				const viewShiftNotes = APModDataSpy.viewShiftNotes(grid);
-				this.insert(2, viewShiftNotes);
+				this.insert(2, APModDataSpy.viewShiftNotes(grid,"A"));
+				this.insert(3, APModDataSpy.viewShiftNotes(grid,"B"));
+				this.insert(4, APModDataSpy.viewShiftNotes(grid,"C"));
+				this.insert(5, APModDataSpy.viewShiftNotes(grid,"D"));
 			}
 		}
 	}
@@ -510,12 +512,12 @@ APModDataSpy.getDataSpyEditButton = (grid) => {
 	});
 }
 
-APModDataSpy.viewShiftNotes = (grid) => {
+APModDataSpy.viewShiftNotes = (grid,shift) => {
 	return Ext.create('Ext.Button', {
-		text: "🗉",
+		text: shift,
 		tooltip: "View Shift Notes",
 		handler: function() {
-			APModShift.attach(grid);
+			APModShift.setDataset(shift);
 		}
 	});
 }
@@ -1625,6 +1627,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

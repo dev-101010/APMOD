@@ -140,6 +140,7 @@ APModDataSpy.injectReadOnlyGrid = () => {
 			}
 
 			if (this.gridURL.includes("EWSUSR.TAB")) {
+				console.log(this);
 				const list = this.getDockedItems('toolbar[dock="bottom"]');
 				if(list.length > 0) {
 					const botToolbar = this.getDockedItems('toolbar[dock="bottom"]')[0];
@@ -1632,6 +1633,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

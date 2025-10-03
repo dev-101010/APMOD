@@ -103,7 +103,7 @@ APModDataSpy.injectDataspy = (dsStore) => {
 			if (this.gridURL.includes("EWSUSR.TAB")) {
 				const viewShiftNotes = APModDataSpy.viewShiftNotes(grid);
 				this.insert(2, viewShiftNotes);
-			]
+			}
 		}
 	}
 }
@@ -1624,6 +1624,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

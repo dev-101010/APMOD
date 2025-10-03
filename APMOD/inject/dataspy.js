@@ -520,7 +520,7 @@ APModDataSpy.viewShiftNotes = (grid,shift) => {
     	allowDepress: true,
 		cls: "shift-btn",
     	pressedCls: "shift-btn-pressed",
-		tooltip: `View Shift ${shift} Notes`,
+		tooltip: `Shift ${shift} Notes`,
 		toggleHandler: function (btn, pressed) {
 	      if (pressed) APModShift.setDataset(shift); else APModShift.clearSelection();
 	    }
@@ -1632,6 +1632,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

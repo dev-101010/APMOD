@@ -515,7 +515,7 @@ APModDataSpy.getDataSpyEditButton = (grid) => {
 APModDataSpy.viewShiftNotes = (grid,shift) => {
 	return Ext.create('Ext.Button', {
 		text: shift,
-		tooltip: "View Shift Notes",
+		tooltip: `View Shift ${shift} Notes`,
 		handler: function() {
 			APModShift.setDataset(shift);
 		}
@@ -537,7 +537,7 @@ APModDataSpy.getGridNodesExportButton = (grid) => {
 		text: "⇓",
 		tooltip: "Export Notes",
 		handler: function() {
-			APModShift.exportToFile({ storageKey: "APModShift" });
+			APModShift.exportAllToFile({ storageKey: "APModShift" });
 		}
 	});
 }
@@ -547,7 +547,7 @@ APModDataSpy.getGridNodesImportButton = (grid) => {
 		text: "⇑",
 		tooltip: "Import Notes",
 		handler: function() {
-			APModShift.importFromFile({ store: grid.getStore() });
+			APModShift.importUniversalFromFile({ store: grid.getStore() });
 		}
 	});
 }
@@ -1627,6 +1627,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

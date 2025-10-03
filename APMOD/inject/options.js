@@ -12,13 +12,7 @@ var APModOptions = (function () {
         iconCls: "toolbarGear",
         menu: [
           // --- Header + separator ---
-        { 
-          xtype: "menuitem",
-          text: "APMod",
-          overCls: "",      // remove hover class
-          focusable: false, // no focus outline
-          style: "font-weight:bold;cursor:default;"
-        },
+        { xtype: "menutextitem", text: "APMod", style: "font-weight:bold;color:#000;padding:6px 10px;" },
         "-",
           { text: "Filler Manager", icon: null, iconCls: null, hideOnClick: true,
             handler: function(){ 

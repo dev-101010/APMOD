@@ -465,6 +465,31 @@ var APModShift = (function () {
     input.click();
   };
 
+  api.clearSelection = function () {
+    // deactivate
+    api.activeDataset = null;
+    api.cache = {};
+  
+    // blank current column values in UI without persisting
+    api._attachedStores && api._attachedStores.forEach(function (store) {
+      const c = api.defaults;
+      if (!store || !store.each) return;
+      store.each(function (rec) {
+        rec.set(c.dataIndex, ""); // clear visual value
+      });
+      // refresh the grid view if available
+      const grid = store.ownerGrid || null;
+      if (grid && grid.getView && grid.getView().refresh) {
+        grid.getView().refresh();
+      }
+    });
+  
+    // refresh any tracked grids as a safety (older setups)
+    api._attachedGrids && api._attachedGrids.forEach(function (grid) {
+      try { grid.getView && grid.getView().refresh && grid.getView().refresh(); } catch (e) {}
+    });
+  };
+
   // --- Utilities --------------------------------------------------------------
   api.clearAll = function (opts) {
     const key = (opts && opts.storageKey) || api.defaults.storageKey;

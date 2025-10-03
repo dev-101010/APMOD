@@ -12,17 +12,38 @@ var APModShift = (function () {
     columnText  : "Note",
     columnWidth : 180,
     keyFn       : function (rec) {
+      // Record key used to map notes; adjust as needed for your data model
       return rec.get("laborid") || rec.get("id") || rec.internalId;
     }
   };
+
+  // --- Multi-dataset state (A/B/C/D) -----------------------------------------
+  api.activeDataset = null; // "A" | "B" | "C" | "D" | null
+  api._attachedStores = new Set();
+  api._attachedGrids  = new Set();
+
+  function _ensureExtAlertSelectShift() {
+    if (typeof Ext !== "undefined" && Ext.Msg && Ext.Msg.alert) {
+      Ext.Msg.alert("Select Shift", "Please activate A, B, C, or D first.");
+    } else if (typeof alert === "function") {
+      alert("Select Shift");
+    }
+  }
+
+  function _isActive() { return !!api.activeDataset; }
+
+  function _datasetKey(baseKey, ds) {
+    const root = baseKey || api.defaults.storageKey;
+    return `${root}:DS:${ds}`;
+  }
 
   // --- In-memory cache --------------------------------------------------------
   api.cache = {};   // { recordKey: "note string" }
   api._loadedKey = null;
 
-  /** Load once from localStorage into in-memory cache. */
+  /** Load once from localStorage into in-memory cache (for current active dataset). */
   api.load = function (storageKey) {
-    const key = storageKey || api.defaults.storageKey;
+    const key = storageKey || api._loadedKey || api.defaults.storageKey;
     api._loadedKey = key;
     try {
       const raw = localStorage.getItem(key);
@@ -32,7 +53,7 @@ var APModShift = (function () {
     }
   };
 
-  /** Persist in-memory cache back to localStorage. */
+  /** Persist in-memory cache back to localStorage (for current active dataset). */
   api.save = function (storageKey) {
     const key = storageKey || api._loadedKey || api.defaults.storageKey;
     try {
@@ -40,15 +61,18 @@ var APModShift = (function () {
     } catch (e) { /* ignore */ }
   };
 
-  /** Apply current cache to a store's records. */
+  /** Apply current cache to a store's records (NO-OP if no dataset active). */
   api.refresh = function (store, cfg) {
     if (!store) return;
+    if (!_isActive()) return; // Do not write values until a dataset is active
     const c = cfg || api.defaults;
     const map = api.cache || {};
     store.each(function(rec){
       const k = c.keyFn(rec);
       if (Object.prototype.hasOwnProperty.call(map, k)) {
         rec.set(c.dataIndex, String(map[k] || ""));
+      } else {
+        rec.set(c.dataIndex, "");
       }
     });
   };
@@ -58,7 +82,8 @@ var APModShift = (function () {
     const model = store && store.getModel && store.getModel();
     if (!model || !model.fields) return;
     const fields = model.fields;
-    // Modern ExtJS: fields is a MixedCollection with .get()
+
+    // MixedCollection case
     if (typeof fields.get === 'function') {
       if (!fields.get(dataIndex)) {
         fields.add(new Ext.data.Field({
@@ -68,9 +93,11 @@ var APModShift = (function () {
           persist: false
         }));
       }
+      return;
     }
-    // Fallback: if fields is an array (older/extremely custom)
-    else if (Array.isArray(fields)) {
+
+    // Array fallback case
+    if (Array.isArray(fields)) {
       const exists = fields.some(f => f.name === dataIndex);
       if (!exists) {
         fields.push(new Ext.data.Field({
@@ -87,7 +114,9 @@ var APModShift = (function () {
     if (!store || store.__apmodShiftNoteSynced) return;
     store.__apmodShiftNoteSynced = true;
 
-    // On every remote load, restore from in-memory cache (no storage read here)
+    try { api._attachedStores.add(store); } catch (e) {}
+
+    // On every datachanged, attempt to restore from in-memory cache — only if active
     store.on("datachanged", function () {
       api.refresh(store, cfg);
     });
@@ -117,7 +146,13 @@ var APModShift = (function () {
     if (!plugin.__apmodShiftBeforeEditBound) {
       plugin.__apmodShiftBeforeEditBound = true;
       plugin.on("beforeedit", function (editor, e) {
-        return e && e.column && e.column.dataIndex === cfg.dataIndex;
+        // Only allow editing of our column *and* only when a dataset is active
+        if (!e || !e.column || e.column.dataIndex !== cfg.dataIndex) return false;
+        if (!_isActive()) {
+          _ensureExtAlertSelectShift();
+          return false;
+        }
+        return true;
       });
     }
     if (!plugin.__apmodShiftEditBound) {
@@ -125,6 +160,10 @@ var APModShift = (function () {
       plugin.on("edit", function (ed, ctx) {
         if (!ctx || !ctx.record) return;
         if (!ctx.column || ctx.column.dataIndex !== cfg.dataIndex) return;
+        if (!_isActive()) {
+          _ensureExtAlertSelectShift();
+          return;
+        }
         // Update cache and persist once
         const rec = ctx.record;
         const newVal = String(ctx.value || "");
@@ -136,7 +175,7 @@ var APModShift = (function () {
         } else {
           delete api.cache[k];
         }
-        api.save(cfg.storageKey);
+        api.save(api._loadedKey);
         const store = rec.store;
         if (store) {
           store.fireEvent('datachanged', store);
@@ -154,10 +193,14 @@ var APModShift = (function () {
     }
   };
 
-  // --- Public method ----------------------------------------------------------
+  function _trackGrid(grid) {
+    try { api._attachedGrids.add(grid); } catch (e) {}
+  }
+
+  // --- Public: attach ---------------------------------------------------------
   /**
    * Attach a local-only editable text column (left-most) and wire syncing.
-   * Requires api.load(...) to have run once earlier, or falls back to defaults.
+   * Builds the column and listeners, but does NOT write/restore data unless a dataset is active.
    *
    * @param {Ext.grid.Panel} grid
    * @param {Object} [options] { storageKey, dataIndex, columnText, columnWidth, keyFn }
@@ -168,9 +211,6 @@ var APModShift = (function () {
 
     const cfg = Ext.apply({}, options || {}, api.defaults);
 
-    // If user did not call load() yet, do it once with current key.
-    if (!api._loadedKey) api.load(cfg.storageKey);
-
     const store = grid.getStore && grid.getStore();
     if (!store) return;
 
@@ -179,48 +219,116 @@ var APModShift = (function () {
 
     const col = api._makeTextColumn(cfg);
     api._insertColumnLeft(grid, col);
-
     api._ensureCellEditing(grid, cfg);
+    _trackGrid(grid);
 
-    // Initial apply of cache to already-loaded data (if any)
+    // No initial writes unless a dataset is active
     api.refresh(store, cfg);
   };
 
-  // ---- Export / Import helpers ------------------------------------------------
-  const EXPORT_KIND = "APModShift.Notes";
-  const EXPORT_VERSION = 1;
+  // --- Dataset activation -----------------------------------------------------
+  /**
+   * Activate one of the four datasets: "A", "B", "C", or "D".
+   * Loads the corresponding storage key and refreshes all attached stores/grids.
+   */
+  api.setDataset = function (ds, opts) {
+    const upper = String(ds || "").trim().toUpperCase();
+    if (!/^[ABCD]$/.test(upper)) {
+      throw new Error("Unsupported dataset. Use A, B, C, or D.");
+    }
+    const baseKey = (opts && opts.storageKey) || api.defaults.storageKey;
+    const dsKey = _datasetKey(baseKey, upper);
+    api.activeDataset = upper;
+    api._loadedKey = dsKey;
+    api.load(dsKey);
+
+    // Refresh all attached stores/grids so values appear immediately
+    api._attachedStores.forEach(function (store) {
+      api.refresh(store, api.defaults);
+      const grid = store.ownerGrid || null;
+      if (grid && grid.getView && grid.getView().refresh) {
+        grid.getView().refresh();
+      }
+    });
+    api._attachedGrids.forEach(function (grid) {
+      try { grid.getView && grid.getView().refresh && grid.getView().refresh(); } catch (e) {}
+    });
+  };
+
+  api.activateA = function (opts) { api.setDataset("A", opts); };
+  api.activateB = function (opts) { api.setDataset("B", opts); };
+  api.activateC = function (opts) { api.setDataset("C", opts); };
+  api.activateD = function (opts) { api.setDataset("D", opts); };
+  api.getActiveDataset = function () { return api.activeDataset; };
+
+  // --- Export (always allowed) ------------------------------------------------
+  const EXPORT_KIND_SINGLE  = "APModShift.Notes";
+  const EXPORT_KIND_BUNDLE  = "APModShift.NotesBundle";
+  const EXPORT_VERSION      = 1;
 
   function _nowTimestamp() {
-    // yyyy-mm-dd_HH-MM-SS
     const d = new Date();
     const pad = n => String(n).padStart(2, "0");
-    const yyyy = d.getFullYear();
-    const mm   = pad(d.getMonth() + 1);
-    const dd   = pad(d.getDate());
-    const HH   = pad(d.getHours());
-    const MM   = pad(d.getMinutes());
-    const SS   = pad(d.getSeconds());
-    return `${yyyy}-${mm}-${dd}_${HH}-${MM}-${SS}`;
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
   }
 
   function _safeFileNamePart(s) {
-    return String(s || "")
-      .replace(/[^a-z0-9_\-\.]+/gi, "_")
-      .replace(/^_+|_+$/g, "");
+    return String(s || "").replace(/[^a-z0-9_\-\.]+/gi, "_").replace(/^_+|_+$/g, "");
   }
 
-  /** Build typed export payload from current in-memory cache. */
+  function _loadCacheForKey(storageKey) {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      return raw ? (JSON.parse(raw) || {}) : {};
+    } catch (e) { return {}; }
+  }
+
+  /** Build typed export payload for the CURRENT dataset (requires active). */
   api.buildExportPayload = function (opts) {
-    const key = (opts && opts.storageKey) || api._loadedKey || api.defaults.storageKey;
-    const data = {};
-    // Copy only string values
-    const src = api.cache || {};
-    Object.keys(src).forEach(k => { data[k] = String(src[k] == null ? "" : src[k]); });
-    return { kind: EXPORT_KIND, version: EXPORT_VERSION, storageKey: key, data };
+    if (!api.activeDataset) throw new Error("No dataset active.");
+    const baseKey = (opts && opts.storageKey) || api.defaults.storageKey;
+    const dsKey   = _datasetKey(baseKey, api.activeDataset);
+    const data    = {};
+    const src     = api.cache || {};
+    Object.keys(src).forEach(k => data[k] = String(src[k] ?? ""));
+    return { kind: EXPORT_KIND_SINGLE, version: EXPORT_VERSION, storageKey: dsKey, data };
   };
 
-  /** Trigger a file download with a timestamped filename. */
-  api.exportToFile = function (opts) {
+  /** Build a bundle containing A, B, C, D — always allowed. */
+  api.buildExportBundle = function (opts) {
+    const baseKey = (opts && opts.storageKey) || api.defaults.storageKey;
+    const dsList  = ["A","B","C","D"];
+    const datasets = {};
+    dsList.forEach(ds => {
+      const key   = _datasetKey(baseKey, ds);
+      const cache = _loadCacheForKey(key);
+      const data  = {};
+      Object.keys(cache).forEach(k => data[k] = String(cache[k] ?? ""));
+      datasets[ds] = { storageKey: key, data };
+    });
+    return { kind: EXPORT_KIND_BUNDLE, version: EXPORT_VERSION, baseKey, datasets };
+  };
+
+  /** File download for the ALL-datasets bundle — always works. */
+  api.exportAllToFile = function (opts) {
+    const payload = api.buildExportBundle(opts);
+    const json = JSON.stringify(payload, null, 2);
+    const keyPart = _safeFileNamePart(payload.baseKey || "APModShift");
+    const ts = _nowTimestamp();
+    const filename = `${keyPart}_Notes_ALL_${ts}.json`;
+    const uri = "data:application/json;charset=utf-8," + encodeURIComponent(json);
+    const a = document.createElement("a");
+    a.setAttribute("href", uri);
+    a.setAttribute("download", filename);
+    a.click();
+  };
+
+  /** Optional: keep the per-dataset export (only when active). */
+  api.exportCurrentToFile = function (opts) {
+    if (!api.activeDataset) {
+      _ensureExtAlertSelectShift();
+      return;
+    }
     const payload = api.buildExportPayload(opts);
     const json = JSON.stringify(payload, null, 2);
     const keyPart = _safeFileNamePart(payload.storageKey || "APModShift");
@@ -233,70 +341,105 @@ var APModShift = (function () {
     a.click();
   };
 
-  // --- Strict import normalization --------------------------------------------
-  function _normalizeImportedDataStrict(parsed) {
-    // Enforce typed payload: object with exact kind, valid version, and object data
+  // --- Import (universal: always allowed) ------------------------------------
+  const IMPORT_KIND_SINGLE = "APModShift.Notes";
+  const IMPORT_KIND_BUNDLE = "APModShift.NotesBundle";
+  const IMPORT_VERSION_MAX = 1;
+
+  function _saveCacheForKey(storageKey, map, merge) {
+    const incoming = map || {};
+    if (merge === true) {
+      const prev = _loadCacheForKey(storageKey);
+      const merged = Object.assign({}, prev, incoming);
+      localStorage.setItem(storageKey, JSON.stringify(merged));
+    } else {
+      localStorage.setItem(storageKey, JSON.stringify(incoming));
+    }
+  }
+
+  // Accept both single and bundle payloads
+  function _normalizeImportedAny(parsed) {
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
       throw new Error("Unsupported file: payload must be an object.");
     }
-    if (parsed.kind !== EXPORT_KIND) {
-      throw new Error("Unsupported file: wrong 'kind'.");
+    // Bundle path
+    if (parsed.kind === IMPORT_KIND_BUNDLE) {
+      if (typeof parsed.version !== "number" || parsed.version > IMPORT_VERSION_MAX) {
+        throw new Error("Unsupported file: invalid or newer 'version'.");
+      }
+      const ds = parsed.datasets;
+      if (!ds || typeof ds !== "object" || Array.isArray(ds)) {
+        throw new Error("Invalid bundle: 'datasets' must be an object.");
+      }
+      const cleaned = {};
+      Object.keys(ds).forEach(name => {
+        const entry = ds[name] || {};
+        const data = entry.data || {};
+        const norm = {};
+        Object.keys(data).forEach(k => { norm[String(k)] = String(data[k] ?? ""); });
+        cleaned[name] = { storageKey: entry.storageKey || null, data: norm };
+      });
+      return { mode: "bundle", baseKey: parsed.baseKey || null, datasets: cleaned };
     }
-    if (typeof parsed.version !== "number" || parsed.version > EXPORT_VERSION) {
-      throw new Error("Unsupported file: invalid or newer 'version'.");
+    // Single path
+    if (parsed.kind === IMPORT_KIND_SINGLE) {
+      if (typeof parsed.version !== "number" || parsed.version > IMPORT_VERSION_MAX) {
+        throw new Error("Unsupported file: invalid or newer 'version'.");
+      }
+      const map = {};
+      const src = parsed.data || {};
+      Object.keys(src).forEach(k => { map[String(k)] = String(src[k] ?? ""); });
+      return { mode: "single", storageKey: parsed.storageKey || null, data: map };
     }
-    if (!parsed.data || typeof parsed.data !== "object" || Array.isArray(parsed.data)) {
-      throw new Error("Invalid payload: 'data' must be an object.");
-    }
-    // Ensure all values are strings (normalize to strings)
-    const map = {};
-    Object.keys(parsed.data).forEach(k => {
-      map[String(k)] = String(parsed.data[k] == null ? "" : parsed.data[k]);
-    });
-    const storageKey = parsed.storageKey || null;
-    return { map, storageKey };
+    throw new Error("Unsupported file: unknown 'kind'.");
   }
 
   /**
-   * Import from a parsed JSON value (already JSON.parse'd).
-   * Merges or replaces cache (default: replace = true). Saves and optionally refreshes a store.
-   * Strictly validates typed header (kind/version/storageKey).
+   * Universal parsed import:
+   * - Always allowed.
+   * - Writes all provided datasets to localStorage (no UI constraints).
+   * - If a dataset is currently active, immediately applies it to the UI.
+   * Options: { storageKey?: string, merge?: boolean, applyToUI?: boolean }
    */
-  api.importFromParsed = function (parsed, opts) {
+  api.importUniversalFromParsed = function (parsed, opts) {
     const o = opts || {};
-    const normalized = _normalizeImportedDataStrict(parsed);
-    const targetKey = o.storageKey || normalized.storageKey || api._loadedKey || api.defaults.storageKey;
+    const norm = _normalizeImportedAny(parsed);
+    const baseKey = (o.storageKey || api.defaults.storageKey);
 
-    // Ensure cache belongs to the active key
-    if (!api._loadedKey || api._loadedKey !== targetKey) {
-      api.load(targetKey);
-    }
-
-    const incoming = normalized.map || {};
-    if (o.merge === true) {
-      // merge: override incoming keys, keep others
-      api.cache = Object.assign({}, api.cache || {}, incoming);
+    if (norm.mode === "bundle") {
+      // 1) Write ALL datasets to storage
+      Object.keys(norm.datasets).forEach(ds => {
+        const entry = norm.datasets[ds];
+        const key = entry.storageKey || _datasetKey(baseKey, ds);
+        _saveCacheForKey(key, entry.data, o.merge === true);
+      });
     } else {
-      // replace
-      api.cache = incoming;
+      // SINGLE: write to provided storageKey; if none, prefer active dataset, else fallback to A
+      let targetKey = norm.storageKey;
+      if (!targetKey) {
+        if (api.activeDataset) targetKey = _datasetKey(baseKey, api.activeDataset);
+        else                   targetKey = _datasetKey(baseKey, "A");
+      }
+      _saveCacheForKey(targetKey, norm.data, o.merge === true);
     }
-    api.save(targetKey);
 
-    // Optionally refresh a store to push values into records
-    const store = o.store;
-    if (store) {
-      api.refresh(store, Ext.apply({}, { storageKey: targetKey }, api.defaults));
+    // 2) If there is an active dataset and UI application is desired, apply it now
+    if (api.activeDataset && o.applyToUI !== false) {
+      const activeKey = _datasetKey(baseKey, api.activeDataset);
+      api._loadedKey = activeKey;
+      api.load(activeKey);
+      // Push values into records (UI write)
+      api._attachedStores.forEach(function (s) { api.refresh(s, api.defaults); });
     }
   };
 
   /**
-   * Open a file picker, parse, validate, import, save, and refresh.
-   * Options: { storageKey?, store?, merge? }
-   * UI behavior:
-   *  - On success: only a short APModPopup message (if available); otherwise silent (console).
-   *  - On failure: Ext.Msg.alert with a concise error message.
+   * Universal file import:
+   * - Always allowed.
+   * - Loads all data to storage; applies active dataset to UI if present.
+   * Options: { storageKey?: string, merge?: boolean, applyToUI?: boolean }
    */
-  api.importFromFile = function (opts) {
+  api.importUniversalFromFile = function (opts) {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".json,application/json";
@@ -307,18 +450,16 @@ var APModShift = (function () {
       reader.onload = evt => {
         try {
           const parsed = JSON.parse(String(evt.target.result || "null"));
-          api.importFromParsed(parsed, opts || {});
-          if (APModPopup) {
+          api.importUniversalFromParsed(parsed, opts || {});
+          if (typeof APModPopup !== "undefined" && APModPopup && APModPopup.openPopup) {
             APModPopup.openPopup("Notes imported.");
           } else {
-            // Silent fallback (no blocking alerts); useful for unit tests/dev
             console.info("APModShift: Notes imported.");
           }
         } catch (err) {
-          if (Ext && Ext.Msg && Ext.Msg.alert) {
+          if (typeof Ext !== "undefined" && Ext.Msg && Ext.Msg.alert) {
             Ext.Msg.alert("Import failed", err && err.message ? String(err.message) : "Invalid JSON or unsupported file.");
-          } else {
-            // Last-resort fallback if Ext.Msg is not present
+          } else if (typeof alert === "function") {
             alert("Import failed");
           }
         }
@@ -326,6 +467,15 @@ var APModShift = (function () {
       reader.readAsText(file, "UTF-8");
     };
     input.click();
+  };
+
+  // Public convenience: clear all datasets (optional utility)
+  api.clearAll = function (opts) {
+    const baseKey = (opts && opts.storageKey) || api.defaults.storageKey;
+    ["A","B","C","D"].forEach(ds => {
+      try { localStorage.removeItem(_datasetKey(baseKey, ds)); } catch (e) {}
+    });
+    // Do not touch UI unless active dataset is cleared explicitly by caller
   };
 
   return api;

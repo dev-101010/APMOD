@@ -923,9 +923,14 @@ APModFiller.openPriorityWindow = function() {
   const win = Ext.create("Ext.window.Window", {
     title: "Priority Settings",
     modal: true,
-    width: 640,
-    height: 380,
+    width: 900,
+	height: 600,
+	minWidth: 900,
+	minHeight: 600,
+	closable: false,
+	maximizable: false,
     layout: "fit",
+	padding: '10 10 10 10',
     items: [ mainPanel ]
   });
 
@@ -1192,6 +1197,8 @@ function doImport() {
 	height: 600,
 	minWidth: 900,
 	minHeight: 600,
+	closable: false,
+	maximizable: false,
     layout: "fit",
 	padding: '10 10 10 10',
     items: [ mainPanel ]
@@ -1687,6 +1694,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

@@ -91,7 +91,7 @@ APModDataSpy.injectDataspy = (dsStore) => {
 		DSclass.prototype.apmodDataSpyOrigInitComponent = DSclass.prototype.initComponent;
 		DSclass.prototype.initComponent = function() {
 			this.apmodDataSpyOrigInitComponent.apply(this, []);
-			//console.log(this.getGrid().gridURL);
+			//console.log(this.getGrid().gridURL); APModDataSpy.viewShiftNotes
 			if (APModDataSpy.gridURLs.includes(this.gridURL)) {
 				const grid = this.getGrid();
 				grid.apModStore = APModDataSpy.loadFilter(grid);
@@ -100,6 +100,10 @@ APModDataSpy.injectDataspy = (dsStore) => {
 				this.insert(2, customDataSpyCombo);
 				this.insert(3, customDataSpyEdit);
 			}
+			if (this.gridURL.includes("EWSUSR.TAB")) {
+				const viewShiftNotes = APModDataSpy.viewShiftNotes(grid);
+				this.insert(2, viewShiftNotes);
+			]
 		}
 	}
 }
@@ -501,6 +505,16 @@ APModDataSpy.getDataSpyEditButton = (grid) => {
 				APModDataSpy.popup = APModDataSpy.createPopupPanel(grid,null)
 				if (APModDataSpy.popup != null) APModDataSpy.popup.show();
 			}
+		}
+	});
+}
+
+APModDataSpy.viewShiftNotes = (grid) => {
+	return Ext.create('Ext.Button', {
+		text: "🗉",
+		tooltip: "View Shift Notes",
+		handler: function() {
+			APModShift.attach(grid);
 		}
 	});
 }
@@ -1610,6 +1624,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

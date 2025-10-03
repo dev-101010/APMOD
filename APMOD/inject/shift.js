@@ -1,5 +1,5 @@
 // apmod-shift.js
-// Single-localStorage entry holding ALL datasets (A–D) in one blob.
+// Single-localStorage entry holding ALL datasets (A–D) in one blob. 
 // English comments; no icons in code/comments.
 
 var APModShift = (function () {

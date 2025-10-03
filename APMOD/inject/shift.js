@@ -210,6 +210,9 @@ var APModShift = (function () {
     if (!grid || grid.__apmodShiftAttached) return;
     grid.__apmodShiftAttached = true;
 
+    api.activeDataset = null;
+    api.cache = {};
+
     const cfg = Ext.apply({}, options || {}, api.defaults);
     _loadMaster(cfg.storageKey); // ensure master present
 

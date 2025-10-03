@@ -520,10 +520,10 @@ APModDataSpy.viewShiftNotes = (grid,shift) => {
 		text: shift,
 		enableToggle: true,
     	toggleGroup: "shiftGroup",
-    	allowDepress: false,
+    	allowDepress: true,
 		tooltip: `View Shift ${shift} Notes`,
 		toggleHandler: function (btn, pressed) {
-	      if (pressed) APModShift.setDataset("A"); else APModShift.setDataset(null);
+	      if (pressed) APModShift.setDataset("A"); else APModShift.clearSelection();
 	    }
 	});
 }
@@ -1633,6 +1633,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

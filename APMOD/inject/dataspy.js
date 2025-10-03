@@ -5,7 +5,7 @@ const APModDataSpy = {
 };
 
 APModDataSpy.load = () => {
-	if (typeof Ext === 'undefined' || typeof EAM === 'undefined') return;
+	if (typeof Ext === 'undefined' || typeof EAM === 'undefined') return; 
 	
 	EAM.APModDataSpy = APModDataSpy;
 	APModDataSpy.login = "UNKNOWN";
@@ -1633,6 +1633,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

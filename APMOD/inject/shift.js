@@ -1,13 +1,13 @@
 // apmod-shift.js
-// Local text column for remote-loaded/remote-sorted grids (e.g., Shift Report Book Labor)
+// Single-localStorage entry holding ALL datasets (A–D) in one blob.
 // English comments; no icons in code/comments.
 
 var APModShift = (function () {
   const api = {};
 
-  // --- Defaults (can be overridden in attach options) -------------------------
+  // --- Defaults ---------------------------------------------------------------
   api.defaults = {
-    storageKey  : "APModShift",
+    storageKey  : "APModShift:ALL",     // single localStorage key for all datasets
     dataIndex   : "_localNote",
     columnText  : "Note",
     columnWidth : 180,
@@ -17,10 +17,55 @@ var APModShift = (function () {
     }
   };
 
-  // --- Multi-dataset state (A/B/C/D) -----------------------------------------
-  api.activeDataset = null; // "A" | "B" | "C" | "D" | null
+  // --- In-memory state --------------------------------------------------------
+  api.activeDataset = null;              // "A" | "B" | "C" | "D" | null
+  api.cache = {};                        // points to the current dataset map (by reference)
+  api._master = null;                    // { kind, version, datasets: {A:{},B:{},C:{},D:{}} }
   api._attachedStores = new Set();
   api._attachedGrids  = new Set();
+
+  // --- Storage schema ---------------------------------------------------------
+  const STORAGE_KIND = "APModShift.Storage";
+  const STORAGE_VERSION = 1;
+
+  function _ensureMasterShape(obj) {
+    // Normalize any loaded object into our master structure.
+    const master = (obj && typeof obj === "object") ? obj : {};
+    if (master.kind !== STORAGE_KIND) master.kind = STORAGE_KIND;
+    if (typeof master.version !== "number") master.version = STORAGE_VERSION;
+    if (!master.datasets || typeof master.datasets !== "object") master.datasets = {};
+    ["A","B","C","D"].forEach(ds => {
+      if (!master.datasets[ds] || typeof master.datasets[ds] !== "object") master.datasets[ds] = {};
+    });
+    return master;
+  }
+
+  function _loadMaster(storageKey) {
+    const key = storageKey || api.defaults.storageKey;
+    try {
+      const raw = localStorage.getItem(key);
+      const parsed = raw ? JSON.parse(raw) : null;
+      api._master = _ensureMasterShape(parsed);
+    } catch (e) {
+      api._master = _ensureMasterShape(null);
+    }
+    return api._master;
+  }
+
+  function _saveMaster(storageKey) {
+    const key = storageKey || api.defaults.storageKey;
+    try {
+      localStorage.setItem(key, JSON.stringify(api._master || _ensureMasterShape(null)));
+    } catch (e) { /* ignore */ }
+  }
+
+  function _getDatasetMap(ds) {
+    const d = String(ds || "").toUpperCase();
+    if (!/^[ABCD]$/.test(d)) return {};
+    if (!api._master) _loadMaster();
+    if (!api._master.datasets[d]) api._master.datasets[d] = {};
+    return api._master.datasets[d];
+  }
 
   function _ensureExtAlertSelectShift() {
     if (typeof Ext !== "undefined" && Ext.Msg && Ext.Msg.alert) {
@@ -32,39 +77,11 @@ var APModShift = (function () {
 
   function _isActive() { return !!api.activeDataset; }
 
-  function _datasetKey(baseKey, ds) {
-    const root = baseKey || api.defaults.storageKey;
-    return `${root}:DS:${ds}`;
-  }
-
-  // --- In-memory cache --------------------------------------------------------
-  api.cache = {};   // { recordKey: "note string" }
-  api._loadedKey = null;
-
-  /** Load once from localStorage into in-memory cache (for current active dataset). */
-  api.load = function (storageKey) {
-    const key = storageKey || api._loadedKey || api.defaults.storageKey;
-    api._loadedKey = key;
-    try {
-      const raw = localStorage.getItem(key);
-      api.cache = raw ? (JSON.parse(raw) || {}) : {};
-    } catch (e) {
-      api.cache = {};
-    }
-  };
-
-  /** Persist in-memory cache back to localStorage (for current active dataset). */
-  api.save = function (storageKey) {
-    const key = storageKey || api._loadedKey || api.defaults.storageKey;
-    try {
-      localStorage.setItem(key, JSON.stringify(api.cache || {}));
-    } catch (e) { /* ignore */ }
-  };
-
-  /** Apply current cache to a store's records (NO-OP if no dataset active). */
+  // --- UI sync ----------------------------------------------------------------
+  /** Apply current cache (active dataset) to a store's records (NO-OP if no dataset active). */
   api.refresh = function (store, cfg) {
     if (!store) return;
-    if (!_isActive()) return; // Do not write values until a dataset is active
+    if (!_isActive()) return; // no writes without active dataset
     const c = cfg || api.defaults;
     const map = api.cache || {};
     store.each(function(rec){
@@ -77,35 +94,21 @@ var APModShift = (function () {
     });
   };
 
-  // --- Internal helpers -------------------------------------------------------
+  // --- Internal helpers for grid wiring --------------------------------------
   api._ensureModelField = function (store, dataIndex) {
     const model = store && store.getModel && store.getModel();
     if (!model || !model.fields) return;
     const fields = model.fields;
-
-    // MixedCollection case
     if (typeof fields.get === 'function') {
       if (!fields.get(dataIndex)) {
-        fields.add(new Ext.data.Field({
-          name: dataIndex,
-          type: "string",
-          defaultValue: "",
-          persist: false
-        }));
+        fields.add(new Ext.data.Field({ name: dataIndex, type: "string", defaultValue: "", persist: false }));
       }
       return;
     }
-
-    // Array fallback case
     if (Array.isArray(fields)) {
       const exists = fields.some(f => f.name === dataIndex);
       if (!exists) {
-        fields.push(new Ext.data.Field({
-          name: dataIndex,
-          type: "string",
-          defaultValue: "",
-          persist: false
-        }));
+        fields.push(new Ext.data.Field({ name: dataIndex, type: "string", defaultValue: "", persist: false }));
       }
     }
   };
@@ -113,13 +116,8 @@ var APModShift = (function () {
   api._attachStoreSync = function (store, cfg) {
     if (!store || store.__apmodShiftNoteSynced) return;
     store.__apmodShiftNoteSynced = true;
-
     try { api._attachedStores.add(store); } catch (e) {}
-
-    // On every datachanged, attempt to restore from in-memory cache — only if active
-    store.on("datachanged", function () {
-      api.refresh(store, cfg);
-    });
+    store.on("datachanged", function () { api.refresh(store, cfg); });
   };
 
   api._makeTextColumn = function (cfg) {
@@ -146,12 +144,8 @@ var APModShift = (function () {
     if (!plugin.__apmodShiftBeforeEditBound) {
       plugin.__apmodShiftBeforeEditBound = true;
       plugin.on("beforeedit", function (editor, e) {
-        // Only allow editing of our column *and* only when a dataset is active
         if (!e || !e.column || e.column.dataIndex !== cfg.dataIndex) return false;
-        if (!_isActive()) {
-          _ensureExtAlertSelectShift();
-          return false;
-        }
+        if (!_isActive()) { _ensureExtAlertSelectShift(); return false; }
         return true;
       });
     }
@@ -160,26 +154,17 @@ var APModShift = (function () {
       plugin.on("edit", function (ed, ctx) {
         if (!ctx || !ctx.record) return;
         if (!ctx.column || ctx.column.dataIndex !== cfg.dataIndex) return;
-        if (!_isActive()) {
-          _ensureExtAlertSelectShift();
-          return;
-        }
-        // Update cache and persist once
+        if (!_isActive()) { _ensureExtAlertSelectShift(); return; }
+        // On edit, update cache (active dataset) and save master
         const rec = ctx.record;
         const newVal = String(ctx.value || "");
         rec.set(cfg.dataIndex, newVal);
         rec.commit();
         const k = cfg.keyFn(rec);
-        if (newVal) {
-          api.cache[k] = newVal;
-        } else {
-          delete api.cache[k];
-        }
-        api.save(api._loadedKey);
+        if (newVal) { api.cache[k] = newVal; } else { delete api.cache[k]; }
+        _saveMaster(); // persist the single blob
         const store = rec.store;
-        if (store) {
-          store.fireEvent('datachanged', store);
-        }
+        if (store) { store.fireEvent('datachanged', store); }
       });
     }
   };
@@ -201,15 +186,13 @@ var APModShift = (function () {
   /**
    * Attach a local-only editable text column (left-most) and wire syncing.
    * Builds the column and listeners, but does NOT write/restore data unless a dataset is active.
-   *
-   * @param {Ext.grid.Panel} grid
-   * @param {Object} [options] { storageKey, dataIndex, columnText, columnWidth, keyFn }
    */
   api.attach = function (grid, options) {
     if (!grid || grid.__apmodShiftAttached) return;
     grid.__apmodShiftAttached = true;
 
     const cfg = Ext.apply({}, options || {}, api.defaults);
+    _loadMaster(cfg.storageKey); // ensure master present
 
     const store = grid.getStore && grid.getStore();
     if (!store) return;
@@ -227,28 +210,22 @@ var APModShift = (function () {
   };
 
   // --- Dataset activation -----------------------------------------------------
-  /**
-   * Activate one of the four datasets: "A", "B", "C", or "D".
-   * Loads the corresponding storage key and refreshes all attached stores/grids.
-   */
   api.setDataset = function (ds, opts) {
     const upper = String(ds || "").trim().toUpperCase();
     if (!/^[ABCD]$/.test(upper)) {
       throw new Error("Unsupported dataset. Use A, B, C, or D.");
     }
-    const baseKey = (opts && opts.storageKey) || api.defaults.storageKey;
-    const dsKey = _datasetKey(baseKey, upper);
+    const cfgKey = (opts && opts.storageKey) || api.defaults.storageKey;
+    _loadMaster(cfgKey);
     api.activeDataset = upper;
-    api._loadedKey = dsKey;
-    api.load(dsKey);
+    // Point cache to the live map inside master (mutations update master directly)
+    api.cache = _getDatasetMap(upper);
 
     // Refresh all attached stores/grids so values appear immediately
     api._attachedStores.forEach(function (store) {
       api.refresh(store, api.defaults);
       const grid = store.ownerGrid || null;
-      if (grid && grid.getView && grid.getView().refresh) {
-        grid.getView().refresh();
-      }
+      if (grid && grid.getView && grid.getView().refresh) grid.getView().refresh();
     });
     api._attachedGrids.forEach(function (grid) {
       try { grid.getView && grid.getView().refresh && grid.getView().refresh(); } catch (e) {}
@@ -276,44 +253,44 @@ var APModShift = (function () {
     return String(s || "").replace(/[^a-z0-9_\-\.]+/gi, "_").replace(/^_+|_+$/g, "");
   }
 
-  function _loadCacheForKey(storageKey) {
-    try {
-      const raw = localStorage.getItem(storageKey);
-      return raw ? (JSON.parse(raw) || {}) : {};
-    } catch (e) { return {}; }
-  }
-
-  /** Build typed export payload for the CURRENT dataset (requires active). */
-  api.buildExportPayload = function (opts) {
+  /** Build payload for current dataset (requires active). */
+  api.buildExportPayload = function () {
     if (!api.activeDataset) throw new Error("No dataset active.");
-    const baseKey = (opts && opts.storageKey) || api.defaults.storageKey;
-    const dsKey   = _datasetKey(baseKey, api.activeDataset);
-    const data    = {};
-    const src     = api.cache || {};
+    _loadMaster();
+    const data = {};
+    const src = _getDatasetMap(api.activeDataset);
     Object.keys(src).forEach(k => data[k] = String(src[k] ?? ""));
-    return { kind: EXPORT_KIND_SINGLE, version: EXPORT_VERSION, storageKey: dsKey, data };
+    return {
+      kind: EXPORT_KIND_SINGLE,
+      version: EXPORT_VERSION,
+      dataset: api.activeDataset, // informative
+      data
+    };
   };
 
-  /** Build a bundle containing A, B, C, D — always allowed. */
-  api.buildExportBundle = function (opts) {
-    const baseKey = (opts && opts.storageKey) || api.defaults.storageKey;
-    const dsList  = ["A","B","C","D"];
+  /** Build bundle A–D from single master. */
+  api.buildExportBundle = function () {
+    _loadMaster();
     const datasets = {};
-    dsList.forEach(ds => {
-      const key   = _datasetKey(baseKey, ds);
-      const cache = _loadCacheForKey(key);
-      const data  = {};
-      Object.keys(cache).forEach(k => data[k] = String(cache[k] ?? ""));
-      datasets[ds] = { storageKey: key, data };
+    ["A","B","C","D"].forEach(ds => {
+      const src = _getDatasetMap(ds);
+      const data = {};
+      Object.keys(src).forEach(k => data[k] = String(src[k] ?? ""));
+      datasets[ds] = { data };
     });
-    return { kind: EXPORT_KIND_BUNDLE, version: EXPORT_VERSION, baseKey, datasets };
+    return {
+      kind: EXPORT_KIND_BUNDLE,
+      version: EXPORT_VERSION,
+      baseKey: api.defaults.storageKey,
+      datasets
+    };
   };
 
-  /** File download for the ALL-datasets bundle — always works. */
-  api.exportAllToFile = function (opts) {
-    const payload = api.buildExportBundle(opts);
+  /** Download ALL datasets (always works). */
+  api.exportAllToFile = function () {
+    const payload = api.buildExportBundle();
     const json = JSON.stringify(payload, null, 2);
-    const keyPart = _safeFileNamePart(payload.baseKey || "APModShift");
+    const keyPart = _safeFileNamePart(api.defaults.storageKey || "APModShift");
     const ts = _nowTimestamp();
     const filename = `${keyPart}_Notes_ALL_${ts}.json`;
     const uri = "data:application/json;charset=utf-8," + encodeURIComponent(json);
@@ -323,17 +300,14 @@ var APModShift = (function () {
     a.click();
   };
 
-  /** Optional: keep the per-dataset export (only when active). */
-  api.exportCurrentToFile = function (opts) {
-    if (!api.activeDataset) {
-      _ensureExtAlertSelectShift();
-      return;
-    }
-    const payload = api.buildExportPayload(opts);
+  /** Download current dataset (only when active). */
+  api.exportCurrentToFile = function () {
+    if (!api.activeDataset) { _ensureExtAlertSelectShift(); return; }
+    const payload = api.buildExportPayload();
     const json = JSON.stringify(payload, null, 2);
-    const keyPart = _safeFileNamePart(payload.storageKey || "APModShift");
+    const keyPart = _safeFileNamePart(api.defaults.storageKey || "APModShift");
     const ts = _nowTimestamp();
-    const filename = `${keyPart}_Notes_${ts}.json`;
+    const filename = `${keyPart}_Notes_${payload.dataset}_${ts}.json`;
     const uri = "data:application/json;charset=utf-8," + encodeURIComponent(json);
     const a = document.createElement("a");
     a.setAttribute("href", uri);
@@ -346,23 +320,18 @@ var APModShift = (function () {
   const IMPORT_KIND_BUNDLE = "APModShift.NotesBundle";
   const IMPORT_VERSION_MAX = 1;
 
-  function _saveCacheForKey(storageKey, map, merge) {
-    const incoming = map || {};
-    if (merge === true) {
-      const prev = _loadCacheForKey(storageKey);
-      const merged = Object.assign({}, prev, incoming);
-      localStorage.setItem(storageKey, JSON.stringify(merged));
-    } else {
-      localStorage.setItem(storageKey, JSON.stringify(incoming));
-    }
+  function _extractDatasetFromLegacyStorageKey(sk) {
+    // If legacy single-file used keys like "...:DS:A", try to detect the suffix.
+    if (!sk || typeof sk !== "string") return null;
+    const m = sk.match(/:DS:([ABCD])$/i);
+    return m ? m[1].toUpperCase() : null;
   }
 
-  // Accept both single and bundle payloads
   function _normalizeImportedAny(parsed) {
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
       throw new Error("Unsupported file: payload must be an object.");
     }
-    // Bundle path
+    // Bundle
     if (parsed.kind === IMPORT_KIND_BUNDLE) {
       if (typeof parsed.version !== "number" || parsed.version > IMPORT_VERSION_MAX) {
         throw new Error("Unsupported file: invalid or newer 'version'.");
@@ -377,11 +346,12 @@ var APModShift = (function () {
         const data = entry.data || {};
         const norm = {};
         Object.keys(data).forEach(k => { norm[String(k)] = String(data[k] ?? ""); });
-        cleaned[name] = { storageKey: entry.storageKey || null, data: norm };
+        const upper = String(name || "").toUpperCase();
+        if (/^[ABCD]$/.test(upper)) cleaned[upper] = norm;
       });
-      return { mode: "bundle", baseKey: parsed.baseKey || null, datasets: cleaned };
+      return { mode: "bundle", datasets: cleaned };
     }
-    // Single path
+    // Single
     if (parsed.kind === IMPORT_KIND_SINGLE) {
       if (typeof parsed.version !== "number" || parsed.version > IMPORT_VERSION_MAX) {
         throw new Error("Unsupported file: invalid or newer 'version'.");
@@ -389,56 +359,64 @@ var APModShift = (function () {
       const map = {};
       const src = parsed.data || {};
       Object.keys(src).forEach(k => { map[String(k)] = String(src[k] ?? ""); });
-      return { mode: "single", storageKey: parsed.storageKey || null, data: map };
+      // Prefer explicit dataset field; else try legacy storageKey; else undefined
+      const dsFromField = parsed.dataset && /^[ABCD]$/.test(String(parsed.dataset)) ? String(parsed.dataset).toUpperCase() : null;
+      const dsFromKey = _extractDatasetFromLegacyStorageKey(parsed.storageKey);
+      const ds = dsFromField || dsFromKey || null;
+      return { mode: "single", dataset: ds, data: map };
     }
     throw new Error("Unsupported file: unknown 'kind'.");
   }
 
   /**
-   * Universal parsed import:
-   * - Always allowed.
-   * - Writes all provided datasets to localStorage (no UI constraints).
-   * - If a dataset is currently active, immediately applies it to the UI.
-   * Options: { storageKey?: string, merge?: boolean, applyToUI?: boolean }
+   * Always-allowed universal import:
+   * - Writes ALL provided datasets into the single master entry.
+   * - If a dataset is currently active, immediately applies it to the UI (Grid fields).
+   * Options: { merge?: boolean, applyToUI?: boolean }
    */
   api.importUniversalFromParsed = function (parsed, opts) {
     const o = opts || {};
+    _loadMaster(); // ensure master loaded
+
     const norm = _normalizeImportedAny(parsed);
-    const baseKey = (o.storageKey || api.defaults.storageKey);
 
     if (norm.mode === "bundle") {
-      // 1) Write ALL datasets to storage
-      Object.keys(norm.datasets).forEach(ds => {
-        const entry = norm.datasets[ds];
-        const key = entry.storageKey || _datasetKey(baseKey, ds);
-        _saveCacheForKey(key, entry.data, o.merge === true);
+      // Write every provided dataset into master
+      ["A","B","C","D"].forEach(ds => {
+        const incoming = norm.datasets[ds];
+        if (!incoming) return;
+        if (o.merge === true) {
+          api._master.datasets[ds] = Object.assign({}, api._master.datasets[ds] || {}, incoming);
+        } else {
+          api._master.datasets[ds] = incoming;
+        }
       });
     } else {
-      // SINGLE: write to provided storageKey; if none, prefer active dataset, else fallback to A
-      let targetKey = norm.storageKey;
-      if (!targetKey) {
-        if (api.activeDataset) targetKey = _datasetKey(baseKey, api.activeDataset);
-        else                   targetKey = _datasetKey(baseKey, "A");
+      // SINGLE: decide which dataset it belongs to
+      let targetDS = norm.dataset;
+      if (!targetDS) {
+        targetDS = api.activeDataset || "A"; // fallback if dataset unknown and no active selection
       }
-      _saveCacheForKey(targetKey, norm.data, o.merge === true);
+      if (!/^[ABCD]$/.test(targetDS)) targetDS = "A";
+      if (o.merge === true) {
+        api._master.datasets[targetDS] = Object.assign({}, api._master.datasets[targetDS] || {}, norm.data);
+      } else {
+        api._master.datasets[targetDS] = norm.data;
+      }
     }
 
-    // 2) If there is an active dataset and UI application is desired, apply it now
+    // Persist master
+    _saveMaster();
+
+    // If an active dataset exists and UI application is desired, apply it now
     if (api.activeDataset && o.applyToUI !== false) {
-      const activeKey = _datasetKey(baseKey, api.activeDataset);
-      api._loadedKey = activeKey;
-      api.load(activeKey);
-      // Push values into records (UI write)
+      // Point cache to the active map (may have changed by import)
+      api.cache = _getDatasetMap(api.activeDataset);
       api._attachedStores.forEach(function (s) { api.refresh(s, api.defaults); });
     }
   };
 
-  /**
-   * Universal file import:
-   * - Always allowed.
-   * - Loads all data to storage; applies active dataset to UI if present.
-   * Options: { storageKey?: string, merge?: boolean, applyToUI?: boolean }
-   */
+  /** File-picker wrapper for universal import. Always allowed. */
   api.importUniversalFromFile = function (opts) {
     const input = document.createElement("input");
     input.type = "file";
@@ -469,13 +447,16 @@ var APModShift = (function () {
     input.click();
   };
 
-  // Public convenience: clear all datasets (optional utility)
+  // --- Utilities --------------------------------------------------------------
   api.clearAll = function (opts) {
-    const baseKey = (opts && opts.storageKey) || api.defaults.storageKey;
-    ["A","B","C","D"].forEach(ds => {
-      try { localStorage.removeItem(_datasetKey(baseKey, ds)); } catch (e) {}
-    });
-    // Do not touch UI unless active dataset is cleared explicitly by caller
+    const key = (opts && opts.storageKey) || api.defaults.storageKey;
+    try { localStorage.removeItem(key); } catch (e) {}
+    api._master = _ensureMasterShape(null);
+    if (api.activeDataset) {
+      api.cache = _getDatasetMap(api.activeDataset);
+    } else {
+      api.cache = {};
+    }
   };
 
   return api;

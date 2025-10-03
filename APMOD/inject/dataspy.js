@@ -141,7 +141,7 @@ APModDataSpy.injectReadOnlyGrid = () => {
 			}
 
 			if (this.gridURL.includes("EWSUSR.TAB")) {
-				console.log("rg",grid);
+				console.log("rg",this);
 				const list = this.getDockedItems('toolbar[dock="bottom"]');
 				if(list.length > 0) {
 					const botToolbar = this.getDockedItems('toolbar[dock="bottom"]')[0];
@@ -151,7 +151,7 @@ APModDataSpy.injectReadOnlyGrid = () => {
 					}
 				}
 				this.on("afterrender", function(){
-					console.log("ar",grid);
+					console.log("ar",this);
 				  	APModShift.attach(this);
 				});
 			}
@@ -1630,6 +1630,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

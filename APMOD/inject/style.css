@@ -23,3 +23,23 @@
 .x-grid-cell-row-numberer-ov {
     background-color: transparent !important;
 }
+
+/* base look for all shift buttons */
+.shift-btn {
+  background-color: #f3f4f6 !important;  /* light gray */
+  color: #111827 !important;              /* near-black text */
+  border-color: #e5e7eb !important;
+}
+
+/* pressed/selected look */
+.shift-btn-pressed,
+.x-btn.x-btn-pressed.shift-btn {
+  background-color: #bfdbfe !important;   /* light blue */
+  border-color: #2563eb !important;       /* blue border */
+  color: #0b1b37 !important;
+}
+
+/* optional: on hover while pressed */
+.shift-btn-pressed:hover {
+  filter: brightness(0.98);
+}

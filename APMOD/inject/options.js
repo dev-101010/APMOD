@@ -15,7 +15,6 @@ var APModOptions = (function () {
         { 
           xtype: "menuitem",
           text: "APMod",
-          disabled: true,
           overCls: "",      // remove hover class
           focusable: false, // no focus outline
           style: "font-weight:bold;cursor:default;"

@@ -146,9 +146,9 @@ APModDataSpy.injectReadOnlyGrid = () => {
 						botToolbar.insert(botToolbar.items.length,APModDataSpy.getGridNodesImportButton(this));
 					}
 				}
-				/*this.on("afterrender", function(){
+				this.on("afterrender", function(){
 				  APModShift.attach(this);
-				});*/
+				});
 			}
 		}
 	}
@@ -1625,6 +1625,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

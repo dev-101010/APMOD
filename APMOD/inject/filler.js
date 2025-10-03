@@ -1114,7 +1114,7 @@ function doImport() {
   // Left vertical text-icon buttons: compact size
   const leftControls = {
     xtype: "container",
-    width: 40, // narrower rail
+    width: 40,
     layout: { type: "vbox" },
     defaults: {
       margin: "2 0 2 0",
@@ -1188,9 +1188,12 @@ function doImport() {
   const win = Ext.create("Ext.window.Window", {
     title: "AutoFill Manager",
     modal: true,
-    width: 820,
-    height: 500,
+    width: 900,
+	height: 600,
+	minWidth: 900,
+	minHeight: 600,
     layout: "fit",
+	padding: '10 10 10 10',
     items: [ mainPanel ]
   });
 
@@ -1684,6 +1687,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

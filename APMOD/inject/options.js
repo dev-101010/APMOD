@@ -11,14 +11,22 @@ var APModOptions = (function () {
       this.insert(this.items.length, {
         iconCls: "toolbarGear",
         menu: [
-          // --- Header + separator ---
         {
-          xtype: "menuitem",
           text: "APMod",
-          canActivate: false,   // prevents hover/active highlight
-          focusable: false,     // no focus outline
-          hideOnClick: false,   // do nothing on click
-          style: "font-weight:bold;color:#000;cursor:default;padding:6px 10px;"
+          hideOnClick: true,
+          handler: function () {
+            // Use a central place to store the URL (override elsewhere if you like)
+            var url = "https://github.com/dev-101010/APMOD";
+            try {
+              var win = window.open(url, "_blank");
+              if (!win) {
+                // Fallback if popup blocked
+                window.location.href = url;
+              }
+            } catch (e) {
+              window.location.href = url;
+            }
+          }
         },
         "-",
           { text: "Filler Manager", icon: null, iconCls: null, hideOnClick: true,

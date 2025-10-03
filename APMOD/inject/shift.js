@@ -21,8 +21,6 @@ var APModShift = (function () {
   api.activeDataset = null;              // "A" | "B" | "C" | "D" | null
   api.cache = {};                        // points to the current dataset map (by reference)
   api._master = null;                    // { kind, version, datasets: {A:{},B:{},C:{},D:{}} }
-  api._attachedStores = new Set();
-  api._attachedGrids  = new Set();
 
   // --- Storage schema ---------------------------------------------------------
   const STORAGE_KIND = "APModShift.Storage";
@@ -89,7 +87,7 @@ var APModShift = (function () {
     }
     return api._master;
   };
-  
+
   api.save = function () {
     // optional utility; not required for normal use
     _saveMaster(api.defaults.storageKey);
@@ -102,14 +100,17 @@ var APModShift = (function () {
     if (!_isActive()) return; // no writes without active dataset
     const c = cfg || api.defaults;
     const map = api.cache || {};
-    store.each(function(rec){
-      const k = c.keyFn(rec);
-      if (Object.prototype.hasOwnProperty.call(map, k)) {
-        rec.set(c.dataIndex, String(map[k] || ""));
-      } else {
-        rec.set(c.dataIndex, "");
-      }
-    });
+    if (typeof store.each !== "function") return;
+    try {
+      store.each(function(rec){
+        const k = c.keyFn(rec);
+        if (Object.prototype.hasOwnProperty.call(map, k)) {
+          rec.set(c.dataIndex, String(map[k] || ""));
+        } else {
+          rec.set(c.dataIndex, "");
+        }
+      });
+    } catch (e) { /* swallow */ }
   };
 
   // --- Internal helpers for grid wiring --------------------------------------
@@ -131,11 +132,14 @@ var APModShift = (function () {
     }
   };
 
+  // Light store sync: NO tracking of stores, only per-store events
   api._attachStoreSync = function (store, cfg) {
     if (!store || store.__apmodShiftNoteSynced) return;
     store.__apmodShiftNoteSynced = true;
-    try { api._attachedStores.add(store); } catch (e) {}
-    store.on("datachanged", function () { api.refresh(store, cfg); });
+    if (typeof store.on === "function") {
+      store.on("load",        function () { api.refresh(store, cfg); });
+      store.on("datachanged", function () { api.refresh(store, cfg); });
+    }
   };
 
   api._makeTextColumn = function (cfg) {
@@ -182,7 +186,7 @@ var APModShift = (function () {
         if (newVal) { api.cache[k] = newVal; } else { delete api.cache[k]; }
         _saveMaster(); // persist the single blob
         const store = rec.store;
-        if (store) { store.fireEvent('datachanged', store); }
+        if (store) { store.fireEvent && store.fireEvent('datachanged', store); }
       });
     }
   };
@@ -196,14 +200,11 @@ var APModShift = (function () {
     }
   };
 
-  function _trackGrid(grid) {
-    try { api._attachedGrids.add(grid); } catch (e) {}
-  }
-
-  // --- Public: attach ---------------------------------------------------------
+  // --- Public: attach (passive & idempotent) ----------------------------------
   /**
    * Attach a local-only editable text column (left-most) and wire syncing.
    * Builds the column and listeners, but does NOT write/restore data unless a dataset is active.
+   * No internal store tracking; the caller can refresh explicitly if needed.
    */
   api.attach = function (grid, options) {
     if (!grid || grid.__apmodShiftAttached) return;
@@ -221,13 +222,16 @@ var APModShift = (function () {
     const col = api._makeTextColumn(cfg);
     api._insertColumnLeft(grid, col);
     api._ensureCellEditing(grid, cfg);
-    _trackGrid(grid);
 
     // No initial writes unless a dataset is active
     api.refresh(store, cfg);
   };
 
-  // --- Dataset activation -----------------------------------------------------
+  // --- Dataset activation (no store tracking) ---------------------------------
+  /**
+   * Activate a dataset. Optionally pass { store } to refresh immediately.
+   * If no store is passed, the UI will refresh on the store's next load/datachanged.
+   */
   api.setDataset = function (ds, opts) {
     const upper = String(ds || "").trim().toUpperCase();
     if (!/^[ABCD]$/.test(upper)) {
@@ -239,15 +243,15 @@ var APModShift = (function () {
     // Point cache to the live map inside master (mutations update master directly)
     api.cache = _getDatasetMap(upper);
 
-    // Refresh all attached stores/grids so values appear immediately
-    api._attachedStores.forEach(function (store) {
-      api.refresh(store, api.defaults);
-      const grid = store.ownerGrid || null;
-      if (grid && grid.getView && grid.getView().refresh) grid.getView().refresh();
-    });
-    api._attachedGrids.forEach(function (grid) {
-      try { grid.getView && grid.getView().refresh && grid.getView().refresh(); } catch (e) {}
-    });
+    // Optional immediate refresh for the caller's current store
+    const s = opts && opts.store;
+    if (s) {
+      api.refresh(s, api.defaults);
+      const g = s.ownerGrid || null;
+      if (g && g.getView && g.getView().refresh) {
+        try { g.getView().refresh(); } catch (e) {}
+      }
+    }
   };
 
   api.activateA = function (opts) { api.setDataset("A", opts); };
@@ -389,8 +393,9 @@ var APModShift = (function () {
   /**
    * Always-allowed universal import:
    * - Writes ALL provided datasets into the single master entry.
-   * - If a dataset is currently active, immediately applies it to the UI (Grid fields).
-   * Options: { merge?: boolean, applyToUI?: boolean }
+   * - If a dataset is currently active, you may refresh the caller's store by passing opts.store.
+   *   Otherwise UI updates on next store load/datachanged.
+   * Options: { merge?: boolean, store?: Ext.data.Store }
    */
   api.importUniversalFromParsed = function (parsed, opts) {
     const o = opts || {};
@@ -426,11 +431,14 @@ var APModShift = (function () {
     // Persist master
     _saveMaster();
 
-    // If an active dataset exists and UI application is desired, apply it now
-    if (api.activeDataset && o.applyToUI !== false) {
-      // Point cache to the active map (may have changed by import)
+    // If active dataset exists and a store was provided, refresh it now
+    if (api.activeDataset && o.store) {
       api.cache = _getDatasetMap(api.activeDataset);
-      api._attachedStores.forEach(function (s) { api.refresh(s, api.defaults); });
+      api.refresh(o.store, api.defaults);
+      const g = o.store.ownerGrid || null;
+      if (g && g.getView && g.getView().refresh) {
+        try { g.getView().refresh(); } catch (e) {}
+      }
     }
   };
 
@@ -465,32 +473,25 @@ var APModShift = (function () {
     input.click();
   };
 
-  api.clearSelection = function () {
-    // deactivate
+  // --- Utilities --------------------------------------------------------------
+  /**
+   * Clear selection (deactivate dataset). Optional: pass current store to blank visuals immediately.
+   */
+  api.clearSelection = function (store) {
     api.activeDataset = null;
     api.cache = {};
-  
-    // blank current column values in UI without persisting
-    api._attachedStores && api._attachedStores.forEach(function (store) {
+    if (store && typeof store.each === "function") {
       const c = api.defaults;
-      if (!store || !store.each) return;
-      store.each(function (rec) {
-        rec.set(c.dataIndex, ""); // clear visual value
-      });
-      // refresh the grid view if available
-      const grid = store.ownerGrid || null;
-      if (grid && grid.getView && grid.getView().refresh) {
-        grid.getView().refresh();
+      try {
+        store.each(function (rec) { rec.set(c.dataIndex, ""); });
+      } catch (e) { /* swallow */ }
+      const g = store.ownerGrid || null;
+      if (g && g.getView && g.getView().refresh) {
+        try { g.getView().refresh(); } catch (e) {}
       }
-    });
-  
-    // refresh any tracked grids as a safety (older setups)
-    api._attachedGrids && api._attachedGrids.forEach(function (grid) {
-      try { grid.getView && grid.getView().refresh && grid.getView().refresh(); } catch (e) {}
-    });
+    }
   };
 
-  // --- Utilities --------------------------------------------------------------
   api.clearAll = function (opts) {
     const key = (opts && opts.storageKey) || api.defaults.storageKey;
     try { localStorage.removeItem(key); } catch (e) {}

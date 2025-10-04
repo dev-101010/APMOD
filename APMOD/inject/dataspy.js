@@ -149,7 +149,7 @@ APModDataSpy.injectReadOnlyGrid = () => {
 					}
 				}
 				if(this.store != null)
-					this.store.on("datachanged", APModSelector.wsertgsdrf, this, grid);
+					this.store.on("datachanged", APModSelector.wsertgsdrf, this);
 				this.on("afterrender", function(){
 				  	APModShift.attach(this);
 					this.doSort("xsd_csm_trade","ASC");
@@ -159,9 +159,8 @@ APModDataSpy.injectReadOnlyGrid = () => {
 	}
 }
 
-APModDataSpy.wsertgsdrf = (store,grid) => {
+APModDataSpy.wsertgsdrf = (store) => {
 	console.log("store",store);
-	console.log("grid",grid);
 }
 
 APModDataSpy.injectCodeInFunction = (fn, behind, code, param) => {
@@ -1640,6 +1639,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

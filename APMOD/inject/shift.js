@@ -257,10 +257,6 @@ var APModShift = (function () {
     }
   };
 
-  api.activateA = function (opts) { api.setDataset("A", opts); };
-  api.activateB = function (opts) { api.setDataset("B", opts); };
-  api.activateC = function (opts) { api.setDataset("C", opts); };
-  api.activateD = function (opts) { api.setDataset("D", opts); };
   api.getActiveDataset = function () { return api.activeDataset; };
 
   // --- Export (always allowed) ------------------------------------------------

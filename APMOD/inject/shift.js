@@ -13,7 +13,7 @@ var APModShift = (function () {
     columnWidth : 180,
     keyFn       : function (rec) {
       // Record key used to map notes; adjust as needed for your data model
-      return rec.get("laborid") || rec.get("id") || rec.internalId;
+      return rec.get("id");
     }
   };
 

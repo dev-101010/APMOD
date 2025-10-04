@@ -149,9 +149,10 @@ APModDataSpy.injectReadOnlyGrid = () => {
 						botToolbar.insert(botToolbar.items.length,APModDataSpy.getGridNodesImportButton(this));
 					}
 				}
-				//this.doSort("xsd_csm_trade","ASC");
+				//
 				this.on("afterrender", function(){
 				  	APModShift.attach(this);
+					this.doSort("xsd_csm_trade","ASC");
 				});
 			}
 		}
@@ -1634,6 +1635,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

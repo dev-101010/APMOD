@@ -101,6 +101,7 @@ APModDataSpy.injectDataspy = (dsStore) => {
 			}
 			if (this.gridURL.includes("EWSUSR.TAB")) {
 				const grid = this.getGrid();
+				console.log(this.items);
 				this.insert(2, APModDataSpy.viewShiftNotes(grid,"A"));
 				this.insert(3, APModDataSpy.viewShiftNotes(grid,"B"));
 				this.insert(4, APModDataSpy.viewShiftNotes(grid,"C"));
@@ -1632,6 +1633,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

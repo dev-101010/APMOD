@@ -454,40 +454,46 @@ APModFiller.injectRecordView = () => {
 
       const form = this.getForm();
 
+      // Helpers for 7.7: check writability and write safely
+      const isDisabled = (fld) =>
+        typeof fld.isDisabled === 'function' ? fld.isDisabled() : !!fld.disabled;
+      const isReadOnly = (fld) =>
+        typeof fld.isReadOnly === 'function' ? fld.isReadOnly() : !!fld.readOnly;
+      const isWritable = (fld) => fld && !isDisabled(fld) && !isReadOnly(fld);
+
+      const writeIfWritable = (fld, val) => {
+        if (!isWritable(fld)) return false;
+        fld.setValue?.(val);
+        fld.clearInvalid?.();
+        const record = form.getRecord?.();
+        if (record && fld.name) record.set(fld.name, val);
+        return true;
+      };
+
       // Apply type === "save" rules (same style as your original)
       const autoFillSave = (APModFiller.store.autoFill || []).filter(aF => aF.type === "save");
       for (const aFS of autoFillSave) {
         const field = form.findField ? form.findField(aFS.field) : null;
-        if(!field) continue;
-          
+        if (!field) continue;
+
         if (aFS.status === "always") {
-          if (field) {
-            const val = APModDataSpy.onFunction(aFS.value);
-            field.setValue(val);
-              field.clearInvalid && field.clearInvalid();
-            const record = form.getRecord();
-            if (record) record.set(field.name, val);
-          }
+          const val = APModDataSpy.onFunction(aFS.value);
+          writeIfWritable(field, val);
         } else {
-          if (!field.getValue() || String(field.getValue()).trim() === '') {
+          const cur = field.getValue?.();
+          if (cur == null || String(cur).trim() === '') {
             const val = APModDataSpy.onFunction(aFS.value);
-            field.setValue(val);
-              field.clearInvalid && field.clearInvalid();
-            const record = form.getRecord();
-            if (record) record.set(field.name, val);
+            writeIfWritable(field, val);
           }
         }
       }
 
-      // Optional: priority handling on save
-      const combo = form.findField('priority');
-      if (combo) {
-        const data = APModFiller.store.priority[combo.getValue()];
+      // Optional: priority handling on save (respect disabled/readOnly)
+      const combo = form.findField ? form.findField('priority') : null;
+      if (combo && isWritable(combo)) {
+        const data = APModFiller.store.priority?.[combo.getValue?.()];
         if (data && data.switchTo) {
-          combo.setValue(data.switchTo);
-          const record = form.getRecord();
-          if (record) record.set('priority', data.switchTo);
-          if (combo.clearInvalid) combo.clearInvalid();
+          writeIfWritable(combo, data.switchTo);
         }
         if (typeof combo.updateDurationLabel === 'function') combo.updateDurationLabel();
       }
@@ -1716,6 +1722,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

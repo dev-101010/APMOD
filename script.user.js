@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         APMod
 // @namespace    https://github.com/dev-101010/APMOD/
-// @version      1.2.17
+// @version      1.3.1
 // @description  APMod fügt Filter und Ausfüllhilfen in APM ein welche die Arbeit erleichtern.
 // @author       dev-101010
 // @match        https://eu1.eam.hxgnsmartcloud.com/*

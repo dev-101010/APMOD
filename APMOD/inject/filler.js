@@ -513,51 +513,77 @@ APModFiller.injectRecordView = () => {
       // Patch loadRecord ONCE per form instance. We must use a classic function to keep correct "this".
       if (!form.__apmodPatchedLoadRecord && typeof form.loadRecord === 'function') {
         form.__apmodPatchedLoadRecord = true;
-        const origLoadRecord = form.loadRecord;
-
-        form.loadRecord = function(...args) {
-          // Let Ext populate all fields first
-          const res = origLoadRecord.apply(this, args);
-
-          // Apply type === "load" rules (mirror of your beforeSave style)
-          const autoFillLoad = (APModFiller.store.autoFill || []).filter(aF => aF.type === "load");
-          for (const aFL of autoFillLoad) {
-            const field = this.findField ? this.findField(aFL.field) : null;
-            if (!field) continue;
-
-            if (aFL.status === "always") {
-                const val = APModDataSpy.onFunction(aFL.value);
-                field.setValue && field.setValue(val);
-                field.clearInvalid && field.clearInvalid();
-                const rec = this.getRecord && this.getRecord();
-                if (rec && field.name) rec.set(field.name, val);
-            } else {
-                  if (!field.getValue() || String(field.getValue()).trim() === '') {
-                    const val = APModDataSpy.onFunction(aFL.value);
-                    field.setValue(val);
-                    field.clearInvalid && field.clearInvalid();
-                    const rec = this.getRecord && this.getRecord();
-                    if (rec && field.name) rec.set(field.name, val);
-                  }
-                }
-          }
-
-          // Optional: priority handling right after load
-          const combo = this.findField && this.findField('priority');
-          if (combo) {
-            const data = APModFiller.store.priority[combo.getValue()];
-            if (data && data.switchTo) {
-              combo.setValue(data.switchTo);
-              const rec = this.getRecord && this.getRecord();
-              if (rec) rec.set('priority', data.switchTo);
-              combo.clearInvalid && combo.clearInvalid();
-            }
-            typeof combo.updateDurationLabel === 'function' && combo.updateDurationLabel();
-          }
-
-          // Keep original return (form instance)
-          return res;
-        };
+        // Keep a reference to the original
+		const origLoadRecord = form.loadRecord;
+		
+		form.loadRecord = function (...args) {
+		  // Let Ext populate all fields first
+		  const res = origLoadRecord.apply(this, args);
+		
+		  const runPostLoad = () => {
+		    if (this.destroyed || this.isDestroyed?.()) return;
+		
+		    // Apply type === "load" rules (mirror of your beforeSave style)
+		    const autoFillLoad = (APModFiller.store.autoFill || []).filter(aF => aF.type === "load");
+		
+		    for (const aFL of autoFillLoad) {
+		      const field = this.findField ? this.findField(aFL.field) : null;
+		      if (!field) continue;
+		
+		      // Skip fields that ended up disabled/readOnly after bindings/layout
+		      const isDisabled = typeof field.isDisabled === 'function' ? field.isDisabled() : !!field.disabled;
+		      const isReadOnly = typeof field.isReadOnly === 'function' ? field.isReadOnly() : !!field.readOnly;
+		      if (isDisabled || isReadOnly) continue;
+		
+		      const setIfAllowed = () => {
+		        const val = APModDataSpy.onFunction(aFL.value);
+		        field.setValue && field.setValue(val);
+		        field.clearInvalid && field.clearInvalid();
+		        const rec = this.getRecord && this.getRecord();
+		        if (rec && field.name) rec.set(field.name, val);
+		      };
+		
+		      if (aFL.status === "always") {
+		        setIfAllowed();
+		      } else {
+		        const cur = field.getValue && field.getValue();
+		        if (cur == null || String(cur).trim() === '') {
+		          setIfAllowed();
+		        }
+		      }
+		    }
+		
+		    // Optional: priority handling right after load (only if combo still writable)
+		    const combo = this.findField && this.findField('priority');
+		    if (combo) {
+		      const comboDisabled = typeof combo.isDisabled === 'function' ? combo.isDisabled() : !!combo.disabled;
+		      const comboRO = typeof combo.isReadOnly === 'function' ? combo.isReadOnly() : !!combo.readOnly;
+		
+		      if (!comboDisabled && !comboRO) {
+		        const data = APModFiller.store.priority[combo.getValue()];
+		        if (data && data.switchTo) {
+		          combo.setValue(data.switchTo);
+		          const rec = this.getRecord && this.getRecord();
+		          if (rec) rec.set('priority', data.switchTo);
+		          combo.clearInvalid && combo.clearInvalid();
+		        }
+		        if (typeof combo.updateDurationLabel === 'function') {
+		          combo.updateDurationLabel();
+		        }
+		      }
+		    }
+		  };
+		
+		  // Defer until the framework is idle (after layouts/bindings/disable)
+		  if (Ext.GlobalEvents?.on) {
+		    Ext.GlobalEvents.on('idle', runPostLoad, this, { single: true });
+		  } else {
+		    Ext.defer(runPostLoad, 1, this);
+		  }
+		
+		  // Keep original return (form instance)
+		  return res;
+		};
       }
 
       // ------------- existing buttons -------------
@@ -1694,6 +1720,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

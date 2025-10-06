@@ -513,75 +513,71 @@ APModFiller.injectRecordView = () => {
       // Patch loadRecord ONCE per form instance. We must use a classic function to keep correct "this".
       if (!form.__apmodPatchedLoadRecord && typeof form.loadRecord === 'function') {
         form.__apmodPatchedLoadRecord = true;
-        // Keep a reference to the original
+        // Wrap once, keep original
 		const origLoadRecord = form.loadRecord;
 		
 		form.loadRecord = function (...args) {
-		  // Let Ext populate all fields first
+		  // Let Ext populate the fields first
 		  const res = origLoadRecord.apply(this, args);
 		
-		  const runPostLoad = () => {
+		  const runAfterIdle = () => {
 		    if (this.destroyed || this.isDestroyed?.()) return;
 		
-		    // Apply type === "load" rules (mirror of your beforeSave style)
-		    const autoFillLoad = (APModFiller.store.autoFill || []).filter(aF => aF.type === "load");
+		    // Helper that safely writes only into writable fields
+		    const writeIfWritable = (field, value) => {
+		      // In Ext 7.7 these reflect current state after bindings/layout
+		      const disabled = typeof field.isDisabled === 'function' ? field.isDisabled() : !!field.disabled;
+		      const readOnly = typeof field.isReadOnly === 'function' ? field.isReadOnly() : !!field.readOnly;
+		      if (disabled || readOnly) return;
 		
+		      field.setValue?.(value);
+		      field.clearInvalid?.();
+		
+		      const rec = this.getRecord?.();
+		      if (rec && field.name) rec.set(field.name, value);
+		    };
+		
+		    // Apply type === "load" rules
+		    const autoFillLoad = (APModFiller.store.autoFill || []).filter(aF => aF.type === "load");
 		    for (const aFL of autoFillLoad) {
 		      const field = this.findField ? this.findField(aFL.field) : null;
 		      if (!field) continue;
 		
-		      // Skip fields that ended up disabled/readOnly after bindings/layout
-		      const isDisabled = typeof field.isDisabled === 'function' ? field.isDisabled() : !!field.disabled;
-		      const isReadOnly = typeof field.isReadOnly === 'function' ? field.isReadOnly() : !!field.readOnly;
-		      if (isDisabled || isReadOnly) continue;
-		
-		      const setIfAllowed = () => {
-		        const val = APModDataSpy.onFunction(aFL.value);
-		        field.setValue && field.setValue(val);
-		        field.clearInvalid && field.clearInvalid();
-		        const rec = this.getRecord && this.getRecord();
-		        if (rec && field.name) rec.set(field.name, val);
-		      };
-		
 		      if (aFL.status === "always") {
-		        setIfAllowed();
+		        const val = APModDataSpy.onFunction(aFL.value);
+		        writeIfWritable(field, val);
 		      } else {
-		        const cur = field.getValue && field.getValue();
+		        const cur = field.getValue?.();
 		        if (cur == null || String(cur).trim() === '') {
-		          setIfAllowed();
+		          const val = APModDataSpy.onFunction(aFL.value);
+		          writeIfWritable(field, val);
 		        }
 		      }
 		    }
 		
-		    // Optional: priority handling right after load (only if combo still writable)
-		    const combo = this.findField && this.findField('priority');
+		    // Optional: priority handling (also respect disabled/readOnly)
+		    const combo = this.findField?.('priority');
 		    if (combo) {
-		      const comboDisabled = typeof combo.isDisabled === 'function' ? combo.isDisabled() : !!combo.disabled;
-		      const comboRO = typeof combo.isReadOnly === 'function' ? combo.isReadOnly() : !!combo.readOnly;
+		      const disabled = typeof combo.isDisabled === 'function' ? combo.isDisabled() : !!combo.disabled;
+		      const readOnly = typeof combo.isReadOnly === 'function' ? combo.isReadOnly() : !!combo.readOnly;
 		
-		      if (!comboDisabled && !comboRO) {
-		        const data = APModFiller.store.priority[combo.getValue()];
+		      if (!disabled && !readOnly) {
+		        const data = APModFiller.store.priority?.[combo.getValue()];
 		        if (data && data.switchTo) {
 		          combo.setValue(data.switchTo);
-		          const rec = this.getRecord && this.getRecord();
+		          const rec = this.getRecord?.();
 		          if (rec) rec.set('priority', data.switchTo);
-		          combo.clearInvalid && combo.clearInvalid();
+		          combo.clearInvalid?.();
 		        }
-		        if (typeof combo.updateDurationLabel === 'function') {
-		          combo.updateDurationLabel();
-		        }
+		        typeof combo.updateDurationLabel === 'function' && combo.updateDurationLabel();
 		      }
 		    }
 		  };
 		
-		  // Defer until the framework is idle (after layouts/bindings/disable)
-		  if (Ext.GlobalEvents?.on) {
-		    Ext.GlobalEvents.on('idle', runPostLoad, this, { single: true });
-		  } else {
-		    Ext.defer(runPostLoad, 1, this);
-		  }
+		  // Ext 7.7: 'idle' fires after layouts, bindings, and disable/readOnly propagation
+		  Ext.GlobalEvents.on('idle', runAfterIdle, this, { single: true });
 		
-		  // Keep original return (form instance)
+		  // Keep original return
 		  return res;
 		};
       }
@@ -1720,6 +1716,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

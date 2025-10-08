@@ -2,7 +2,8 @@ const APModFiller = {
     popup: null,
     store: {},
     popup2: null,
-    store2: []
+    store2: [],
+	autoFillEnabled: true
 };
 
 APModFiller.load = () => {
@@ -471,6 +472,7 @@ APModFiller.injectRecordView = () => {
       };
 
       // Apply type === "save" rules (same style as your original)
+	if(APModFiller.autoFillEnabled) {
       const autoFillSave = (APModFiller.store.autoFill || []).filter(aF => aF.type === "save");
       for (const aFS of autoFillSave) {
         const field = form.findField ? form.findField(aFS.field) : null;
@@ -487,6 +489,7 @@ APModFiller.injectRecordView = () => {
           }
         }
       }
+	}
 
       // Optional: priority handling on save (respect disabled/readOnly)
       const combo = form.findField ? form.findField('priority') : null;
@@ -542,24 +545,26 @@ APModFiller.injectRecordView = () => {
 		      const rec = this.getRecord?.();
 		      if (rec && field.name) rec.set(field.name, value);
 		    };
-		
-		    // Apply type === "load" rules
-		    const autoFillLoad = (APModFiller.store.autoFill || []).filter(aF => aF.type === "load");
-		    for (const aFL of autoFillLoad) {
-		      const field = this.findField ? this.findField(aFL.field) : null;
-		      if (!field) continue;
-		
-		      if (aFL.status === "always") {
-		        const val = APModDataSpy.onFunction(aFL.value);
-		        writeIfWritable(field, val);
-		      } else {
-		        const cur = field.getValue?.();
-		        if (cur == null || String(cur).trim() === '') {
-		          const val = APModDataSpy.onFunction(aFL.value);
-		          writeIfWritable(field, val);
-		        }
-		      }
-		    }
+
+			  if(APModFiller.autoFillEnabled) {
+			    // Apply type === "load" rules
+			    const autoFillLoad = (APModFiller.store.autoFill || []).filter(aF => aF.type === "load");
+			    for (const aFL of autoFillLoad) {
+			      const field = this.findField ? this.findField(aFL.field) : null;
+			      if (!field) continue;
+			
+			      if (aFL.status === "always") {
+			        const val = APModDataSpy.onFunction(aFL.value);
+			        writeIfWritable(field, val);
+			      } else {
+			        const cur = field.getValue?.();
+			        if (cur == null || String(cur).trim() === '') {
+			          const val = APModDataSpy.onFunction(aFL.value);
+			          writeIfWritable(field, val);
+			        }
+			      }
+			    }
+			  }
 		
 		    // Optional: priority handling (also respect disabled/readOnly)
 		    const combo = this.findField?.('priority');
@@ -1722,6 +1727,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

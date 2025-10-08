@@ -152,12 +152,17 @@ APModDataSpy.injectReadOnlyGrid = () => {
 					this.doSort("xsd_csm_trade","ASC");
 				});
 			}
+			if (this.gridURL.includes("WSJOBS")) {
+				const list = this.getDockedItems('toolbar[dock="bottom"]');
+				if(list.length > 0) {
+					const botToolbar = this.getDockedItems('toolbar[dock="bottom"]')[0];
+					if(botToolbar != null && botToolbar.items != null) {
+						botToolbar.insert(botToolbar.items.length,APModDataSpy.AutoFillEnableButton(this));
+					}
+				}
+			}
 		}
 	}
-}
-
-APModDataSpy.wsertgsdrf = (store) => {
-	console.log("store",store);
 }
 
 APModDataSpy.injectCodeInFunction = (fn, behind, code, param) => {
@@ -265,33 +270,6 @@ APModDataSpy.onFunction = (value) => {
     }
 	return value;
 }
-
-/*APModDataSpy.injectMainToolbar = () => {
-	if (typeof EAM?.view?.common?.MainToolbar === 'undefined') return;
-	const TBclass = EAM.view.common.MainToolbar;
-	if (TBclass.prototype.APModDataSpyOrigInitComponent == null) {
-		TBclass.prototype.APModDataSpyOrigInitComponent = TBclass.prototype.initComponent;
-		TBclass.prototype.initComponent = function() {
-			this.APModDataSpyOrigInitComponent.apply(this, []);
-            if(typeof GM_getValue != 'undefined') {
-                this.insert(this.items.length, APModDataSpy.createCopyWoButton());
-            }
-		}
-	}
-}*/
-
-/*APModDataSpy.createCopyWoButton = () => {
-	return Ext.create('Ext.Button', {
-		text: '📋',
-		tooltip: "CopyWo Menu",
-		handler: function() {
-			if (APModDataSpy.popupWo == null) {
-                APModDataSpy.popupWo = APModDataSpy.createCopyWoPopupPanel()
-				if (APModDataSpy.popupWo != null) APModDataSpy.popupWo.show();
-			}
-		}
-	});
-}*/
 
 APModDataSpy.showCopyWoOptions = () => {
 	if (APModDataSpy.popupWo == null) {
@@ -528,6 +506,21 @@ APModDataSpy.viewShiftNotes = (grid,shift) => {
 		pressed: APModShift.getActiveDataset() === shift ? true : false,
 		toggleHandler: function (btn, pressed) {
 	      if (pressed) APModShift.setDataset(shift, { store: grid.getStore() }); else APModShift.clearSelection(grid.getStore());
+	    }
+	});
+}
+
+APModDataSpy.AutoFillEnableButton = (grid) => {
+	return Ext.create('Ext.Button', {
+		text: "A",
+		enableToggle: true,
+    	allowDepress: true,
+		cls: "shift-btn",
+    	pressedCls: "shift-btn-pressed",
+		tooltip: `Enable/Disable Autofill`,
+		pressed: APModFiller.autoFillEnabled,
+		toggleHandler: function (btn, pressed) {
+	      APModFiller.autoFillEnabled = pressed;
 	    }
 	});
 }
@@ -1637,6 +1630,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

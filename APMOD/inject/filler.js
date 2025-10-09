@@ -1,9 +1,11 @@
+// noinspection JSUnresolvedExtXType,ExceptionCaughtLocallyJS
+
 const APModFiller = {
     popup: null,
     store: {},
     popup2: null,
     store2: [],
-	autoFillEnabled: true
+    autoFillEnabled: true
 };
 
 APModFiller.load = () => {
@@ -57,20 +59,20 @@ APModFiller.inputClick = (e) => {
     const x = e.clientX;
     const y = e.clientY;
 
-    if (e.ctrlKey && !e.altKey && ((target.tagName == "INPUT" && target.type == "text") || target.type == "textarea")) {
+    if (e.ctrlKey && !e.altKey && ((target.tagName === "INPUT" && target.type === "text") || target.type === "textarea")) {
         APModFiller.getRad(target, x, y, null);
     }
 
-    if (e.shiftKey && ((target.tagName == "INPUT" && target.type == "text") || target.type == "textarea")) {
+    if (e.shiftKey && ((target.tagName === "INPUT" && target.type === "text") || target.type === "textarea")) {
         APModFiller.overRad(target, x, y, null);
     }
 
-    if (e.altKey && e.ctrlKey && ((target.tagName == "INPUT" && target.type == "text") || target.type == "textarea")) {
+    if (e.altKey && e.ctrlKey && ((target.tagName === "INPUT" && target.type === "text") || target.type === "textarea")) {
         APModFiller.delRad(target, x, y, null);
     }
 
     if (APModFiller.popup2) APModFiller.popup2.style.display = "none";
-    if (!e.ctrlKey && e.altKey && ((target.tagName == "INPUT" && target.type == "text") || target.type == "textarea")) {
+    if (!e.ctrlKey && e.altKey && ((target.tagName === "INPUT" && target.type === "text") || target.type === "textarea")) {
         const storage2 = JSON.parse(localStorage.getItem("APModCopy"));
         if (storage2 != null && typeof storage2 === 'object' && Array.isArray(storage2.history))
             APModFiller.store2 = storage2.history;
@@ -92,7 +94,7 @@ APModFiller.inputClick = (e) => {
                     APModFiller.store2.unshift({type: "text", content: textToCopy, timestamp: Date.now()});
                     if (APModFiller.store2.length > APModFiller.store.settings.copyEntries) APModFiller.store2.pop();
                     localStorage.setItem("APModCopy", JSON.stringify({"history": APModFiller.store2}));
-                    if(APModPopup) APModPopup.openPopup("Kopiert: " + textToCopy);
+                    if (APModPopup) APModPopup.openPopup("Kopiert: " + textToCopy);
                 }
             }
         }
@@ -201,11 +203,11 @@ APModFiller.addContextLine = (ele, item, last) => {
 APModFiller.getRad = (target, x, y, apModFields) => {
     const apModData = Ext.clone(APModFiller.store.data);
 
-    const entries = apModData.filter((instance, index) => {
+    const entries = apModData.filter((instance, _index) => {
         return instance.field === target.name;
     });
 
-    if (entries.length == 1) {
+    if (entries.length === 1) {
         if (apModFields != null && entries[0].data != null && typeof entries[0].data === 'string') {
             const values = entries[0].data.split('|');
             let i = 0;
@@ -402,7 +404,7 @@ APModFiller.overRad = (target, x, y, apModFields) => {
     }
 }
 
-APModFiller.delRad = (target, x, y, apModFields) => {
+APModFiller.delRad = (target, x, y, _apModFields) => {
     const apModData = Ext.clone(APModFiller.store.data);
     const entries = apModData.filter((instance, index) => {
         instance.oId = index;
@@ -440,275 +442,280 @@ APModFiller.delRad = (target, x, y, apModFields) => {
 }
 
 APModFiller.injectRecordView = () => {
-  if (typeof EAM.view?.common?.RecordView === 'undefined') return;
-  const RVclass = EAM.view.common.RecordView;
+    if (typeof EAM?.view?.common?.RecordView === 'undefined') return;
+    const RVclass = EAM.view.common.RecordView;
 
-  // --- Patch beforeSave (only for WSJOBS.HDR). Keep original under apmodFillerOrigBeforeSave.
-  if (RVclass.prototype.apmodFillerOrigBeforeSave == null) {
-    RVclass.prototype.apmodFillerOrigBeforeSave = RVclass.prototype.beforeSave;
+    // --- Patch beforeSave (only for WSJOBS.HDR). Keep original under apmodFillerOrigBeforeSave.
+    if (RVclass.prototype.apmodFillerOrigBeforeSave == null) {
+        RVclass.prototype.apmodFillerOrigBeforeSave = RVclass.prototype.beforeSave;
 
-    RVclass.prototype.beforeSave = function(a) {
-      // Guard: restrict to WSJOBS.HDR only
-      if (this.tabURL !== "WSJOBS.HDR") {
-        return RVclass.prototype.apmodFillerOrigBeforeSave.call(this, a);
-      }
-
-      const form = this.getForm();
-
-      // Helpers for 7.7: check writability and write safely
-      const isDisabled = (fld) =>
-        typeof fld.isDisabled === 'function' ? fld.isDisabled() : !!fld.disabled;
-      const isReadOnly = (fld) =>
-        typeof fld.isReadOnly === 'function' ? fld.isReadOnly() : !!fld.readOnly;
-      const isWritable = (fld) => fld && !isDisabled(fld) && !isReadOnly(fld);
-
-      const writeIfWritable = (fld, val) => {
-        if (!isWritable(fld)) return false;
-        fld.setValue?.(val);
-        fld.clearInvalid?.();
-        const record = form.getRecord?.();
-        if (record && fld.name) record.set(fld.name, val);
-        return true;
-      };
-
-      // Apply type === "save" rules (same style as your original)
-	if(APModFiller.autoFillEnabled) {
-      const autoFillSave = (APModFiller.store.autoFill || []).filter(aF => aF.type === "save");
-      for (const aFS of autoFillSave) {
-        const field = form.findField ? form.findField(aFS.field) : null;
-        if (!field) continue;
-
-        if (aFS.status === "always") {
-          const val = APModDataSpy.onFunction(aFS.value);
-          writeIfWritable(field, val);
-        } else {
-          const cur = field.getValue?.();
-          if (cur == null || String(cur).trim() === '') {
-            const val = APModDataSpy.onFunction(aFS.value);
-            writeIfWritable(field, val);
-          }
-        }
-      }
-	}
-
-      // Optional: priority handling on save (respect disabled/readOnly)
-      const combo = form.findField ? form.findField('priority') : null;
-      if (combo && isWritable(combo)) {
-        const data = APModFiller.store.priority?.[combo.getValue?.()];
-        if (data && data.switchTo) {
-          writeIfWritable(combo, data.switchTo);
-        }
-        if (typeof combo.updateDurationLabel === 'function') combo.updateDurationLabel();
-      }
-
-      // Pass through to original beforeSave
-      return RVclass.prototype.apmodFillerOrigBeforeSave.call(this, a);
-    };
-  }
-
-  // --- Patch initPageLayout. Keep original under apmodFillerOrigInitPageLayout.
-  if (RVclass.prototype.apmodFillerOrigInitPageLayout == null) {
-    RVclass.prototype.apmodFillerOrigInitPageLayout = RVclass.prototype.initPageLayout;
-
-    RVclass.prototype.initPageLayout = function(c, e, b) {
-      this.apmodFillerOrigInitPageLayout.apply(this, [c, e, b]);
-
-      // Act only on WSJOBS.HDR
-      if (this.tabURL !== "WSJOBS.HDR") return;
-
-      const form = this.getForm();
-      if (!form) return;
-
-      // Patch loadRecord ONCE per form instance. We must use a classic function to keep correct "this".
-      if (!form.__apmodPatchedLoadRecord && typeof form.loadRecord === 'function') {
-        form.__apmodPatchedLoadRecord = true;
-        // Wrap once, keep original
-		const origLoadRecord = form.loadRecord;
-		
-		form.loadRecord = function (...args) {
-		  // Let Ext populate the fields first
-		  const res = origLoadRecord.apply(this, args);
-		
-		  const runAfterIdle = () => {
-		    if (this.destroyed || this.isDestroyed?.()) return;
-		
-		    // Helper that safely writes only into writable fields
-		    const writeIfWritable = (field, value) => {
-		      // In Ext 7.7 these reflect current state after bindings/layout
-		      const disabled = typeof field.isDisabled === 'function' ? field.isDisabled() : !!field.disabled;
-		      const readOnly = typeof field.isReadOnly === 'function' ? field.isReadOnly() : !!field.readOnly;
-		      if (disabled || readOnly) return;
-		
-		      field.setValue?.(value);
-		      field.clearInvalid?.();
-		
-		      const rec = this.getRecord?.();
-		      if (rec && field.name) rec.set(field.name, value);
-		    };
-
-			  if(APModFiller.autoFillEnabled) {
-			    // Apply type === "load" rules
-			    const autoFillLoad = (APModFiller.store.autoFill || []).filter(aF => aF.type === "load");
-			    for (const aFL of autoFillLoad) {
-			      const field = this.findField ? this.findField(aFL.field) : null;
-			      if (!field) continue;
-			
-			      if (aFL.status === "always") {
-			        const val = APModDataSpy.onFunction(aFL.value);
-			        writeIfWritable(field, val);
-			      } else {
-			        const cur = field.getValue?.();
-			        if (cur == null || String(cur).trim() === '') {
-			          const val = APModDataSpy.onFunction(aFL.value);
-			          writeIfWritable(field, val);
-			        }
-			      }
-			    }
-			  }
-		
-		    // Optional: priority handling (also respect disabled/readOnly)
-		    const combo = this.findField?.('priority');
-		    if (combo) {
-		      const disabled = typeof combo.isDisabled === 'function' ? combo.isDisabled() : !!combo.disabled;
-		      const readOnly = typeof combo.isReadOnly === 'function' ? combo.isReadOnly() : !!combo.readOnly;
-		
-		      if (!disabled && !readOnly) {
-		        const data = APModFiller.store.priority?.[combo.getValue()];
-		        if (data && data.switchTo) {
-		          combo.setValue(data.switchTo);
-		          const rec = this.getRecord?.();
-		          if (rec) rec.set('priority', data.switchTo);
-		          combo.clearInvalid?.();
-		        }
-		        typeof combo.updateDurationLabel === 'function' && combo.updateDurationLabel();
-		      }
-		    }
-		  };
-		
-		  // Ext 7.7: 'idle' fires after layouts, bindings, and disable/readOnly propagation
-		  Ext.GlobalEvents.on('idle', runAfterIdle, this, { single: true });
-		
-		  // Keep original return
-		  return res;
-		};
-      }
-
-      // ------------- existing buttons -------------
-      const problemcode = form.findField('problemcode');
-      const failurecode = form.findField('failurecode');
-      const causecode   = form.findField('causecode');
-
-      if (problemcode && failurecode && causecode) {
-        const parent = causecode.ownerCt;
-        if (parent?.items?.keys) {
-          const pos = parent.items.keys.indexOf(causecode.id) + 1;
-          parent.insert(pos, {
-            xtype: 'button',
-            name: 'apModCloseCodes',
-            text: 'Fill Close Codes',
-            margin: '0 0 0 150',
-            listeners: {
-              click: function(cmp, e) {
-                APModFiller.buttonClick(cmp, e, [problemcode, failurecode, causecode]);
-              }
+        RVclass.prototype.beforeSave = function (a) {
+            // Guard: restrict to WSJOBS.HDR only
+            if (this.tabURL !== "WSJOBS.HDR") {
+                return RVclass.prototype.apmodFillerOrigBeforeSave.call(this, a);
             }
-          });
-        }
-      }
 
-      const URL = "https://eu1.eam.hxgnsmartcloud.com/web/base/logindisp?tenant=AMAZONRMEEU_PRD&FROMEMAIL=YES&SYSTEM_FUNCTION_NAME=WSJOBS&USER_FUNCTION_NAME=WSJOBS&workordernum=";
-      const description = form.findField('description');
-      const workorder   = form.findField('workordernum');
+            const form = this.getForm();
 
-      if (description && workorder) {
-        const parent = description.ownerCt;
-        if (parent?.items?.keys) {
-          const pos = parent.items.keys.indexOf(description.id) + 1;
-          parent.insert(pos, {
-            xtype: 'button',
-            name: 'apModCopyWO',
-            text: '©',
-            margin: '0 0 0 20',
-            tooltip: 'Copy APM WO link',
-            listeners: {
-              click: function() {
-                const woNumber = workorder.getValue() ?? "";
-                navigator.clipboard.writeText(URL + woNumber);
-                if (APModPopup) APModPopup.openPopup("WO direct link saved to Clipboard.");
-              }
+            // Helpers for 7.7: check writability and write safely
+            const isDisabled = (fld) =>
+                typeof fld.isDisabled === 'function' ? fld.isDisabled() : !!fld.disabled;
+            const isReadOnly = (fld) =>
+                typeof fld.isReadOnly === 'function' ? fld.isReadOnly() : !!fld.readOnly;
+            const isWritable = (fld) => fld && !isDisabled(fld) && !isReadOnly(fld);
+
+            const writeIfWritable = (fld, val) => {
+                if (!isWritable(fld)) return false;
+                fld.setValue?.(val);
+                fld.clearInvalid?.();
+                const record = form.getRecord?.();
+                if (record && fld.name) record.set(fld.name, val);
+                return true;
+            };
+
+            // Apply type === "save" rules (same style as your original)
+            if (!!APModOptions?.options?.autoFillEnabled) {
+                const autoFillSave = (APModFiller.store.autoFill || []).filter(aF => aF.type === "save");
+                for (const aFS of autoFillSave) {
+                    const field = form.findField ? form.findField(aFS.field) : null;
+                    if (!field) continue;
+
+                    if (aFS.status === "always") {
+                        const val = APModDataSpy.onFunction(aFS.value);
+                        writeIfWritable(field, val);
+                    } else {
+                        const cur = field.getValue?.();
+                        if (cur == null || String(cur).trim() === '') {
+                            const val = APModDataSpy.onFunction(aFS.value);
+                            writeIfWritable(field, val);
+                        }
+                    }
+                }
             }
-          });
-        }
-      }
 
-      // ------------- combo UI -------------
-      const combo = form.findField("priority");
-      if (combo && combo.ownerCt && !combo.apmUiWired) {
-        combo.apmUiWired = true;
+            if (!!APModOptions?.options?.priorityEnabled) {
+                // Optional: priority handling on save (respect disabled/readOnly)
+                const combo = form.findField ? form.findField('priority') : null;
+                if (combo && isWritable(combo)) {
+                    const data = APModFiller.store.priority?.[combo.getValue?.()];
+                    if (data && data.switchTo) {
+                        writeIfWritable(combo, data.switchTo);
+                    }
+                    if (typeof combo.updateDurationLabel === 'function') combo.updateDurationLabel();
+                }
+            }
 
-        const parent = combo.ownerCt;
-        const insertIndex = parent.items.indexOf
-          ? parent.items.indexOf(combo) + 1
-          : (parent.items.keys ? parent.items.keys.indexOf(combo.id) + 1 : null);
+            // Pass through to original beforeSave
+            return RVclass.prototype.apmodFillerOrigBeforeSave.call(this, a);
+        };
+    }
 
-        const labelItemId = combo.getId() + '-apModPriorityOverdueLabel';
-        let label = parent.down('#' + labelItemId);
-        if (!label && insertIndex != null) {
-          label = parent.insert(insertIndex, {
-            xtype: 'displayfield',
-            itemId: labelItemId,
-            value: '',
-            margin: '0 0 0 150'
-          });
-        }
+    // --- Patch initPageLayout. Keep original under apmodFillerOrigInitPageLayout.
+    if (RVclass.prototype.apmodFillerOrigInitPageLayout == null) {
+        RVclass.prototype.apmodFillerOrigInitPageLayout = RVclass.prototype.initPageLayout;
 
-        function updateLabel() {
-          if (!label) return;
-          const data = APModFiller.store.priority[combo.getValue()];
-          label.setValue(data.label || "");
-        }
-        combo.updateDurationLabel = updateLabel;
+        RVclass.prototype.initPageLayout = function (c, e, b) {
+            this.apmodFillerOrigInitPageLayout.apply(this, [c, e, b]);
 
-        if (!combo.apmSetValuePatched) {
-          combo.apmSetValuePatched = true;
+            // Act only on WSJOBS.HDR
+            if (this.tabURL !== "WSJOBS.HDR") return;
 
-          const origSetValue = combo.setValue;
-          combo.setValue = function() {
-            const res = origSetValue.apply(this, arguments);
-            if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
-            return res;
-          };
+            const form = this.getForm();
+            if (!form) return;
 
-          if (combo.clearValue) {
-            const origClearValue = combo.clearValue;
-            combo.clearValue = function() {
-              const res = origClearValue.apply(this, arguments);
-              if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
-              return res;
-            };
-          }
+            // Patch loadRecord ONCE per form instance. We must use a classic function to keep correct "this".
+            if (!form.__apmodPatchedLoadRecord && typeof form.loadRecord === 'function') {
+                form.__apmodPatchedLoadRecord = true;
+                // Wrap once, keep original
+                const origLoadRecord = form.loadRecord;
 
-          if (combo.reset) {
-            const origReset = combo.reset;
-            combo.reset = function() {
-              const res = origReset.apply(this, arguments);
-              if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
-              return res;
-            };
-          }
+                form.loadRecord = function (...args) {
+                    // Let Ext populate the fields first
+                    const res = origLoadRecord.apply(this, args);
 
-          if (combo.setRawValue) {
-            const origSetRaw = combo.setRawValue;
-            combo.setRawValue = function() {
-              const res = origSetRaw.apply(this, arguments);
-              if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
-              return res;
-            };
-          }
-        }
-      }
-    };
-  }
+                    const runAfterIdle = () => {
+                        if (this.destroyed || this.isDestroyed?.()) return;
+
+                        // Helper that safely writes only into writable fields
+                        const writeIfWritable = (field, value) => {
+                            // In Ext 7.7 these reflect current state after bindings/layout
+                            const disabled = typeof field.isDisabled === 'function' ? field.isDisabled() : !!field.disabled;
+                            const readOnly = typeof field.isReadOnly === 'function' ? field.isReadOnly() : !!field.readOnly;
+                            if (disabled || readOnly) return;
+
+                            field.setValue?.(value);
+                            field.clearInvalid?.();
+
+                            const rec = this.getRecord?.();
+                            if (rec && field.name) rec.set(field.name, value);
+                        };
+
+                        if (!!APModOptions?.options?.autoFillEnabled) {
+                            // Apply type === "load" rules
+                            const autoFillLoad = (APModFiller.store.autoFill || []).filter(aF => aF.type === "load");
+                            for (const aFL of autoFillLoad) {
+                                const field = this.findField ? this.findField(aFL.field) : null;
+                                if (!field) continue;
+
+                                if (aFL.status === "always") {
+                                    const val = APModDataSpy.onFunction(aFL.value);
+                                    writeIfWritable(field, val);
+                                } else {
+                                    const cur = field.getValue?.();
+                                    if (cur == null || String(cur).trim() === '') {
+                                        const val = APModDataSpy.onFunction(aFL.value);
+                                        writeIfWritable(field, val);
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!!APModOptions?.options?.priorityEnabled) {
+                            // Optional: priority handling (also respect disabled/readOnly)
+                            const combo = this.findField?.('priority');
+                            if (combo) {
+                                const disabled = typeof combo.isDisabled === 'function' ? combo.isDisabled() : !!combo.disabled;
+                                const readOnly = typeof combo.isReadOnly === 'function' ? combo.isReadOnly() : !!combo.readOnly;
+
+                                if (!disabled && !readOnly) {
+                                    const data = APModFiller.store.priority?.[combo.getValue()];
+                                    if (data && data.switchTo) {
+                                        combo.setValue(data.switchTo);
+                                        const rec = this.getRecord?.();
+                                        if (rec) rec.set('priority', data.switchTo);
+                                        combo.clearInvalid?.();
+                                    }
+                                    typeof combo.updateDurationLabel === 'function' && combo.updateDurationLabel();
+                                }
+                            }
+                        }
+                    }
+
+                    // Ext 7.7: 'idle' fires after layouts, bindings, and disable/readOnly propagation
+                    Ext.GlobalEvents.on('idle', runAfterIdle, this, {single: true});
+
+                    // Keep original return
+                    return res;
+                };
+            }
+
+            // ------------- existing buttons -------------
+            const problemcode = form.findField('problemcode');
+            const failurecode = form.findField('failurecode');
+            const causecode = form.findField('causecode');
+
+            if (problemcode && failurecode && causecode) {
+                const parent = causecode.ownerCt;
+                if (parent?.items?.keys) {
+                    const pos = parent.items.keys.indexOf(causecode.id) + 1;
+                    parent.insert(pos, {
+                        xtype: 'button',
+                        name: 'apModCloseCodes',
+                        text: 'Fill Close Codes',
+                        margin: '0 0 0 150',
+                        listeners: {
+                            click: function (cmp, e) {
+                                APModFiller.buttonClick(cmp, e, [problemcode, failurecode, causecode]);
+                            }
+                        }
+                    });
+                }
+            }
+
+            const URL = "https://eu1.eam.hxgnsmartcloud.com/web/base/logindisp?tenant=AMAZONRMEEU_PRD&FROMEMAIL=YES&SYSTEM_FUNCTION_NAME=WSJOBS&USER_FUNCTION_NAME=WSJOBS&workordernum=";
+            const description = form.findField('description');
+            const workorder = form.findField('workordernum');
+
+            if (description && workorder) {
+                const parent = description.ownerCt;
+                if (parent?.items?.keys) {
+                    const pos = parent.items.keys.indexOf(description.id) + 1;
+                    parent.insert(pos, {
+                        xtype: 'button',
+                        name: 'apModCopyWO',
+                        text: '©',
+                        margin: '0 0 0 20',
+                        tooltip: 'Copy APM WO link',
+                        listeners: {
+                            click: function () {
+                                const woNumber = workorder.getValue() ?? "";
+                                navigator.clipboard.writeText(URL + woNumber);
+                                if (APModPopup) APModPopup.openPopup("WO direct link saved to Clipboard.");
+                            }
+                        }
+                    });
+                }
+            }
+
+            // ------------- combo UI -------------
+            const combo = form.findField("priority");
+            if (combo && combo.ownerCt && !combo.apmUiWired) {
+                combo.apmUiWired = true;
+
+                const parent = combo.ownerCt;
+                const insertIndex = parent.items.indexOf
+                    ? parent.items.indexOf(combo) + 1
+                    : (parent.items.keys ? parent.items.keys.indexOf(combo.id) + 1 : null);
+
+                const labelItemId = combo.getId() + '-apModPriorityOverdueLabel';
+                let label = parent.down('#' + labelItemId);
+                if (!label && insertIndex != null) {
+                    label = parent.insert(insertIndex, {
+                        xtype: 'displayfield',
+                        itemId: labelItemId,
+                        value: '',
+                        margin: '0 0 0 150'
+                    });
+                }
+
+                function updateLabel() {
+                    if (!label) return;
+                    const data = APModFiller.store.priority[combo.getValue()];
+                    label.setValue(data.label || "");
+                }
+
+                combo.updateDurationLabel = updateLabel;
+
+                if (!combo.apmSetValuePatched) {
+                    combo.apmSetValuePatched = true;
+
+                    const origSetValue = combo.setValue;
+                    combo.setValue = function () {
+                        const res = origSetValue.apply(this, arguments);
+                        if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
+                        return res;
+                    };
+
+                    if (combo.clearValue) {
+                        const origClearValue = combo.clearValue;
+                        combo.clearValue = function () {
+                            const res = origClearValue.apply(this, arguments);
+                            if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
+                            return res;
+                        };
+                    }
+
+                    if (combo.reset) {
+                        const origReset = combo.reset;
+                        combo.reset = function () {
+                            const res = origReset.apply(this, arguments);
+                            if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
+                            return res;
+                        };
+                    }
+
+                    if (combo.setRawValue) {
+                        const origSetRaw = combo.setRawValue;
+                        combo.setRawValue = function () {
+                            const res = origSetRaw.apply(this, arguments);
+                            if (typeof this.updateDurationLabel === 'function') this.updateDurationLabel();
+                            return res;
+                        };
+                    }
+                }
+            }
+        };
+    }
 };
 
 APModFiller.injectListDetailView = () => {
@@ -720,7 +727,7 @@ APModFiller.injectListDetailView = () => {
         RVclass.prototype.initPageLayout = function (c, e, b) {
             this.apmodFillerOrigInitPageLayout.apply(this, [c, e, b]);
             const a = this;
-            if (this.tabURL == "WSJOBS.BOO") {
+            if (this.tabURL === "WSJOBS.BOO") {
                 const employee = a.getForm().findField('employee');
                 const octype = a.getForm().findField('octype');
                 const hrswork = a.getForm().findField('hrswork');
@@ -759,7 +766,7 @@ APModFiller.injectListDetailView = () => {
                     }
                 }
             }
-            if (this.tabURL == "WSJOBS.PAR") {
+            if (this.tabURL === "WSJOBS.PAR") {
                 const partcode = a.getForm().findField('partcode');
                 const transactionquantity = a.getForm().findField('transactionquantity');
                 const activity = a.getForm().findField('activity');
@@ -834,410 +841,422 @@ APModFiller.showFillerSettings = () => {
         APModFiller.popup = APModFiller.createPopupPanel(APModFiller.store)
         if (APModFiller.popup != null) APModFiller.popup.show();
     } else {
-        if (APModFiller.popup != null) APModFiller.popup.show();
+        APModFiller.popup.show();
     }
 }
 
 /** Opens a window to edit APModFiller.store.priority (object as key->config). */
-APModFiller.openPriorityWindow = function() {
-  // fixed, hardcoded code list
-  const fixedCodes = ["1", "2", "3", "4", "5"];
+APModFiller.openPriorityWindow = function () {
+    // fixed, hardcoded code list
+    const fixedCodes = ["1", "2", "3", "4", "5"];
 
-  // source object (may or may not contain entries for all codes)
-  const src = APModFiller.store.priority || {};
+    // source object (may or may not contain entries for all codes)
+    const src = APModFiller.store.priority || {};
 
-  // build rows for all fixed codes
-  const rows = fixedCodes.map(code => ({
-    code,
-    switchTo: (src[code] && src[code].switchTo) || "",
-    label: (src[code] && src[code].label) || ""
-  }));
+    // build rows for all fixed codes
+    const rows = fixedCodes.map(code => ({
+        code,
+        switchTo: (src[code] && src[code].switchTo) || "",
+        label: (src[code] && src[code].label) || ""
+    }));
 
-  // grid store
-  const store = new Ext.data.Store({
-    fields: ["code","switchTo","label"],
-    data: rows
-  });
+    // grid store
+    const store = new Ext.data.Store({
+        fields: ["code", "switchTo", "label"],
+        data: rows
+    });
 
-  // switchTo options: show "—" for empty but store "" as value
-  const codeOptionsStore = new Ext.data.Store({
-    fields: ["val","label"],
-    data: [{ val: "", label: "—" }].concat(
-      fixedCodes.map(v => ({ val: v, label: v }))
-    )
-  });
+    // switchTo options: show "—" for empty but store "" as value
+    const codeOptionsStore = new Ext.data.Store({
+        fields: ["val", "label"],
+        data: [{val: "", label: "—"}].concat(
+            fixedCodes.map(v => ({val: v, label: v}))
+        )
+    });
 
-  // use CellEditing (no row update/cancel popup)
-  const cellEditor = Ext.create("Ext.grid.plugin.CellEditing", { clicksToEdit: 1 });
+    // use CellEditing (no row update/cancel popup)
+    const cellEditor = Ext.create("Ext.grid.plugin.CellEditing", {clicksToEdit: 1});
 
-  // helper renderer: empty value -> "—"
-  function renderSwitchTo(v){
-    const rec = codeOptionsStore.findRecord("val", v, 0, false, true, true);
-    return rec ? rec.get("label") : (v || "—");
-  }
+    // helper renderer: empty value -> "—"
+    function renderSwitchTo(v) {
+        const rec = codeOptionsStore.findRecord("val", v, 0, false, true, true);
+        return rec ? rec.get("label") : (v || "—");
+    }
 
-  // the grid (no sorting, no header menus)
-  const grid = Ext.create("Ext.grid.Panel", {
-    border: true,
-    flex: 1,
-    store,
-    columns: [
-      { text: "Code", dataIndex: "code", flex: 1, sortable: false, menuDisabled: true },
-      { 
-        text: "Switch To",
-        dataIndex: "switchTo",
+    // the grid (no sorting, no header menus)
+    const grid = Ext.create("Ext.grid.Panel", {
+        border: true,
         flex: 1,
-        sortable: false,
-        menuDisabled: true,
-        editor: {
-          xtype: "combo",
-          queryMode: "local",
-          store: codeOptionsStore,
-          displayField: "label", // "—" for empty
-          valueField: "val",     // store ""
-          forceSelection: true,
-          editable: false,
-          allowBlank: true,
-          triggerAction: "all",
-          minChars: 0
-        },
-        renderer: renderSwitchTo
-      },
-      { 
-        text: "Label",
-        dataIndex: "label",
-        flex: 2,
-        sortable: false,
-        menuDisabled: true,
-        editor: { xtype: "textfield", allowBlank: true }
-      }
-    ],
-    sortableColumns: false,
-    enableColumnMove: false,
-    enableColumnHide: false,
-    selModel: "rowmodel",
-    plugins: [ cellEditor ]
-  });
+        store,
+        columns: [
+            {text: "Code", dataIndex: "code", flex: 1, sortable: false, menuDisabled: true},
+            {
+                text: "Switch To",
+                dataIndex: "switchTo",
+                flex: 1,
+                sortable: false,
+                menuDisabled: true,
+                editor: {
+                    xtype: "combo",
+                    queryMode: "local",
+                    store: codeOptionsStore,
+                    displayField: "label", // "—" for empty
+                    valueField: "val",     // store ""
+                    forceSelection: true,
+                    editable: false,
+                    allowBlank: true,
+                    triggerAction: "all",
+                    minChars: 0
+                },
+                renderer: renderSwitchTo
+            },
+            {
+                text: "Label",
+                dataIndex: "label",
+                flex: 2,
+                sortable: false,
+                menuDisabled: true,
+                editor: {xtype: "textfield", allowBlank: true}
+            }
+        ],
+        sortableColumns: false,
+        enableColumnMove: false,
+        enableColumnHide: false,
+        selModel: "rowmodel",
+        plugins: [cellEditor]
+    });
 
-  // bottom docked toolbar with centered Save/Close
-  const bottomBar = {
-    xtype: "toolbar",
-    dock: "bottom",
-    layout: { pack: "center" },
-    items: [
-      {
-        text: "Save",
-        handler: function(){
-          // persist all fixed codes
-          const out = {};
-          store.each(function(r){
-            const code = String(r.get("code"));
-            out[code] = {
-              switchTo: String(r.get("switchTo")||"").trim(), // "" when "—" shown
-              label: String(r.get("label")||"").trim()
-            };
-          });
-          APModFiller.store.priority = out;
-          APModFiller.save();
-          if (APModPopup) APModPopup.openPopup("Priority saved.");
-        }
-      },
-      { xtype: "tbspacer", width: 24 },
-      { text: "Close", handler: function(){ win.close(); } }
-    ]
-  };
+    // bottom docked toolbar with centered Save/Close
+    const bottomBar = {
+        xtype: "toolbar",
+        dock: "bottom",
+        layout: {pack: "center"},
+        items: [
+            {
+                text: "Save",
+                handler: function () {
+                    // persist all fixed codes
+                    const out = {};
+                    store.each(function (r) {
+                        const code = String(r.get("code"));
+                        out[code] = {
+                            switchTo: String(r.get("switchTo") || "").trim(), // "" when "—" shown
+                            label: String(r.get("label") || "").trim()
+                        };
+                    });
+                    APModFiller.store.priority = out;
+                    APModFiller.save();
+                    if (APModPopup) APModPopup.openPopup("Priority saved.");
+                }
+            },
+            {xtype: "tbspacer", width: 24},
+            {
+                text: "Close", handler: function () {
+                    win.close();
+                }
+            }
+        ]
+    };
 
-  const mainPanel = Ext.create("Ext.panel.Panel", {
-    layout: { type: "hbox", align: "stretch" },
-    items: [ grid ],
-    dockedItems: [ bottomBar ]
-  });
+    const mainPanel = Ext.create("Ext.panel.Panel", {
+        layout: {type: "hbox", align: "stretch"},
+        items: [grid],
+        dockedItems: [bottomBar]
+    });
 
-  const win = Ext.create("Ext.window.Window", {
-    title: "Priority Settings",
-    modal: true,
-    width: 900,
-	height: 600,
-	minWidth: 900,
-	minHeight: 600,
-	closable: false,
-	maximizable: false,
-    layout: "fit",
-	padding: '10 10 10 10',
-    items: [ mainPanel ]
-  });
+    const win = Ext.create("Ext.window.Window", {
+        title: "Priority Settings",
+        modal: true,
+        width: 900,
+        height: 600,
+        minWidth: 900,
+        minHeight: 600,
+        closable: false,
+        maximizable: false,
+        layout: "fit",
+        padding: '10 10 10 10',
+        items: [mainPanel]
+    });
 
-  win.show();
+    win.show();
 };
 
 /** Opens a window to edit APModFiller.store.autoFill (type/status/field/value). */
 // APModFiller.openAutoFillWindow: CellEditing (no row update/cancel popup), left text-icons, bottom dock with centered Save/Close and right-aligned Import/Export
-APModFiller.openAutoFillWindow = function() {
-  // --- typed payload metadata for import/export ---
-  const AUTO_KIND = "APModFiller.AutoFill";
-  const AUTO_VERSION = 1;
+APModFiller.openAutoFillWindow = function () {
+    // --- typed payload metadata for import/export ---
+    const AUTO_KIND = "APModFiller.AutoFill";
+    const AUTO_VERSION = 1;
 
-  // --- Friendly labels while keeping internal values ---
-  const TYPE_OPTS   = [["save",  "On save"], ["load",  "On load"]];
-  const STATUS_OPTS = [["always","Always"],  ["empty", "Field is empty"]];
+    // --- Friendly labels while keeping internal values ---
+    const TYPE_OPTS = [["save", "On save"], ["load", "On load"]];
+    const STATUS_OPTS = [["always", "Always"], ["empty", "Field is empty"]];
 
-  const TYPE_LABEL   = { save: "On save",  load: "On load" };
-  const STATUS_LABEL = { always: "Always", empty: "Field is empty" };
+    const TYPE_LABEL = {save: "On save", load: "On load"};
+    const STATUS_LABEL = {always: "Always", empty: "Field is empty"};
 
-  const typeStore = new Ext.data.ArrayStore({ fields: ["value","label"], data: TYPE_OPTS });
-  const statusStore = new Ext.data.ArrayStore({ fields: ["value","label"], data: STATUS_OPTS });
+    const typeStore = new Ext.data.ArrayStore({fields: ["value", "label"], data: TYPE_OPTS});
+    const statusStore = new Ext.data.ArrayStore({fields: ["value", "label"], data: STATUS_OPTS});
 
-  const data = (APModFiller.store.autoFill || []).map(r => ({
-    type: r.type || "save",
-    status: r.status || "empty",
-    field: r.field || "",
-    value: r.value != null ? r.value : ""
-  }));
+    const data = (APModFiller.store.autoFill || []).map(r => ({
+        type: r.type || "save",
+        status: r.status || "empty",
+        field: r.field || "",
+        value: r.value != null ? r.value : ""
+    }));
 
-  const store = new Ext.data.Store({
-    fields: ["type","status","field","value"],
-    data
-  });
-
-  function doSave() {
-    const arr = [];
-    store.each(function(r){
-      const type = r.get("type") || "save";
-      const status = r.get("status") || "empty";
-      const field = String(r.get("field") || "").trim();
-      const value = r.get("value");
-      if (!field) return;
-      arr.push({ type, status, field, value });
+    const store = new Ext.data.Store({
+        fields: ["type", "status", "field", "value"],
+        data
     });
-    APModFiller.store.autoFill = arr;
-    APModFiller.save();
-    if (APModPopup) APModPopup.openPopup("AutoFill saved.");
-  }
 
-  // Build typed export object (keeps your existing AUTO_KIND/AUTO_VERSION)
-function buildExportObject() {
-  const items = [];
-  store.each(function(r){
-    items.push({
-      type:  r.get("type"),
-      status:r.get("status"),
-      field: r.get("field"),
-      value: r.get("value")
-    });
-  });
-  return { kind: AUTO_KIND, version: AUTO_VERSION, data: items };
-}
+    function doSave() {
+        const arr = [];
+        store.each(function (r) {
+            const type = r.get("type") || "save";
+            const status = r.get("status") || "empty";
+            const field = String(r.get("field") || "").trim();
+            const value = r.get("value");
+            if (!field) return;
+            arr.push({type, status, field, value});
+        });
+        APModFiller.store.autoFill = arr;
+        APModFiller.save();
+        if (APModPopup) APModPopup.openPopup("AutoFill saved.");
+    }
+
+    // Build typed export object (keeps your existing AUTO_KIND/AUTO_VERSION)
+    function buildExportObject() {
+        const items = [];
+        store.each(function (r) {
+            items.push({
+                type: r.get("type"),
+                status: r.get("status"),
+                field: r.get("field"),
+                value: r.get("value")
+            });
+        });
+        return {kind: AUTO_KIND, version: AUTO_VERSION, data: items};
+    }
 
 // Export filename: APModAutofill_YYYY-MM-DD_HH-MM-SS.json
-function doExport() {
-  try {
-    const payload = buildExportObject();
-    const json = JSON.stringify(payload, null, 2);
+    function doExport() {
+        try {
+            const payload = buildExportObject();
+            const json = JSON.stringify(payload, null, 2);
 
-    const ts = (() => {
-      const d = new Date();
-      const pad = n => String(n).padStart(2, "0");
-      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_` +
-             `${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
-    })();
+            const ts = (() => {
+                const d = new Date();
+                const pad = n => String(n).padStart(2, "0");
+                return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_` +
+                    `${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
+            })();
 
-    const uri = "data:application/json;charset=utf-8," + encodeURIComponent(json);
-    const a = document.createElement("a");
-    a.setAttribute("href", uri);
-    a.setAttribute("download", `APModAutofill_${ts}.json`);
-    a.click();
-    if (APModPopup) APModPopup.openPopup("Exported.");
-  } catch (err) {
-    if (Ext && Ext.Msg && Ext.Msg.alert) {
-      Ext.Msg.alert("Export failed", err && err.message ? String(err.message) : "Unexpected error during export.");
+            const uri = "data:application/json;charset=utf-8," + encodeURIComponent(json);
+            const a = document.createElement("a");
+            a.setAttribute("href", uri);
+            a.setAttribute("download", `APModAutofill_${ts}.json`);
+            a.click();
+            if (APModPopup) APModPopup.openPopup("Exported.");
+        } catch (err) {
+            if (Ext && Ext.Msg && Ext.Msg.alert) {
+                Ext.Msg.alert("Export failed", err && err.message ? String(err.message) : "Unexpected error during export.");
+            }
+        }
     }
-  }
-}
 
 // Strict typed import (no legacy arrays).
-function doImport() {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = ".json,application/json";
-  input.onchange = e => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
+    function doImport() {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".json,application/json";
+        input.onchange = e => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = evt => {
-      try {
-        const parsed = JSON.parse(String(evt.target.result || "null"));
-        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-          throw new Error("Unsupported file: payload must be an object.");
-        }
-        if (parsed.kind !== AUTO_KIND) {
-          throw new Error("Unsupported file: wrong 'kind'.");
-        }
-        if (typeof parsed.version !== "number" || parsed.version > AUTO_VERSION) {
-          throw new Error("Unsupported file: invalid or newer 'version'.");
-        }
-        if (!Array.isArray(parsed.data)) {
-          throw new Error("Invalid payload: 'data' must be an array.");
-        }
+            const reader = new FileReader();
+            reader.onload = evt => {
+                try {
+                    const parsed = JSON.parse(String(evt.target.result || "null"));
+                    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+                        throw new Error("Unsupported file: payload must be an object.");
+                    }
+                    if (parsed.kind !== AUTO_KIND) {
+                        throw new Error("Unsupported file: wrong 'kind'.");
+                    }
+                    if (typeof parsed.version !== "number" || parsed.version > AUTO_VERSION) {
+                        throw new Error("Unsupported file: invalid or newer 'version'.");
+                    }
+                    if (!Array.isArray(parsed.data)) {
+                        throw new Error("Invalid payload: 'data' must be an array.");
+                    }
 
-        // Normalize and load into grid store
-        const arr = parsed.data.map(r => ({
-          type:   (r && r.type)   || "save",
-          status: (r && r.status) || "empty",
-          field:  (r && r.field)  || "",
-          value:  (r && r.value) != null ? r.value : ""
-        }));
-        store.loadData(arr);
+                    // Normalize and load into grid store
+                    const arr = parsed.data.map(r => ({
+                        type: (r && r.type) || "save",
+                        status: (r && r.status) || "empty",
+                        field: (r && r.field) || "",
+                        value: (r && r.value) != null ? r.value : ""
+                    }));
+                    store.loadData(arr);
 
-        if (APModPopup) APModPopup.openPopup("Imported (not saved yet).");
-      } catch (e) {
-        Ext.Msg.alert("Import failed", e && e.message ? String(e.message) : "Invalid JSON or unsupported file.");
-      }
+                    if (APModPopup) APModPopup.openPopup("Imported (not saved yet).");
+                } catch (e) {
+                    Ext.Msg.alert("Import failed", e && e.message ? String(e.message) : "Invalid JSON or unsupported file.");
+                }
+            };
+            reader.readAsText(file, "UTF-8");
+        };
+        input.click();
+    }
+
+    // Use CellEditing to avoid row update/cancel confirmation
+    const cellEditor = Ext.create("Ext.grid.plugin.CellEditing", {clicksToEdit: 1});
+
+    const grid = Ext.create("Ext.grid.Panel", {
+        border: true,
+        flex: 1,
+        store,
+        columns: [
+            {
+                text: "When to autofill?",
+                dataIndex: "type",
+                width: 170,
+                tooltip: "Choose when the rule should apply",
+                editor: {
+                    xtype: "combo",
+                    queryMode: "local",
+                    editable: false,
+                    forceSelection: true,
+                    triggerAction: "all",
+                    store: typeStore,
+                    valueField: "value",
+                    displayField: "label"
+                },
+                renderer: function (v) {
+                    return TYPE_LABEL[v] || v;
+                }
+            },
+            {
+                text: "Only autofill if",
+                dataIndex: "status",
+                width: 180,
+                tooltip: "Condition for applying the value",
+                editor: {
+                    xtype: "combo",
+                    queryMode: "local",
+                    editable: false,
+                    forceSelection: true,
+                    triggerAction: "all",
+                    store: statusStore,
+                    valueField: "value",
+                    displayField: "label"
+                },
+                renderer: function (v) {
+                    return STATUS_LABEL[v] || v;
+                }
+            },
+            {text: "Field", dataIndex: "field", flex: 1, editor: {xtype: "textfield"}},
+            {text: "Value", dataIndex: "value", flex: 1, editor: {xtype: "textfield"}}
+        ],
+        selModel: "rowmodel",
+        plugins: [cellEditor],
+        // Sorting is desired -> keep default sortable columns & header menus
+    });
+
+    // Left vertical text-icon buttons: compact size
+    const leftControls = {
+        xtype: "container",
+        width: 40,
+        layout: {type: "vbox"},
+        defaults: {
+            margin: "2 0 2 0",
+        },
+        items: [
+            {
+                xtype: 'button',
+                width: 28,
+                height: 28,
+                text: "+",
+                handler: function () {
+                    const rec = store.add({type: "save", status: "empty", field: "", value: ""})[0];
+                    cellEditor.startEdit(rec, 0);
+                }
+            },
+            {
+                xtype: 'button',
+                width: 28,
+                height: 28,
+                text: "🗑",
+                ariaLabel: "Delete",
+                handler: function () {
+                    const sel = grid.getSelectionModel().getSelection();
+                    if (sel && sel.length) store.remove(sel);
+                }
+            }
+        ]
     };
-    reader.readAsText(file, "UTF-8");
-  };
-  input.click();
-}
 
-  // Use CellEditing to avoid row update/cancel confirmation
-  const cellEditor = Ext.create("Ext.grid.plugin.CellEditing", { clicksToEdit: 1 });
-
-  const grid = Ext.create("Ext.grid.Panel", {
-    border: true,
-    flex: 1,
-    store,
-    columns: [
-      {
-        text: "When to autofill?",
-        dataIndex: "type",
-        width: 170,
-        tooltip: "Choose when the rule should apply",
-        editor: {
-          xtype: "combo",
-          queryMode: "local",
-          editable: false,
-          forceSelection: true,
-          triggerAction: "all",
-          store: typeStore,
-          valueField: "value",
-          displayField: "label"
-        },
-        renderer: function(v){ return TYPE_LABEL[v] || v; }
-      },
-      {
-        text: "Only autofill if",
-        dataIndex: "status",
-        width: 180,
-        tooltip: "Condition for applying the value",
-        editor: {
-          xtype: "combo",
-          queryMode: "local",
-          editable: false,
-          forceSelection: true,
-          triggerAction: "all",
-          store: statusStore,
-          valueField: "value",
-          displayField: "label"
-        },
-        renderer: function(v){ return STATUS_LABEL[v] || v; }
-      },
-      { text: "Field", dataIndex: "field", flex: 1, editor: { xtype: "textfield" } },
-      { text: "Value", dataIndex: "value", flex: 1, editor: { xtype: "textfield" } }
-    ],
-    selModel: "rowmodel",
-    plugins: [ cellEditor ],
-    // Sorting is desired -> keep default sortable columns & header menus
-  });
-
-  // Left vertical text-icon buttons: compact size
-  const leftControls = {
-    xtype: "container",
-    width: 40,
-    layout: { type: "vbox" },
-    defaults: {
-      margin: "2 0 2 0",
-    },
-    items: [
-      {
-        xtype: 'button',
-        width: 28,
-		height: 28,
-        text: "+",
-        handler: function(){
-          const rec = store.add({ type:"save", status:"empty", field:"", value:"" })[0];
-          cellEditor.startEdit(rec, 0);
-        }
-      },
-      {
-        xtype: 'button',
-        width: 28,
-		height: 28,
-        text: "🗑",
-        ariaLabel: "Delete",
-        handler: function(){
-          const sel = grid.getSelectionModel().getSelection();
-          if (sel && sel.length) store.remove(sel);
-        }
-      }
-    ]
-  };
-
-  // Bottom docked toolbar split into thirds:
-  // [ left (spacer) ] [ center (Save/Close centered) ] [ right (Import/Export right-aligned) ]
-  const bottomBar = {
-    xtype: "toolbar",
-    dock: "bottom",
-    layout: { type: "hbox", align: "middle" },
-    items: [
-      // Left third (spacer)
-      { xtype: "container", flex: 1 },
-      // Middle third (center group)
-      {
-        xtype: "container",
-        flex: 1,
-        layout: { type: "hbox", pack: "center" },
+    // Bottom docked toolbar split into thirds:
+    // [ left (spacer) ] [ center (Save/Close centered) ] [ right (Import/Export right-aligned) ]
+    const bottomBar = {
+        xtype: "toolbar",
+        dock: "bottom",
+        layout: {type: "hbox", align: "middle"},
         items: [
-          { xtype: "button", text: "Save", handler: doSave },
-          { xtype: "tbspacer", width: 24 },
-          { xtype: "button", text: "Close", handler: function(){ win.close(); } }
+            // Left third (spacer)
+            {xtype: "container", flex: 1},
+            // Middle third (center group)
+            {
+                xtype: "container",
+                flex: 1,
+                layout: {type: "hbox", pack: "center"},
+                items: [
+                    {xtype: "button", text: "Save", handler: doSave},
+                    {xtype: "tbspacer", width: 24},
+                    {
+                        xtype: "button", text: "Close", handler: function () {
+                            win.close();
+                        }
+                    }
+                ]
+            },
+            // Right third (Import/Export aligned to right)
+            {
+                xtype: "container",
+                flex: 1,
+                layout: {type: "hbox", pack: "end"},
+                items: [
+                    {xtype: "button", text: "Import", handler: doImport},
+                    {xtype: "tbspacer", width: 8},
+                    {xtype: "button", text: "Export", handler: doExport}
+                ]
+            }
         ]
-      },
-      // Right third (Import/Export aligned to right)
-      {
-        xtype: "container",
-        flex: 1,
-        layout: { type: "hbox", pack: "end" },
-        items: [
-          { xtype: "button", text: "Import", handler: doImport },
-          { xtype: "tbspacer", width: 8 },
-          { xtype: "button", text: "Export", handler: doExport }
-        ]
-      }
-    ]
-  };
+    };
 
-  // Main panel: left controls + grid
-  const mainPanel = Ext.create("Ext.panel.Panel", {
-    layout: { type: "hbox", align: "fit" },
-    items: [ leftControls, grid ],
-    dockedItems: [ bottomBar ]
-  });
+    // Main panel: left controls + grid
+    const mainPanel = Ext.create("Ext.panel.Panel", {
+        layout: {type: "hbox", align: "fit"},
+        items: [leftControls, grid],
+        dockedItems: [bottomBar]
+    });
 
-  const win = Ext.create("Ext.window.Window", {
-    title: "AutoFill Manager",
-    modal: true,
-    width: 900,
-	height: 600,
-	minWidth: 900,
-	minHeight: 600,
-	closable: false,
-	maximizable: false,
-    layout: "fit",
-	padding: '10 10 10 10',
-    items: [ mainPanel ]
-  });
+    const win = Ext.create("Ext.window.Window", {
+        title: "AutoFill Manager",
+        modal: true,
+        width: 900,
+        height: 600,
+        minWidth: 900,
+        minHeight: 600,
+        closable: false,
+        maximizable: false,
+        layout: "fit",
+        padding: '10 10 10 10',
+        items: [mainPanel]
+    });
 
-  win.show();
+    win.show();
 };
 
 APModFiller.createPopupPanel = (store) => {
@@ -1392,131 +1411,134 @@ APModFiller.createPopupPanel = (store) => {
 
 // Strict typed export with timestamped filename: APModFiller_YYYY-MM-DD_HH-MM-SS.json
 APModFiller.exportToJsonFile = (data) => {
-  try {
-    if (!Array.isArray(data)) {
-      throw new Error("Export data must be an array.");
+    try {
+        if (!Array.isArray(data)) {
+            throw new Error("Export data must be an array.");
+        }
+
+        // normalize items (defensive)
+        const items = data.map((it) => {
+            const o = it && typeof it === "object" ? it : {};
+            return {
+                field: String(o.field || ""),
+                data: typeof o.data === "string" ? o.data : String(o.data ?? ""),
+                depth: (typeof o.depth === "number" && o.depth >= 0 && o.depth <= 9) ? o.depth : 0,
+                title: typeof o.title === "string" ? o.title : (o.data ? String(o.data) : "")
+            };
+        });
+
+        const payload = {
+            kind: "APModFiller.Data",
+            version: 1,
+            data: items
+        };
+
+        // local timestamp helper (no globals)
+        const ts = (() => {
+            const d = new Date();
+            const pad = n => String(n).padStart(2, "0");
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_` +
+                `${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
+        })();
+
+        const json = JSON.stringify(payload, null, 2);
+        const uri = "data:application/json;charset=utf-8," + encodeURIComponent(json);
+        const a = document.createElement("a");
+        a.setAttribute("href", uri);
+        a.setAttribute("download", `APModFiller_${ts}.json`);
+        a.click();
+
+        if (APModPopup) APModPopup.openPopup("Exported.");
+    } catch (err) {
+        if (Ext && Ext.Msg && Ext.Msg.alert) {
+            Ext.Msg.alert("Export failed", err && err.message ? String(err.message) : "Unexpected error during export.");
+        }
     }
-
-    // normalize items (defensive)
-    const items = data.map((it) => {
-      const o = it && typeof it === "object" ? it : {};
-      return {
-        field: String(o.field || ""),
-        data:  typeof o.data === "string" ? o.data : String(o.data ?? ""),
-        depth: (typeof o.depth === "number" && o.depth >= 0 && o.depth <= 9) ? o.depth : 0,
-        title: typeof o.title === "string" ? o.title : (o.data ? String(o.data) : "")
-      };
-    });
-
-    const payload = {
-      kind: "APModFiller.Data",
-      version: 1,
-      data: items
-    };
-
-    // local timestamp helper (no globals)
-    const ts = (() => {
-      const d = new Date();
-      const pad = n => String(n).padStart(2, "0");
-      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_` +
-             `${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
-    })();
-
-    const json = JSON.stringify(payload, null, 2);
-    const uri = "data:application/json;charset=utf-8," + encodeURIComponent(json);
-    const a = document.createElement("a");
-    a.setAttribute("href", uri);
-    a.setAttribute("download", `APModFiller_${ts}.json`);
-    a.click();
-
-    if (APModPopup) APModPopup.openPopup("Exported.");
-  } catch (err) {
-    if (Ext && Ext.Msg && Ext.Msg.alert) {
-      Ext.Msg.alert("Export failed", err && err.message ? String(err.message) : "Unexpected error during export.");
-    }
-  }
 };
 
 // Strict typed import. Only accepts { kind:"APModFiller.Data", version<=1, data:[...] }.
 // Merges unique entries (same field+data) into the provided apModData. Rebuilds the popup as before.
 APModFiller.importJsonToNew = (apModData) => {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = ".json,application/json";
-  input.onchange = e => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json,application/json";
+    input.onchange = e => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
 
-    const reader = new FileReader();
-    reader.readAsText(file, "UTF-8");
-    reader.onload = readerEvent => {
-      try {
-        const content = String(readerEvent.target.result || "");
-        const parsed = JSON.parse(content);
+        const reader = new FileReader();
+        reader.readAsText(file, "UTF-8");
+        reader.onload = readerEvent => {
+            try {
+                const content = String(readerEvent.target.result || "");
+                const parsed = JSON.parse(content);
 
-        // strict typed header
-        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-          throw new Error("Unsupported file: payload must be an object.");
-        }
-        if (parsed.kind !== "APModFiller.Data") {
-          throw new Error("Unsupported file: wrong 'kind'.");
-        }
-        if (typeof parsed.version !== "number" || parsed.version > 1) {
-          throw new Error("Unsupported file: invalid or newer 'version'.");
-        }
-        if (!Array.isArray(parsed.data)) {
-          throw new Error("Invalid payload: 'data' must be an array.");
-        }
+                // strict typed header
+                if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+                    throw new Error("Unsupported file: payload must be an object.");
+                }
+                if (parsed.kind !== "APModFiller.Data") {
+                    throw new Error("Unsupported file: wrong 'kind'.");
+                }
+                if (typeof parsed.version !== "number" || parsed.version > 1) {
+                    throw new Error("Unsupported file: invalid or newer 'version'.");
+                }
+                if (!Array.isArray(parsed.data)) {
+                    throw new Error("Invalid payload: 'data' must be an array.");
+                }
 
-        // normalize
-        const incoming = parsed.data.map((it) => {
-          const o = it && typeof it === "object" ? it : {};
-          return {
-            field: String(o.field || ""),
-            data:  typeof o.data === "string" ? o.data : String(o.data ?? ""),
-            depth: (typeof o.depth === "number" && o.depth >= 0 && o.depth <= 9) ? o.depth : 0,
-            title: typeof o.title === "string" ? o.title : (o.data ? String(o.data) : "")
-          };
-        });
+                // normalize
+                const incoming = parsed.data.map((it) => {
+                    const o = it && typeof it === "object" ? it : {};
+                    return {
+                        field: String(o.field || ""),
+                        data: typeof o.data === "string" ? o.data : String(o.data ?? ""),
+                        depth: (typeof o.depth === "number" && o.depth >= 0 && o.depth <= 9) ? o.depth : 0,
+                        title: typeof o.title === "string" ? o.title : (o.data ? String(o.data) : "")
+                    };
+                });
 
-        if (!Array.isArray(apModData)) {
-          throw new Error("Target list is not an array.");
-        }
+                if (!Array.isArray(apModData)) {
+                    throw new Error("Target list is not an array.");
+                }
 
-        // merge by (field+data)
-        for (const entry of incoming) {
-          if (apModData.find(e => e.field == entry.field && e.data == entry.data)) continue;
-          apModData.push(entry);
-        }
+                // merge by (field+data)
+                for (const entry of incoming) {
+                    if (apModData.find(e => e.field === entry.field && e.data === entry.data)) continue;
+                    apModData.push(entry);
+                }
 
-        // rebuild popup (same flow as your original)
-        const out = Ext.clone(APModFiller.store);
-        out.data = apModData;
+                // rebuild popup (same flow as your original)
+                const out = Ext.clone(APModFiller.store);
+                out.data = apModData;
 
-        if (APModFiller.popup && APModFiller.popup.disable) {
-          APModFiller.popup.disable();
-        }
+                if (APModFiller.popup && APModFiller.popup.disable) {
+                    APModFiller.popup.disable();
+                }
 
-        new Ext.util.DelayedTask(function () {
-          if (APModFiller.popup) {
-            try { APModFiller.popup.destroy(); } catch (ignore) {}
-            APModFiller.popup = null;
-          }
-          APModFiller.popup = APModFiller.createPopupPanel(out);
-          if (APModFiller.popup) APModFiller.popup.show();
-          if (APModPopup) APModPopup.openPopup("Imported.");
-        }).delay(200);
+                new Ext.util.DelayedTask(function () {
+                    if (APModFiller.popup) {
+                        try {
+                            APModFiller.popup.destroy();
+                        } catch (ignore) {
+                        }
+                        APModFiller.popup = null;
+                    }
+                    APModFiller.popup = APModFiller.createPopupPanel(out);
+                    if (APModFiller.popup) APModFiller.popup.show();
+                    if (APModPopup) APModPopup.openPopup("Imported.");
+                }).delay(200);
 
-      } catch (err) {
-        if (Ext && Ext.Msg && Ext.Msg.alert) {
-          Ext.Msg.alert("Import failed", err && err.message ? String(err.message) : "Invalid JSON or unsupported file.");
-        } else {
-          alert("Import failed");
-        }
-      }
+            } catch (err) {
+                if (Ext && Ext.Msg && Ext.Msg.alert) {
+                    Ext.Msg.alert("Import failed", err && err.message ? String(err.message) : "Invalid JSON or unsupported file.");
+                } else {
+                    alert("Import failed");
+                }
+            }
+        };
     };
-  };
-  input.click();
+    input.click();
 };
 
 APModFiller.fillerPanel = (fillerStore) => {
@@ -1727,31 +1749,3 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

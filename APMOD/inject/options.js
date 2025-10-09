@@ -1,66 +1,97 @@
 var APModOptions = (function () {
-  
-  function injectMainToolbar() {
-  if (typeof EAM?.view?.common?.MainToolbar === "undefined") return;
-  var TBclass = EAM.view.common.MainToolbar;
 
-  if (!TBclass.prototype.APModOptionsOrigInitComponent) {
-    TBclass.prototype.APModOptionsOrigInitComponent = TBclass.prototype.initComponent;
-    TBclass.prototype.initComponent = function () {
-      this.APModOptionsOrigInitComponent.apply(this, arguments);
-      this.insert(this.items.length, {
-        iconCls: "toolbarGear",
-        menu: [
-        {
-          text: "APMod",
-          hideOnClick: true,
-          handler: function () {
-            // Use a central place to store the URL (override elsewhere if you like)
-            var url = "https://github.com/dev-101010/APMOD";
-            try {
-              var win = window.open(url, "_blank");
-              if (!win) {
-                // Fallback if popup blocked
-                window.location.href = url;
-              }
-            } catch (e) {
-              window.location.href = url;
+    function injectMainToolbar() {
+        if (typeof EAM?.view?.common?.MainToolbar === "undefined") return;
+        var TBclass = EAM.view.common.MainToolbar;
+
+        if (!TBclass.prototype.APModOptionsOrigInitComponent) {
+            TBclass.prototype.APModOptionsOrigInitComponent = TBclass.prototype.initComponent;
+            TBclass.prototype.initComponent = function () {
+                this.APModOptionsOrigInitComponent.apply(this, arguments);
+
+                this.insert(this.items.length, {
+                    iconCls: "toolbarGear",
+                    menu: [
+                        {
+                            text: "APMod",
+                            hideOnClick: true,
+                            handler: function () {
+                                var url = "https://github.com/dev-101010/APMOD";
+                                try {
+                                    var win = window.open(url, "_blank");
+                                    if (!win) {
+                                        window.location.href = url;
+                                    }
+                                } catch (e) {
+                                    window.location.href = url;
+                                }
+                            }
+                        },
+                        "-",
+                        {
+                            text: "Filler Manager",
+                            hideOnClick: true,
+                            handler: function () {
+                                APModFiller.showFillerSettings();
+                            }
+                        },
+                        {
+                            text: "CopyWo Options",
+                            hideOnClick: true,
+                            handler: function () {
+                                APModDataSpy.showCopyWoOptions();
+                            }
+                        },
+                        {
+                            text: "Priority Settings",
+                            hideOnClick: true,
+                            handler: function () {
+                                APModFiller.openPriorityWindow();
+                            }
+                        },
+                        {
+                            text: "AutoFill Manager",
+                            hideOnClick: true,
+                            handler: function () {
+                                APModFiller.openAutoFillWindow();
+                            }
+                        },
+                        "-",
+                        {
+                            text: "AutoFill active",
+                            xtype: "menucheckitem",
+                            checked: APModFiller.autoFillEnabled === true,
+                            checkHandler: function (checkItem, checked) {
+                                APModFiller.autoFillEnabled = checked;
+                            }
+                        }
+                    ]
+                });
+            }; // <-- Wichtig: Klammer für initComponent
+        }
+    } // <-- Wichtig: Klammer für injectMainToolbar
+
+    function autoFillEnableButton() {
+        return Ext.create('Ext.Button', {
+            text: "A",
+            enableToggle: true,
+            allowDepress: true,
+            cls: "shift-btn",
+            pressedCls: "shift-btn-pressed",
+            tooltip: `Enable/Disable Autofill`,
+            pressed: APModFiller.autoFillEnabled,
+            toggleHandler: function (btn, pressed) {
+                APModFiller.autoFillEnabled = pressed;
             }
-          }
-        },
-        "-",
-          { text: "Filler Manager", icon: null, iconCls: null, hideOnClick: true,
-            handler: function(){ 
-              APModFiller.showFillerSettings(); 
-            } 
-          },
-          { text: "CopyWo Options", icon: null, iconCls: null, hideOnClick: true,
-            handler: function(){ 
-              APModDataSpy.showCopyWoOptions();
-            } 
-          },
-          { text: "Priority Settings", icon: null, iconCls: null, hideOnClick: true,
-            handler: function(){ 
-              APModFiller.openPriorityWindow(); 
-            } 
-          },
-          { text: "AutoFill Manager", icon: null, iconCls: null, hideOnClick: true,
-            handler: function(){ 
-              APModFiller.openAutoFillWindow(); 
-            } 
-          },
-        ]
-      });
+        });
+    }
+
+    // Public API
+    function load() {
+        injectMainToolbar();
+    }
+
+    return {
+        load: load
     };
-  }
-}
-
-  // Public API
-  function load() {
-    injectMainToolbar();
-  }
-
-  return {
-    load: load
-  };
 })();

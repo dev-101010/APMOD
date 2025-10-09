@@ -1,4 +1,4 @@
-# APMod (1.3.2)
+# APMod (1.3.3)
 
 Fügt verschiedene zusätzliche Funktionen in die APM Website ein:
 

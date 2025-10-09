@@ -5,7 +5,6 @@ const APModFiller = {
     store: {},
     popup2: null,
     store2: [],
-    autoFillEnabled: true
 };
 
 APModFiller.load = () => {
@@ -1749,3 +1748,4 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+

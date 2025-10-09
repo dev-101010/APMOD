@@ -152,15 +152,6 @@ APModDataSpy.injectReadOnlyGrid = () => {
 					this.doSort("xsd_csm_trade","ASC");
 				});
 			}
-			if (this.gridURL.includes("WSJOBS")) {
-				const list = this.getDockedItems('toolbar[dock="bottom"]');
-				if(list.length > 0) {
-					const botToolbar = this.getDockedItems('toolbar[dock="bottom"]')[0];
-					if(botToolbar != null && botToolbar.items != null) {
-						botToolbar.insert(botToolbar.items.length,APModDataSpy.AutoFillEnableButton(this));
-					}
-				}
-			}
 		}
 	}
 }
@@ -506,21 +497,6 @@ APModDataSpy.viewShiftNotes = (grid,shift) => {
 		pressed: APModShift.getActiveDataset() === shift ? true : false,
 		toggleHandler: function (btn, pressed) {
 	      if (pressed) APModShift.setDataset(shift, { store: grid.getStore() }); else APModShift.clearSelection(grid.getStore());
-	    }
-	});
-}
-
-APModDataSpy.AutoFillEnableButton = (grid) => {
-	return Ext.create('Ext.Button', {
-		text: "A",
-		enableToggle: true,
-    	allowDepress: true,
-		cls: "shift-btn",
-    	pressedCls: "shift-btn-pressed",
-		tooltip: `Enable/Disable Autofill`,
-		pressed: APModFiller.autoFillEnabled,
-		toggleHandler: function (btn, pressed) {
-	      APModFiller.autoFillEnabled = pressed;
 	    }
 	});
 }
@@ -1630,6 +1606,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

@@ -58,7 +58,7 @@ var APModOptions = (function () {
                         },
                         "-",
                         {
-                            text: "AutoFill active",
+                            text: "AutoFill Active",
                             xtype: "menucheckitem",
                             checked: APModFiller.autoFillEnabled === true,
                             checkHandler: function (checkItem, checked) {

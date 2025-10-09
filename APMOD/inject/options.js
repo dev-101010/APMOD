@@ -67,23 +67,8 @@ var APModOptions = (function () {
                         }
                     ]
                 });
-            }; // <-- Wichtig: Klammer für initComponent
+            };
         }
-    } // <-- Wichtig: Klammer für injectMainToolbar
-
-    function autoFillEnableButton() {
-        return Ext.create('Ext.Button', {
-            text: "A",
-            enableToggle: true,
-            allowDepress: true,
-            cls: "shift-btn",
-            pressedCls: "shift-btn-pressed",
-            tooltip: `Enable/Disable Autofill`,
-            pressed: APModFiller.autoFillEnabled,
-            toggleHandler: function (btn, pressed) {
-                APModFiller.autoFillEnabled = pressed;
-            }
-        });
     }
 
     // Public API

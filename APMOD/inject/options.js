@@ -5,27 +5,32 @@ var APModOptions = (function () {
         autoFillEnabled : true,
     };
 
-    // Helper: get ISO week number using LOCAL time
-    function getISOWeekLocal(d) {
-        // Work with a copy at local midnight to avoid time parts
-        const date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-        const dayNum = date.getDay() || 7; // Sunday -> 7
-        // Move to Thursday of the current week (ISO anchor)
-        date.setDate(date.getDate() + 4 - dayNum);
-        const yearStart = new Date(date.getFullYear(), 0, 1);
-        const weekNo = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
-        return weekNo;
-    } 
+    // Clean ISO week (local time)
+    function getISOWeekLocal(d = new Date()) {
+      const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      x.setDate(x.getDate() + 4 - (x.getDay() || 7)); // to ISO-Thursday
+      const y = new Date(x.getFullYear(), 0, 1);
+      return Math.ceil((((x - y) / 86400000) + 1) / 7);
+    }
+    
+    // Localized date string (browser locale) with weekday short
+    function formatDateLocal(d = new Date()) {
+      const locale = (Array.isArray(navigator.languages) && navigator.languages.length) ? navigator.languages : undefined;
+      return new Intl.DateTimeFormat(locale, {
+        weekday: "short",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      }).format(d);
+    }
 
     function injectMainToolbar() {
         if (typeof EAM?.view?.common?.MainToolbar === "undefined") return;
         var TBclass = EAM.view.common.MainToolbar;
 
-        const kw = getISOWeekLocal(new Date());
-        this.insert(this.items.length - 1, {
-            xtype: "tbtext",
-            text: `KW ${kw}`
-        });
+        const dateStr = formatDateLocal();
+        const kw = getISOWeekLocal();
+        this.insert(this.items.length-1, { xtype: "tbtext", text: `${dateStr} – KW ${kw}` });
 
         if (!TBclass.prototype.APModOptionsOrigInitComponent) {
             TBclass.prototype.APModOptionsOrigInitComponent = TBclass.prototype.initComponent;

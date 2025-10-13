@@ -28,14 +28,33 @@ var APModOptions = (function () {
         if (typeof EAM?.view?.common?.MainToolbar === "undefined") return;
         var TBclass = EAM.view.common.MainToolbar;
 
-        const dateStr = formatDateLocal();
-        const kw = getISOWeekLocal();
-        this.insert(this.items.length-1, { xtype: "tbtext", text: `${dateStr} – KW ${kw}` });
-
         if (!TBclass.prototype.APModOptionsOrigInitComponent) {
             TBclass.prototype.APModOptionsOrigInitComponent = TBclass.prototype.initComponent;
             TBclass.prototype.initComponent = function () {
                 this.APModOptionsOrigInitComponent.apply(this, arguments);
+
+                this.insert(this.items.length-1, { xtype: "tbtext", itemId: "apmod-datekw", text: "" });
+                const updateDateKw = () => {
+                  const cmp = this.down("#apmod-datekw");
+                  if (!cmp) return;
+                  const dateStr = formatDateLocal();
+                  const kw = getISOWeekLocal();
+                  cmp.setText(`${dateStr} – KW ${kw}`);
+                };
+                updateDateKw();
+        
+                // schedule update at next local midnight (+2s buffer)
+                const scheduleMidnightTick = () => {
+                  const now = new Date();
+                  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 2);
+                  setTimeout(() => { updateDateKw(); scheduleMidnightTick(); }, next - now);
+                };
+                scheduleMidnightTick();
+                
+                // also refresh when tab becomes visible again (after sleep)
+                document.addEventListener("visibilitychange", () => {
+                  if (!document.hidden) updateDateKw();
+                });
 
                 this.insert(this.items.length, {
                     iconCls: "toolbarGear",

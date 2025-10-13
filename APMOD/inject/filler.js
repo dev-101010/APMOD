@@ -58,20 +58,20 @@ APModFiller.inputClick = (e) => {
     const x = e.clientX;
     const y = e.clientY;
 
-    if (e.ctrlKey && !e.altKey && ((target.tagName === "INPUT" && target.type === "text") || target.type === "textarea")) {
+    if (e.ctrlKey && !e.altKey && ((target.tagName === "INPUT" && target.type === "text") || target.type === "textarea" || target.tagName === "TEXTAREA") ) {
         APModFiller.getRad(target, x, y, null);
     }
 
-    if (e.shiftKey && ((target.tagName === "INPUT" && target.type === "text") || target.type === "textarea")) {
+    if (e.shiftKey && ((target.tagName === "INPUT" && target.type === "text") || target.type === "textarea" || target.tagName === "TEXTAREA")) {
         APModFiller.overRad(target, x, y, null);
     }
 
-    if (e.altKey && e.ctrlKey && ((target.tagName === "INPUT" && target.type === "text") || target.type === "textarea")) {
+    if (e.altKey && e.ctrlKey && ((target.tagName === "INPUT" && target.type === "text") || target.type === "textarea" || target.tagName === "TEXTAREA")) {
         APModFiller.delRad(target, x, y, null);
     }
 
     if (APModFiller.popup2) APModFiller.popup2.style.display = "none";
-    if (!e.ctrlKey && e.altKey && ((target.tagName === "INPUT" && target.type === "text") || target.type === "textarea")) {
+    if (!e.ctrlKey && e.altKey && ((target.tagName === "INPUT" && target.type === "text") || target.type === "textarea" || target.tagName === "TEXTAREA")) {
         const storage2 = JSON.parse(localStorage.getItem("APModCopy"));
         if (storage2 != null && typeof storage2 === 'object' && Array.isArray(storage2.history))
             APModFiller.store2 = storage2.history;
@@ -212,7 +212,7 @@ APModFiller.getRad = (target, x, y, apModFields) => {
             let i = 0;
             for (const field of apModFields) {
                 let value = values[i];
-                if (value.startsWith('#')) {
+                if (typeof value === 'string' && value.startsWith('#')) {
                     value = APModDataSpy.onFunction(value);
                 }
                 field.setValue(value != null ? value : "");
@@ -221,7 +221,7 @@ APModFiller.getRad = (target, x, y, apModFields) => {
             APModPopup.openPopup("Values inserted.");
         } else {
             let value = entries[0].data;
-            if (value.startsWith('#')) {
+            if (typeof value === 'string' && value.startsWith('#')) {
                 value = APModDataSpy.onFunction(value);
             }
             target.focus();
@@ -254,7 +254,7 @@ APModFiller.getRad = (target, x, y, apModFields) => {
                         let i = 0;
                         for (const field of apModFields) {
                             let value = values[i];
-                            if (value.startsWith('#')) {
+                            if (typeof value === 'string' && value.startsWith('#')) {
                                 value = APModDataSpy.onFunction(value);
                             }
                             field.setValue(value != null ? value : "");
@@ -263,7 +263,7 @@ APModFiller.getRad = (target, x, y, apModFields) => {
                         APModPopup.openPopup("Values inserted.");
                     } else {
                         let value = item.data;
-                        if (value.startsWith('#')) {
+                        if (typeof value === 'string' && value.startsWith('#')) {
                             value = APModDataSpy.onFunction(value);
                         }
                         input.focus();
@@ -456,22 +456,6 @@ APModFiller.injectRecordView = () => {
 
             const form = this.getForm();
 
-            // Helpers for 7.7: check writability and write safely
-            const isDisabled = (fld) =>
-                typeof fld.isDisabled === 'function' ? fld.isDisabled() : !!fld.disabled;
-            const isReadOnly = (fld) =>
-                typeof fld.isReadOnly === 'function' ? fld.isReadOnly() : !!fld.readOnly;
-            const isWritable = (fld) => fld && !isDisabled(fld) && !isReadOnly(fld);
-
-            const writeIfWritable = (fld, val) => {
-                if (!isWritable(fld)) return false;
-                fld.setValue?.(val);
-                fld.clearInvalid?.();
-                const record = form.getRecord?.();
-                if (record && fld.name) record.set(fld.name, val);
-                return true;
-            };
-
             // Apply type === "save" rules (same style as your original)
             if (!!APModOptions?.options?.autoFillEnabled) {
                 const autoFillSave = (APModFiller.store.autoFill || []).filter(aF => aF.type === "save");
@@ -481,12 +465,12 @@ APModFiller.injectRecordView = () => {
 
                     if (aFS.status === "always") {
                         const val = APModDataSpy.onFunction(aFS.value);
-                        writeIfWritable(field, val);
+                        APModFiller.writeIfWritable(form, field, val);
                     } else {
                         const cur = field.getValue?.();
                         if (cur == null || String(cur).trim() === '') {
                             const val = APModDataSpy.onFunction(aFS.value);
-                            writeIfWritable(field, val);
+                            APModFiller.writeIfWritable(form, field, val);
                         }
                     }
                 }
@@ -501,12 +485,12 @@ APModFiller.injectRecordView = () => {
     
                         if (aFC.status === "always") {
                             const val = APModDataSpy.onFunction(aFC.value);
-                            writeIfWritable(field, val);
+                            APModFiller.writeIfWritable(form, field, val);
                         } else {
                             const cur = field.getValue?.();
                             if (cur == null || String(cur).trim() === '') {
                                 const val = APModDataSpy.onFunction(aFC.value);
-                                writeIfWritable(field, val);
+                                APModFiller.writeIfWritable(form, field, val);
                             }
                         }
                     }
@@ -516,10 +500,10 @@ APModFiller.injectRecordView = () => {
             if (!!APModOptions?.options?.priorityEnabled) {
                 // Optional: priority handling on save (respect disabled/readOnly)
                 const combo = form.findField ? form.findField('priority') : null;
-                if (combo && isWritable(combo)) {
+                if (combo) {
                     const data = APModFiller.store.priority?.[combo.getValue?.()];
                     if (data && data.switchTo) {
-                        writeIfWritable(combo, data.switchTo);
+                        APModFiller.writeIfWritable(form, combo, data.switchTo);
                     }
                     if (typeof combo.updateDurationLabel === 'function') combo.updateDurationLabel();
                 }
@@ -556,20 +540,6 @@ APModFiller.injectRecordView = () => {
                     const runAfterIdle = () => {
                         if (this.destroyed || this.isDestroyed?.()) return;
 
-                        // Helper that safely writes only into writable fields
-                        const writeIfWritable = (field, value) => {
-                            // In Ext 7.7 these reflect current state after bindings/layout
-                            const disabled = typeof field.isDisabled === 'function' ? field.isDisabled() : !!field.disabled;
-                            const readOnly = typeof field.isReadOnly === 'function' ? field.isReadOnly() : !!field.readOnly;
-                            if (disabled || readOnly) return;
-
-                            field.setValue?.(value);
-                            field.clearInvalid?.();
-
-                            const rec = this.getRecord?.();
-                            if (rec && field.name) rec.set(field.name, value);
-                        };
-
                         if (!!APModOptions?.options?.autoFillEnabled) {
                             // Apply type === "load" rules
                             const autoFillLoad = (APModFiller.store.autoFill || []).filter(aF => aF.type === "load");
@@ -579,12 +549,12 @@ APModFiller.injectRecordView = () => {
 
                                 if (aFL.status === "always") {
                                     const val = APModDataSpy.onFunction(aFL.value);
-                                    writeIfWritable(field, val);
+                                    APModFiller.writeIfWritable(form, field, val);
                                 } else {
                                     const cur = field.getValue?.();
                                     if (cur == null || String(cur).trim() === '') {
                                         const val = APModDataSpy.onFunction(aFL.value);
-                                        writeIfWritable(field, val);
+                                        APModFiller.writeIfWritable(form, field, val);
                                     }
                                 }
                             }
@@ -664,6 +634,18 @@ APModFiller.injectRecordView = () => {
                             }
                         }
                     });
+                    parent.insert(pos, {
+                        xtype: 'button',
+                        name: 'apModClaim',
+                        text: 'Claim',
+                        margin: '0 0 0 20',
+                        tooltip: 'Autofill Workorder',
+                        listeners: {
+                            click: function () {
+                                //TODO find form and write claim values
+                            }
+                        }
+                    });
                 }
             }
 
@@ -737,6 +719,24 @@ APModFiller.injectRecordView = () => {
         };
     }
 };
+
+APModFiller.writeIfWritable = (form, fld, val) => {
+  if (!fld) return false;
+
+  const disabled = typeof fld.isDisabled === 'function' ? fld.isDisabled() : !!fld.disabled;
+  const readOnly = typeof fld.isReadOnly === 'function' ? fld.isReadOnly() : !!fld.readOnly;
+  if (disabled || readOnly) return false;
+
+  fld.setValue?.(val);
+  fld.clearInvalid?.();
+
+  const record = form?.getRecord?.();
+  if (record && fld.name) {
+    record.set(fld.name, val);
+  }
+
+  return true;
+}
 
 APModFiller.injectListDetailView = () => {
     if (typeof EAM.view?.common?.ListDetailView === 'undefined') return;
@@ -1286,7 +1286,7 @@ APModFiller.createPopupPanel = (store) => {
     });
     fillerStore.sort('field', 'ASC');
 
-    return new Ext.create('Ext.window.Window', {
+    return Ext.create('Ext.window.Window', {
         title: 'Filler Manager',
         width: 900,
         height: 600,
@@ -1769,5 +1769,6 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 

@@ -22,7 +22,7 @@ var APModOptions = (function () {
         var TBclass = EAM.view.common.MainToolbar;
 
         const kw = getISOWeekLocal(new Date());
-        this.insert(this.items.length, {
+        this.insert(this.items.length - 1, {
             xtype: "tbtext",
             text: `KW ${kw}`
         });

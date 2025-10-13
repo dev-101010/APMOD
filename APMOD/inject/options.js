@@ -4,11 +4,28 @@ var APModOptions = (function () {
         priorityEnabled : true,
         autoFillEnabled : true,
     };
-    
+
+    // Helper: get ISO week number using LOCAL time
+    function getISOWeekLocal(d) {
+        // Work with a copy at local midnight to avoid time parts
+        const date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        const dayNum = date.getDay() || 7; // Sunday -> 7
+        // Move to Thursday of the current week (ISO anchor)
+        date.setDate(date.getDate() + 4 - dayNum);
+        const yearStart = new Date(date.getFullYear(), 0, 1);
+        const weekNo = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+        return weekNo;
+    } 
 
     function injectMainToolbar() {
         if (typeof EAM?.view?.common?.MainToolbar === "undefined") return;
         var TBclass = EAM.view.common.MainToolbar;
+
+        const kw = getISOWeekLocal(new Date());
+        this.insert(this.items.length, {
+            xtype: "tbtext",
+            text: `KW ${kw}`
+        });
 
         if (!TBclass.prototype.APModOptionsOrigInitComponent) {
             TBclass.prototype.APModOptionsOrigInitComponent = TBclass.prototype.initComponent;
@@ -19,7 +36,7 @@ var APModOptions = (function () {
                     iconCls: "toolbarGear",
                     menu: [
                         {
-                            text: "APMod",
+                            text: `APMod ${GM_info?.script?.version || ''}`,
                             hideOnClick: true,
                             handler: function () {
                                 var url = "https://github.com/dev-101010/APMOD";

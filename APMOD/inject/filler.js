@@ -627,7 +627,22 @@ APModFiller.injectRecordView = () => {
                         tooltip: 'Autofill Workorder',
                         listeners: {
                             click: function () {
-                                console.log(this.getForm?.());
+                                const autoFillComplete = (APModFiller.store.autoFill || []).filter(aF => aF.type === "click");
+                                for (const aFC of autoFillComplete) {
+                                    const field = form.findField ? form.findField(aFC.field) : null;
+                                    if (!field) continue;
+                
+                                    if (aFC.status === "always") {
+                                        const val = APModDataSpy.onFunction(aFC.value);
+                                        APModFiller.writeIfWritable(form, field, val);
+                                    } else {
+                                        const cur = field.getValue?.();
+                                        if (cur == null || String(cur).trim() === '') {
+                                            const val = APModDataSpy.onFunction(aFC.value);
+                                            APModFiller.writeIfWritable(form, field, val);
+                                        }
+                                    }
+                                }
                             }
                         }
                     });
@@ -1768,6 +1783,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

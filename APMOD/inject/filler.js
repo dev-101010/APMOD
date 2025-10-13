@@ -475,9 +475,9 @@ APModFiller.injectRecordView = () => {
                     }
                 }
 
-                const statusField = form.findField ? form.findField("status") : null;
+                const statusField = form.findField ? form.findField("workorderstatus") : null;
                 console.log(statusField);
-                if(statusField?.getValue?.() === "Complete") {
+                if(statusField?.getValue?.() === "C") {
                     const autoFillComplete = (APModFiller.store.autoFill || []).filter(aF => aF.type === "complete");
                     for (const aFC of autoFillComplete) {
                         const field = form.findField ? form.findField(aFC.field) : null;
@@ -1009,10 +1009,10 @@ APModFiller.openAutoFillWindow = function () {
     const AUTO_VERSION = 1;
 
     // --- Friendly labels while keeping internal values ---
-    const TYPE_OPTS = [["save", "On save"], ["load", "On load"], ["click", "On Click (test)"], ["complete", "On complete (test)"]];
+    const TYPE_OPTS = [["save", "On save"], ["load", "On load"], ["click", "On Click (test)"], ["complete", "On complete"]];
     const STATUS_OPTS = [["always", "Always"], ["empty", "Field is empty"]];
 
-    const TYPE_LABEL = {save: "On save", load: "On load", click: "On Click (test)", complete: "On complete (test)"};
+    const TYPE_LABEL = {save: "On save", load: "On load", click: "On Click (test)", complete: "On complete"};
     const STATUS_LABEL = {always: "Always", empty: "Field is empty"};
 
     const typeStore = new Ext.data.ArrayStore({fields: ["value", "label"], data: TYPE_OPTS});
@@ -1769,6 +1769,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

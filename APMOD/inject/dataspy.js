@@ -86,22 +86,20 @@ APModDataSpy.loadFilter = (grid) => {
 APModDataSpy.injectDataspy = (dsStore) => {
 	if (typeof EAM?.view?.common?.grids?.core?.Dataspy === 'undefined') return;
 	const DSclass = EAM.view.common.grids.core.Dataspy;
-
 	if (DSclass.prototype.apmodDataSpyOrigInitComponent == null) {
 		DSclass.prototype.apmodDataSpyOrigInitComponent = DSclass.prototype.initComponent;
 		DSclass.prototype.initComponent = function() {
 			this.apmodDataSpyOrigInitComponent.apply(this, []);
+            const grid = this.getGrid?.();
+            const gridMeta = grid?.getGridMeta?.();
 			if (APModDataSpy.gridURLs.includes(this.gridURL)) {
-				const grid = this.getGrid();
 				grid.apModStore = APModDataSpy.loadFilter(grid);
 				const customDataSpyCombo = grid.customDataSpyCombo = APModDataSpy.getCustomDataSpy(grid);
 				const customDataSpyEdit = APModDataSpy.getDataSpyEditButton(grid);
 				this.insert(2, customDataSpyCombo);
 				this.insert(3, customDataSpyEdit);
 			}
-			if (this.gridURL.includes("EWSUSR.TAB")) {
-				console.log(this.tabURL);
-				const grid = this.getGrid();
+			if (this.gridURL.includes("EWSUSR.TAB") && gridMeta?.GRIDNAME?.includes("SHFRPT_XSD")) {
 				this.insert(2, APModDataSpy.viewShiftNotes(grid,"A"));
 				this.insert(3, APModDataSpy.viewShiftNotes(grid,"B"));
 				this.insert(4, APModDataSpy.viewShiftNotes(grid,"C"));
@@ -110,14 +108,11 @@ APModDataSpy.injectDataspy = (dsStore) => {
 		}
 	}
 }
-
 APModDataSpy.injectReadOnlyGrid = () => {
 	if (typeof EAM?.view?.common?.grids?.core?.ReadOnlyGrid === 'undefined') return;
 	const ROGclass = EAM.view.common.grids.core.ReadOnlyGrid;
-
 	const code1 = "/*----inject CustomDataSpy----*/[a,b]=EAM.APModDataSpy.injectBuildHeaderFilter(l,a,b);/*----end----*/";
 	ROGclass.prototype.buildHeaderFilter = APModDataSpy.injectCodeInFunction(ROGclass.prototype.buildHeaderFilter, 1, code1, []);
-
 	const code2 = "/*----inject CustomDataSpy----*/f=EAM.APModDataSpy.injectGetVisibleFieldsAndReorder(b,f);/*----end----*/";
 	ROGclass.prototype.getVisibleFieldsAndReorder = APModDataSpy.injectCodeInFunction(ROGclass.prototype.getVisibleFieldsAndReorder, 3, code2, ['f']);
 	
@@ -127,6 +122,7 @@ APModDataSpy.injectReadOnlyGrid = () => {
 		ROGclass.prototype.apmodReadOnlyGridOrigInitComponent = ROGclass.prototype.initComponent;
 		ROGclass.prototype.initComponent = function() {
 			this.apmodReadOnlyGridOrigInitComponent.apply(this, []);
+            const gridMeta = this.getGridMeta?.();
 			if (APModDataSpy.gridURLs.includes(this.gridURL)) {
 				const list = this.getDockedItems('toolbar[dock="bottom"]');
 				if(list.length > 0) {
@@ -138,8 +134,7 @@ APModDataSpy.injectReadOnlyGrid = () => {
 					}
 				}
 			}
-
-			if (this.gridURL.includes("EWSUSR.TAB")) {
+			if (this.gridURL.includes("EWSUSR.TAB") && gridMeta?.GRIDNAME?.includes("SHFRPT_XSD")) {
 				const list = this.getDockedItems('toolbar[dock="bottom"]');
 				if(list.length > 0) {
 					const botToolbar = this.getDockedItems('toolbar[dock="bottom"]')[0];
@@ -1607,6 +1602,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

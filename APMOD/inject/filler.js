@@ -21,7 +21,6 @@ APModFiller.load = () => {
         return arr;
     };
 
-    //APModFiller.injectMainToolbar();
     APModFiller.injectRecordView();
     APModFiller.injectListDetailView();
     APModFiller.injectComment();
@@ -1769,6 +1768,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

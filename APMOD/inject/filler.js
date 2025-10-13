@@ -1023,10 +1023,10 @@ APModFiller.openAutoFillWindow = function () {
     const AUTO_VERSION = 1;
 
     // --- Friendly labels while keeping internal values ---
-    const TYPE_OPTS = [["save", "On save"], ["load", "On load"], ["click", "On Click (test)"], ["complete", "On complete"]];
+    const TYPE_OPTS = [["save", "On save"], ["load", "On load"], ["click", "On click"], ["complete", "On complete"]];
     const STATUS_OPTS = [["always", "Always"], ["empty", "Field is empty"]];
 
-    const TYPE_LABEL = {save: "On save", load: "On load", click: "On Click (test)", complete: "On complete"};
+    const TYPE_LABEL = {save: "On save", load: "On load", click: "On click", complete: "On complete"};
     const STATUS_LABEL = {always: "Always", empty: "Field is empty"};
 
     const typeStore = new Ext.data.ArrayStore({fields: ["value", "label"], data: TYPE_OPTS});
@@ -1783,6 +1783,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

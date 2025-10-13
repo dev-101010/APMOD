@@ -490,6 +490,27 @@ APModFiller.injectRecordView = () => {
                         }
                     }
                 }
+
+                const statusField = form.findField ? form.findField("status") : null;
+                console.log(statusField);
+                if(statusField?.getValue?.() === "Complete") {
+                    const autoFillComplete = (APModFiller.store.autoFill || []).filter(aF => aF.type === "complete");
+                    for (const aFC of autoFillComplete) {
+                        const field = form.findField ? form.findField(aFC.field) : null;
+                        if (!field) continue;
+    
+                        if (aFC.status === "always") {
+                            const val = APModDataSpy.onFunction(aFC.value);
+                            writeIfWritable(field, val);
+                        } else {
+                            const cur = field.getValue?.();
+                            if (cur == null || String(cur).trim() === '') {
+                                const val = APModDataSpy.onFunction(aFC.value);
+                                writeIfWritable(field, val);
+                            }
+                        }
+                    }
+                }
             }
 
             if (!!APModOptions?.options?.priorityEnabled) {
@@ -988,17 +1009,17 @@ APModFiller.openAutoFillWindow = function () {
     const AUTO_VERSION = 1;
 
     // --- Friendly labels while keeping internal values ---
-    const TYPE_OPTS = [["save", "On save"], ["load", "On load"]];
+    const TYPE_OPTS = [["save", "On save"], ["load", "On load"], ["claim", "On claim (test)"], ["complete", "On complete (test)"]];
     const STATUS_OPTS = [["always", "Always"], ["empty", "Field is empty"]];
 
-    const TYPE_LABEL = {save: "On save", load: "On load"};
+    const TYPE_LABEL = {save: "On save", load: "On load", claim: "On claim (test)", complete: "On complete (test)"};
     const STATUS_LABEL = {always: "Always", empty: "Field is empty"};
 
     const typeStore = new Ext.data.ArrayStore({fields: ["value", "label"], data: TYPE_OPTS});
     const statusStore = new Ext.data.ArrayStore({fields: ["value", "label"], data: STATUS_OPTS});
 
     const data = (APModFiller.store.autoFill || []).map(r => ({
-        type: r.type || "save",
+        type: r.type || "complete",
         status: r.status || "empty",
         field: r.field || "",
         value: r.value != null ? r.value : ""
@@ -1012,7 +1033,7 @@ APModFiller.openAutoFillWindow = function () {
     function doSave() {
         const arr = [];
         store.each(function (r) {
-            const type = r.get("type") || "save";
+            const type = r.get("type") || "complete";
             const status = r.get("status") || "empty";
             const field = String(r.get("field") || "").trim();
             const value = r.get("value");
@@ -1735,8 +1756,8 @@ APModFiller.store.priority = {
 }
 
 APModFiller.store.autoFill = [
-    {type: "save", status: "empty", field: "assignedto", value: "#LOGIN"},
-    {type: "save", status: "empty", field: "shift", value: ""},
+    {type: "complete", status: "empty", field: "assignedto", value: "#LOGIN"},
+    {type: "complete", status: "empty", field: "shift", value: ""},
     {type: "load", status: "empty", field: "condition", value: "EXNB"},
     {type: "load", status: "empty", field: "savety", value: "NO"},
 ]
@@ -1748,4 +1769,5 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 

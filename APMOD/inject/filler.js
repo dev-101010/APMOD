@@ -621,6 +621,18 @@ APModFiller.injectRecordView = () => {
                     const pos = parent.items.keys.indexOf(description.id) + 1;
                     parent.insert(pos, {
                         xtype: 'button',
+                        name: 'apModAutoFill',
+                        text: 'Fill',
+                        margin: '0 0 0 20',
+                        tooltip: 'Autofill Workorder',
+                        listeners: {
+                            click: function () {
+                                //TODO find form and write click values
+                            }
+                        }
+                    });
+                    parent.insert(pos, {
+                        xtype: 'button',
                         name: 'apModCopyWO',
                         text: '©',
                         margin: '0 0 0 20',
@@ -630,18 +642,6 @@ APModFiller.injectRecordView = () => {
                                 const woNumber = workorder.getValue() ?? "";
                                 navigator.clipboard.writeText(URL + woNumber);
                                 if (APModPopup) APModPopup.openPopup("WO direct link saved to Clipboard.");
-                            }
-                        }
-                    });
-                    parent.insert(pos, {
-                        xtype: 'button',
-                        name: 'apModAutoFill',
-                        text: 'Fill',
-                        margin: '0 0 0 20',
-                        tooltip: 'Autofill Workorder',
-                        listeners: {
-                            click: function () {
-                                //TODO find form and write click values
                             }
                         }
                     });
@@ -1768,6 +1768,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

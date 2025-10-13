@@ -636,13 +636,13 @@ APModFiller.injectRecordView = () => {
                     });
                     parent.insert(pos, {
                         xtype: 'button',
-                        name: 'apModClaim',
-                        text: 'Claim',
+                        name: 'apModAutoFill',
+                        text: 'Fill',
                         margin: '0 0 0 20',
                         tooltip: 'Autofill Workorder',
                         listeners: {
                             click: function () {
-                                //TODO find form and write claim values
+                                //TODO find form and write click values
                             }
                         }
                     });
@@ -1009,10 +1009,10 @@ APModFiller.openAutoFillWindow = function () {
     const AUTO_VERSION = 1;
 
     // --- Friendly labels while keeping internal values ---
-    const TYPE_OPTS = [["save", "On save"], ["load", "On load"], ["claim", "On claim (test)"], ["complete", "On complete (test)"]];
+    const TYPE_OPTS = [["save", "On save"], ["load", "On load"], ["click", "On Click (test)"], ["complete", "On complete (test)"]];
     const STATUS_OPTS = [["always", "Always"], ["empty", "Field is empty"]];
 
-    const TYPE_LABEL = {save: "On save", load: "On load", claim: "On claim (test)", complete: "On complete (test)"};
+    const TYPE_LABEL = {save: "On save", load: "On load", click: "On Click (test)", complete: "On complete (test)"};
     const STATUS_LABEL = {always: "Always", empty: "Field is empty"};
 
     const typeStore = new Ext.data.ArrayStore({fields: ["value", "label"], data: TYPE_OPTS});
@@ -1769,6 +1769,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

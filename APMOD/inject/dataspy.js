@@ -5,7 +5,7 @@ const APModDataSpy = {
 };
 
 APModDataSpy.load = () => {
-	if (typeof Ext === 'undefined' || typeof EAM === 'undefined') return; 
+	if (typeof Ext === 'undefined' || typeof EAM === 'undefined') return;
 	
 	EAM.APModDataSpy = APModDataSpy;
 	APModDataSpy.login = "UNKNOWN";
@@ -22,7 +22,7 @@ APModDataSpy.load = () => {
 		const arr = [];
 		for (const item of this.data.items) {
 			if (item.data.name == "No Filter") continue;
-			const data = JSON.parse(JSON.stringify(item.data))
+			const data = JSON.parse(JSON.stringify(item.data));
 			delete data.id;
 			arr.push(data);
 		}
@@ -99,7 +99,7 @@ APModDataSpy.injectDataspy = (dsStore) => {
 				this.insert(2, customDataSpyCombo);
 				this.insert(3, customDataSpyEdit);
 			}
-			if (this.gridURL.includes("EWSUSR.TAB") && gridMeta?.GRIDNAME?.includes("SHFRPT_XSD")) {
+			if (this.gridURL?.includes("EWSUSR.TAB") && gridMeta?.GRIDNAME?.includes("SHFRPT_XSD")) {
 				this.insert(2, APModDataSpy.viewShiftNotes(grid,"A"));
 				this.insert(3, APModDataSpy.viewShiftNotes(grid,"B"));
 				this.insert(4, APModDataSpy.viewShiftNotes(grid,"C"));
@@ -286,25 +286,7 @@ APModDataSpy.createCopyWoPopupPanel = () => {
             align: 'left'
         },
 		padding: '10 10 10 10',
-		items: [/*{
-            xtype: 'checkboxfield',
-            boxLabel : 'Copy WO to Clipboard',
-            value: clipEnabled,
-            listeners: {
-                change:    function (cb, newValue, oldValue, eOpts) {
-                    GM_setValue( "copyWoClipboardEnabled", newValue );
-                }
-            }
-        },{
-            xtype: 'checkboxfield',
-            boxLabel : 'Copy WO To APM List',
-            value: woEnabled,
-            listeners: {
-                change:    function (cb, newValue, oldValue, eOpts) {
-                    GM_setValue( "copyWoArrayEnabled", newValue );
-                }
-            }
-        },*/{
+		items: [{
             xtype: 'button',
             text : 'Clear APM WO List',
             handler: function() {
@@ -1602,6 +1584,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

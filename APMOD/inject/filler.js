@@ -627,7 +627,7 @@ APModFiller.injectRecordView = () => {
                         tooltip: 'Autofill Workorder',
                         listeners: {
                             click: function () {
-                                //TODO find form and write click values
+                                console.log(this.getForm?.());
                             }
                         }
                     });
@@ -1768,6 +1768,7 @@ APModFiller.save = () => {
 }
 
 //window.addEventListener("load", APModFiller.load);
+
 
 
 

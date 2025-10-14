@@ -1583,20 +1583,26 @@ APModDataSpy.filterValues = [
 {"typ":"schedstartdate","value":"#DATE"},
 {"typ":"schedstartdate","value":"#DATE H +1"},
 {"typ":"schedstartdate","value":"#DATE W"},
+{"typ":"schedstartdate","value":"#DATE SAT"},
 {"typ":"schedstartdate","value":"#DATE D +7"},
 {"typ":"schedstartdate","value":"#DATE W +1"},
+{"typ":"schedstartdate","value":"#DATE SAT +1"},
 {"typ":"schedstartdate","value":"#HOUR +1"},
 {"typ":"schedenddate","value":"#DATE"},
 {"typ":"schedenddate","value":"#DATE H +1"},
 {"typ":"schedenddate","value":"#DATE W"},
+{"typ":"schedenddate","value":"#DATE SAT"},
 {"typ":"schedenddate","value":"#DATE D +7"},
 {"typ":"schedenddate","value":"#DATE W +1"},
+{"typ":"schedenddate","value":"#DATE SAT +1"},
 {"typ":"schedenddate","value":"#HOUR +1"},
 {"typ":"datereported","value":"#DATE"},
 {"typ":"datereported","value":"#DATE H +1"},
 {"typ":"datereported","value":"#DATE W"},
+{"typ":"datereported","value":"#DATE SAT"},
 {"typ":"datereported","value":"#DATE D +7"},
 {"typ":"datereported","value":"#DATE W +1"},
+{"typ":"datereported","value":"#DATE SAT +1"},
 {"typ":"datereported","value":"#HOUR +1"},
 {"typ":"assignedto","value":"#LOGIN"},
 {"typ":"workordernum","value":"#TICKETWO 1"},
@@ -1612,61 +1618,3 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

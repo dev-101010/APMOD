@@ -347,6 +347,15 @@ APModDataSpy.onTicketWo = (s) => {
 APModDataSpy.onDate = (s) => {
 	const array = s.split(' ');
 	const today = new Date();
+    const daysMap = {
+        "SUN": 0,
+        "MON": 1,
+        "TUE": 2,
+        "WED": 3,
+        "THU": 4,
+        "FRI": 5,
+        "SAT": 6
+    };
 	
 	if(array.length == 1) {
 		return APModDataSpy.DateFormat(today);
@@ -368,33 +377,52 @@ APModDataSpy.onDate = (s) => {
 			return APModDataSpy.DateFormat(month);
 		}
 		if(array[1] == "Y") {
-			const year = new Date(today.getFullYear() + 1, 1, 0);
+			const year = new Date(today.getFullYear(), 11, 31);
 			return APModDataSpy.DateFormat(year);
 		}
+        if (array[1] in daysMap) {
+            const targetDay = daysMap[array[1]];
+            const todayDay = today.getDay();
+            let daysUntilTarget = (targetDay - todayDay + 7) % 7;
+            const targetDate = new Date(today);
+            targetDate.setDate(today.getDate() + daysUntilTarget);
+            return APModDataSpy.DateFormat(targetDate);
+        }
 	}
 	
 	if (array.length == 3 && ( array[2].startsWith('+') || array[2].startsWith('-') ) ) {
 		const num = parseInt(array[2]);
-		if(array[1] == "H" && typeof num === "number" && Number.isFinite(num)) {
-			const hours = new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours() + num, today.getMinutes(), today.getSeconds());
-			return APModDataSpy.DateTimeFormat(hours);
-		}
-		if(array[1] == "D" && typeof num === "number" && Number.isFinite(num)) {
-			const days = new Date(today.getFullYear(), today.getMonth(), today.getDate() + num);
-			return APModDataSpy.DateFormat(days);
-		}
-		if(array[1] == "W" && typeof num === "number" && Number.isFinite(num)) {
-			const weeks = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7 + (7 * num) - today.getDay());
-			return APModDataSpy.DateFormat(weeks);
-		}
-		if(array[1] == "M" && typeof num === "number" && Number.isFinite(num)) {
-			const months = new Date(today.getFullYear(), today.getMonth() + 1 + num, 0);
-			return APModDataSpy.DateFormat(months);
-		}
-		if(array[1] == "Y" && typeof num === "number" && Number.isFinite(num)) {
-			const years = new Date(today.getFullYear() + 1 + num, 0, 0);
-			return APModDataSpy.DateFormat(years);
-		}
+        if (typeof num === "number" && Number.isFinite(num)) {
+            if(array[1] == "H") {
+                const hours = new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours() + num, today.getMinutes(), today.getSeconds());
+                return APModDataSpy.DateTimeFormat(hours);
+            }
+            if(array[1] == "D") {
+                const days = new Date(today.getFullYear(), today.getMonth(), today.getDate() + num);
+                return APModDataSpy.DateFormat(days);
+            }
+            if(array[1] == "W") {
+                const weeks = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7 + (7 * num) - today.getDay());
+                return APModDataSpy.DateFormat(weeks);
+            }
+            if(array[1] == "M") {
+                const months = new Date(today.getFullYear(), today.getMonth() + 1 + num, 0);
+                return APModDataSpy.DateFormat(months);
+            }
+            if(array[1] == "Y") {
+                const years = new Date(today.getFullYear() + num, 11, 31);
+                return APModDataSpy.DateFormat(years);
+            }
+            if (array[1] in daysMap) {
+                const targetDay = daysMap[array[1]];
+                const todayDay = today.getDay();
+                let daysUntilTarget = (targetDay - todayDay + 7) % 7;
+                let totalDays = daysUntilTarget + (7 * num);
+                const targetDate = new Date(today);
+                targetDate.setDate(today.getDate() + totalDays);
+                return APModDataSpy.DateFormat(targetDate);
+            }
+        }
 	}
 	
 	return APModDataSpy.DateFormat(new Date(0,0,1));
@@ -1584,6 +1612,7 @@ APModDataSpy.filterValues = [
 ];
 
 //window.addEventListener("load", APModDataSpy.load);
+
 
 
 

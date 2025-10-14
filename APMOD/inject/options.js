@@ -33,29 +33,6 @@ var APModOptions = (function () {
             TBclass.prototype.initComponent = function () {
                 this.APModOptionsOrigInitComponent.apply(this, arguments);
 
-                this.insert(this.items.length, { xtype: "tbtext", itemId: "apmod-datekw", text: "" });
-                const updateDateKw = () => {
-                  const cmp = this.down("#apmod-datekw");
-                  if (!cmp) return;
-                  const dateStr = formatDateLocal();
-                  const kw = getISOWeekLocal();
-                  cmp.setText(`<b>${dateStr} – KW ${kw}</b>`);
-                };
-                updateDateKw();
-        
-                // schedule update at next local midnight (+2s buffer)
-                const scheduleMidnightTick = () => {
-                  const now = new Date();
-                  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 2);
-                  setTimeout(() => { updateDateKw(); scheduleMidnightTick(); }, next - now);
-                };
-                scheduleMidnightTick();
-                
-                // also refresh when tab becomes visible again (after sleep)
-                document.addEventListener("visibilitychange", () => {
-                  if (!document.hidden) updateDateKw();
-                });
-
                 this.insert(this.items.length, {
                     iconCls: "toolbarGear",
                     menu: [
@@ -128,10 +105,55 @@ var APModOptions = (function () {
         }
     }
 
+    function injectHeader() {
+        if (typeof EAM?.view?.index?.Header === "undefined") return;
+        var Hclass = EAM.view.index.Header;
+        if (!Hclass.prototype.APModOptionsOrigInitComponent) {
+            Hclass.prototype.APModOptionsOrigInitComponent = Hclass.prototype.initComponent;
+            Hclass.prototype.initComponent = function () {
+                this.APModOptionsOrigInitComponent.apply(this, arguments);
+                const targetContainer = this.down('container');
+                if (targetContainer) {
+                    targetContainer.insert(targetContainer.items.length-1, {
+                        xtype: 'label',
+                        itemId: 'apmod-datekw',
+                        text: '',
+                        margin: '0 10 0 0',
+                        style: {
+                            display: 'flex',
+                            alignItems: 'center',
+                            color: '#ABAEB7'
+                        }
+                    });
+                }
+                const updateDateKw = () => {
+                  const cmp = this.down("#apmod-datekw");
+                  if (!cmp) return;
+                  const dateStr = formatDateLocal();
+                  const kw = getISOWeekLocal();
+                  cmp.setText(`${dateStr} – KW ${kw}`);
+                };
+                updateDateKw();
+                // schedule update at next local midnight (+2s buffer)
+                const scheduleMidnightTick = () => {
+                  const now = new Date();
+                  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 2);
+                  setTimeout(() => { updateDateKw(); scheduleMidnightTick(); }, next - now);
+                };
+                scheduleMidnightTick();
+                // also refresh when tab becomes visible again (after sleep)
+                document.addEventListener("visibilitychange", () => {
+                  if (!document.hidden) updateDateKw();
+                });
+            };
+        }
+    }
+
     // Public API
     function load() {
         loadLocal();
         injectMainToolbar();
+        injectHeader();
     }
 
     function saveLocal() {

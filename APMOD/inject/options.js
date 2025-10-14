@@ -33,13 +33,13 @@ var APModOptions = (function () {
             TBclass.prototype.initComponent = function () {
                 this.APModOptionsOrigInitComponent.apply(this, arguments);
 
-                this.insert(this.items.length-1, { xtype: "tbtext", itemId: "apmod-datekw", text: "" });
+                this.insert(this.items.length, { xtype: "tbtext", itemId: "apmod-datekw", text: "" });
                 const updateDateKw = () => {
                   const cmp = this.down("#apmod-datekw");
                   if (!cmp) return;
                   const dateStr = formatDateLocal();
                   const kw = getISOWeekLocal();
-                  cmp.setText(`${dateStr} – KW ${kw}`);
+                  cmp.setText(`<b>${dateStr} – KW ${kw}</b>`);
                 };
                 updateDateKw();
         

@@ -143,7 +143,7 @@ Eine zusätzliche Möglichkeit der Value die eingeführt wurde sind Variablen f�
 
 "#DATE W +2" -> Gibt das Datum vom Ende der übernächsten Woche. (Sonntag)
 
-"#DATE SAT" -> Gibt das Datum vom nächsten Samstag. [MON,TUE,WED,THU,FRI,SAT,SUN]
+"#DATE SAT" -> Gibt das Datum vom diesem/kommendem Samstag. [MON,TUE,WED,THU,FRI,SAT,SUN]
 
 "#DATE SAT +2" -> Gibt das Datum vom Samstag in 2 Wochen. [MON,TUE,WED,THU,FRI,SAT,SUN]
 

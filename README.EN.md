@@ -73,7 +73,7 @@ then the additional filter dropdown (green 2),
 
 and lastly the values entered in the header are filtered (green 3). 
 
-![dataspy.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy.png)
+![dataspy.en.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy.en.png)
 
 ----
 Here you can find some preconfigured filters to import:
@@ -90,7 +90,7 @@ Surely there are one or two people who can handle this without any problems and 
 
 There is an export and import function, which allows you to easily exchange filters with each other.
 
-![dataspy_edit_menu.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_menu.png)
+![dataspy_edit_menu.en.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_menu.en.png)
 
 ----
 
@@ -100,7 +100,7 @@ All values can be freely adjusted, but in the end there must be a logical sequen
 
 It is also important that all brackets are closed.
 
-![dataspy_edit_filter.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_filter.png)
+![dataspy_edit_filter.en.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_filter.en.png)
 
 ```diff
 For those who have dealt with programming before. In this filter it simply says:
@@ -159,7 +159,7 @@ This is about sorting; you can sort by any column, from A -> Z or from Z -> A.
 
 There is not much to do here. Sorting by start date is probably the most sensible. 
 
-![dataspy_edit_sort.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_sort.png)
+![dataspy_edit_sort.en.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_sort.en.png)
 
 ----
 
@@ -167,7 +167,7 @@ Here you can select which columns should be displayed to you and when.
 
 Surely everyone knows that the standard filters are completely overloaded.
 
-![dataspy_edit_fields.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_fields.png)
+![dataspy_edit_fields.en.png](https://github.com/dev-101010/APMOD/blob/main/images/dataspy_edit_fields.en.png)
 
 <br /><br /><br />
 
@@ -195,13 +195,13 @@ If multiple values are stored, selection wheels appear and each selection wheel 
 
 The black wheel shows you your stored values that you can insert into this field.
 
-![wheel_get.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_get.png)
+![wheel_get.en.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_get.en.png)
 
 ----
 
 In the red wheel you can delete stored values when you no longer need them.
 
-![wheel_del.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_del.png)
+![wheel_del.en.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_del.en.png)
 
 ----
 
@@ -209,7 +209,7 @@ In the orange wheel you can place the current value of the field into storage.
 
 Either to a new slot "TO NEW", or overwrite an existing value.
 
-![wheel_over.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_over.png)
+![wheel_over.en.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_over.en.png)
 
 ----
 
@@ -217,13 +217,13 @@ How many entries you store is up to you, but eventually it can get cramped, whic
 
 With the scroll wheel or arrow keys you can cycle through them.
 
-![wheel_over_next.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_over_next.png)
+![wheel_over_next.en.png](https://github.com/dev-101010/APMOD/blob/main/images/wheel_over_next.en.png)
 
 ----
 
 To manage all the entries there is another menu:
 
-![filler_button.png](https://github.com/dev-101010/APMOD/blob/main/images/filler_button.png)
+![filler_button.en.png](https://github.com/dev-101010/APMOD/blob/main/images/filler_button.en.png)
 
 ----
 
@@ -231,7 +231,7 @@ Here you can see all saved values assigned to the fields and the depth of the wh
 
 You can also create an alias for each value here, which will then be displayed in the wheel instead of the value.
 
-![filler_menu.png](https://github.com/dev-101010/APMOD/blob/main/images/filler_menu.png)
+![filler_menu.en.png](https://github.com/dev-101010/APMOD/blob/main/images/filler_menu.en.png)
 
 <br /><br /><br />
 
@@ -243,7 +243,7 @@ By default, overwriting is disabled so that, for example, you can already set th
 
 However, there is an Override checkbox; if this is selected, everything is set regardless of what was previously selected.
 
-![selector.png](https://github.com/dev-101010/APMOD/blob/main/images/selector.png)
+![selector.en.png](https://github.com/dev-101010/APMOD/blob/main/images/selector.en.png)
 
 <br /><br /><br />
 
@@ -251,6 +251,6 @@ However, there is an Override checkbox; if this is selected, everything is set r
 
 The copy helper lets you copy text and images from table cells to the clipboard simply by ALT + left-clicking on them.
 
-![copy.png](https://github.com/dev-101010/APMOD/blob/main/images/copy.png)
+![copy.en.png](https://github.com/dev-101010/APMOD/blob/main/images/copy.en.png)
 
 In addition, copied text is stored in an internal list, which you can call up by ALT + left-clicking in an input field and insert the values again.

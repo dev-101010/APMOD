@@ -221,12 +221,6 @@ With the scroll wheel or arrow keys you can cycle through them.
 
 ----
 
-To manage all the entries there is another menu:
-
-![filler_button.en.png](https://github.com/dev-101010/APMOD/blob/main/images/filler_button.en.png)
-
-----
-
 Here you can see all saved values assigned to the fields and the depth of the wheel they are in.
 
 You can also create an alias for each value here, which will then be displayed in the wheel instead of the value.

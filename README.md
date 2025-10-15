@@ -10,7 +10,7 @@ WO Listen [Filter](https://github.com/dev-101010/APMOD/blob/main/README.md#filte
 
 Installiere in deinem Browser die [Tampermonkey](https://www.tampermonkey.net/index.php) extension.
 
-Lade die Datei "script.user.js" in Tampermonkey. (Oder: [Direct Download Link](https://github.com/dev-101010/APMOD/raw/main/script.user.js))
+Lade die Datei "script.user.js" in Tampermonkey. (Oder: [Direkter Download Link](https://github.com/dev-101010/APMOD/raw/main/script.user.js))
 
 ```diff
 ! Der Entwicklermodus in den Browser Erweiterungen muss mittlerweile leider an sein, damit die Mod noch funktioniert.

@@ -47,7 +47,7 @@ Gehe zu deinen entpackten Datein und wähle den Ordner "APMOD" aus.
 ```
 
 ```diff
-! Firefox läd Addons in ungepackter/unsignierter Form leider nur temporär. (brower neu öffen heißt neu laden...)
+! Firefox läd Addons in ungepackter/unsignierter Form leider nur temporär. (Browser neu öffen heißt neu laden...)
 ```
 Klicke hier auf den grünen "Code" Button und dann auf "Download ZIP". (Oder: [Direct Download Link](https://github.com/dev-101010/APMOD/archive/refs/heads/main.zip))
 

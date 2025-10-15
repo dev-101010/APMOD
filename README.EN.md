@@ -1,4 +1,6 @@
 # APMod (1.3.5)
+[![English](https://img.shields.io/badge/lang-English-blue)](README_en.md)
+[![Deutsch](https://img.shields.io/badge/lang-Deutsch-green)](README.md)
 
 Adds various extra features to the APM website:
 

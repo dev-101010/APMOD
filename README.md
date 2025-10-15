@@ -221,12 +221,6 @@ Mit Scrollrad oder Pfeiltasten kannst du durch diese durchsschalten.
 
 ----
 
-Um die Ganzen Einträge zu verwalten gibt es nochmal ein Menu:
-
-![filler_button.png](https://github.com/dev-101010/APMOD/blob/main/images/filler_button.png)
-
-----
-
 Hier siehst du alle gespeicherten Werte den Feldern zugeordnet und in welcher Tiefe des Rads sie sich befinden.
 
 Ausserden kann man hier für jeden Wert auch einen Alias anlegen, der im Rad dann anstatt des Wertes angezeigt wird.

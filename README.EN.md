@@ -4,7 +4,7 @@
 
 Adds various extra features to the APM website:
 
-WO lists [Filter](https://github.com/dev-101010/APMOD/blob/main/README.EN.md#filter), text field [Fill helper](#fill-helper), checkbox [Selection helper](https://github.com/dev-101010/APMOD/blob/main/README.EN.md#auswahlhilfe), table [Copy helper](https://github.com/dev-101010/APMOD/blob/main/README.EN.md#kopierhilfe)
+WO lists [Filter](#filter), text field [Fill helper](#fill-helper), checkbox [Selection helper](#Selection-helper), table [Copy helper](#copy-helper)
 <br /><br /><br />
 ## Recommended installation (Tampermonkey):
 
